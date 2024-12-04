@@ -6,7 +6,7 @@ import (
 	"image"
 	"image/color"
 	"log"
-	// "math"
+	"math/rand"
 	// "strings"
 	"time"
 
@@ -100,7 +100,7 @@ func (g *Game) Update() error {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		g.lastAct = time.Now()
 		if g.inScreenSaver {
-			g.inScreenSaver = false
+			g.leaveScreenSaver()
 		}
 		x, y := ebiten.CursorPosition()
 		fmt.Printf("Mouse position: x=%d, y=%d\n", x, y)
@@ -120,8 +120,16 @@ func (g *Game) Update() error {
 	return nil
 }
 
-func (g *Game) updateClockLocation() (int, int) {
-	return defaultClockLocationX, defaultClockLocationY // for now
+func (g *Game) updateClockLocation() {
+	// get clock size, determine max range...
+	g.clockLocationX = rand.Int() % 100
+	g.clockLocationY = rand.Int() % 200
+}
+
+func (g *Game) leaveScreenSaver() {
+	g.inScreenSaver = false
+	g.clockLocationX = defaultClockLocationX
+	g.clockLocationY = defaultClockLocationY
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -143,7 +151,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		op := &text.DrawOptions{}
 		op.GeoM.Translate(float64(g.clockLocationX), float64(g.clockLocationY))
 		if g.inScreenSaver {
-			op.ColorScale.ScaleAlpha(0.55)
+			op.ColorScale.ScaleAlpha(0.25)
 		}
 		op.LineSpacing = spaceMonoFace.Size * 1
 		text.Draw(screen, g.timestring, spaceMonoFace, op)
@@ -190,6 +198,7 @@ func main() {
 	now := time.Now()
 	g.lastAct = now
 	g.inScreenSaver = false
+	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
 	g.cyclesSinceTick = int(ms.Milliseconds() * 60 / 1000) // assumes 60Hz
 

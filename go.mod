@@ -1,4 +1,4 @@
-module alarmclock
+module github.com/cloudkucooland/AlarmClock
 
 go 1.22.3
 

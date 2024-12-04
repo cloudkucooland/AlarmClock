@@ -11,6 +11,18 @@ var (
 	//go:embed SpaceMono-Regular.ttf
 	SpaceMonoRegular_ttf []byte
 
+	//go:embed artist.png
+	ArtistPNG []byte
+
+	//go:embed baby.png
+	BabyPNG []byte
+
+	//go:embed bathtime.png
+	BathtimePNG []byte
+
+	//go:embed confused.png
+	ConfusedPNG []byte
+
 	//go:embed happy.png
 	HappyPNG []byte
 )

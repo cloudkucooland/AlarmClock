@@ -25,5 +25,8 @@ var (
 
 	//go:embed happy.png
 	HappyPNG []byte
+
+	//go:embed love.png
+	LovePNG []byte
 )
 

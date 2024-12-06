@@ -43,6 +43,24 @@ func (g *Game) Update() error {
 					fmt.Println("in radiobutton mousedown")
 				}
 			}
+			for idx := range modalbuttons {
+				if modalbuttons[idx].in(x, y) {
+					fmt.Println("in modal mousedown")
+				}
+			}
+		case inAlarmConfig:
+			/* for idx := range radiobuttons {
+				if radiobuttons[idx].in(x, y) {
+					fmt.Println("in radiobutton mousedown")
+				}
+			} */
+			for idx := range modalbuttons {
+				if modalbuttons[idx].in(x, y) {
+					fmt.Println("in modal mousedown")
+				}
+			}
+		case inWeather:
+			// nothing
 		default:
 			fmt.Println("mousedown in unknown state")
 		}
@@ -73,6 +91,31 @@ func (g *Game) Update() error {
 			for idx := range radiobuttons {
 				if radiobuttons[idx].in(x, y) {
 					fmt.Println("in radiobutton mouseup")
+				}
+			}
+			for idx := range modalbuttons {
+				if modalbuttons[idx].in(x, y) {
+					fmt.Println("in modalbutton mouseup")
+					modalbuttons[idx].modaldo(g)
+				}
+			}
+		case inAlarmConfig:
+			/* for idx := range radiobuttons {
+				if radiobuttons[idx].in(x, y) {
+					fmt.Println("in radiobutton mouseup")
+				}
+			} */
+			for idx := range modalbuttons {
+				if modalbuttons[idx].in(x, y) {
+					fmt.Println("in modalbutton mouseup")
+					modalbuttons[idx].modaldo(g)
+				}
+			}
+		case inWeather:
+			for idx := range modalbuttons {
+				if modalbuttons[idx].in(x, y) {
+					fmt.Println("in modalbutton mouseup")
+					modalbuttons[idx].modaldo(g)
 				}
 			}
 		default:

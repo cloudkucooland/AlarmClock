@@ -17,8 +17,8 @@ type clock struct {
 	cyclesSinceTick int
 }
 
-const defaultClockLocationX = 5
-const defaultClockLocationY = 20
+const defaultClockLocationX = 50 
+const defaultClockLocationY = 0
 
 func (c *clock) screensaverClockLocation() {
 	// get clock size, determine max range...
@@ -32,6 +32,6 @@ func (g *Game) drawClock(screen *ebiten.Image) {
 	if g.state == inScreenSaver {
 		op.ColorScale.ScaleAlpha(0.25)
 	}
-	op.LineSpacing = clockfont.Size * 1
+	op.LineSpacing = clockfont.Size * 0.25
 	text.Draw(screen, g.clock.timestring, clockfont, op)
 }

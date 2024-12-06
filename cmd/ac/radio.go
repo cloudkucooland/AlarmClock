@@ -3,11 +3,11 @@ package main
 import (
 	// "fmt"
 	// "image"
-	"image/color"
+	// "image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	// "github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type radiobutton struct {
@@ -54,17 +54,12 @@ func radioDialog(g *Game) {
 }
 
 func (g *Game) drawRadio(screen *ebiten.Image) {
-	grey := color.RGBA{0xaa, 0xaa, 0xaa, 0x99}
-	border := color.RGBA{0x66, 0x66, 0x66, 0x00}
-	vector.DrawFilledRect(screen, float32(20), float32(20), float32(760), float32(440), grey, false)
-	vector.StrokeRect(screen, float32(20), float32(20), float32(760), float32(440), float32(4), border, false)
-	vector.StrokeRect(screen, float32(30), float32(30), float32(740), float32(420), float32(2), border, false)
+	g.drawModal(screen)
 
 	x := 40
 	y := 40
 
 	for idx := range radiobuttons {
-
 		radiobuttons[idx].x = x
 		radiobuttons[idx].y = y
 
@@ -84,20 +79,6 @@ func (g *Game) drawRadio(screen *ebiten.Image) {
 			y = y + 112
 		}
 	}
-
-	x = 720
-	y = 380
-	
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(controlScale, controlScale)
-	op.GeoM.Translate(float64(x), float64(y))
-	screen.DrawImage(radiobuttons[0].sprite.image, op)
-
-	top := &text.DrawOptions{}
-	top.GeoM.Translate(float64(x), float64(y+controlYspace))
-	top.LineSpacing = controlfont.Size
-	text.Draw(screen, "Close", controlfont, top)
-
 }
 
 func (r radiobutton) in(x, y int) bool {

@@ -33,7 +33,7 @@ var controls = []control{
 		label:  "Alarms",
 		x:      700,
 		y:      20,
-		do:     defaultAction,
+		do:     alarmConfigDialog,
 		ani:    &controlanimation{},
 	},
 	{
@@ -49,7 +49,7 @@ var controls = []control{
 		label:  "Weather",
 		x:      700,
 		y:      220,
-		do:     defaultAction,
+		do:     weatherDialog,
 		ani:    &controlanimation{},
 	},
 }

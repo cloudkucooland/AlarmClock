@@ -15,6 +15,8 @@ import (
 	"github.com/cloudkucooland/AlarmClock/resources"
 )
 
+const hz = 60
+
 type gameState int
 
 const (
@@ -44,7 +46,7 @@ var (
 )
 
 func (g *Game) Update() error {
-	g.clock.cyclesSinceTick = (g.clock.cyclesSinceTick + 1) % 3600 // assumes 60Hz
+	g.clock.cyclesSinceTick = (g.clock.cyclesSinceTick + 1) % (60 * hz)
 	if g.clock.cyclesSinceTick == 1 {
 		now := time.Now()
 		g.clock.timestring = now.Format("03:04")
@@ -61,6 +63,14 @@ func (g *Game) Update() error {
 		if g.inScreenSaver() {
 			g.lastAct = time.Now()
 			g.leaveScreenSaver()
+		}
+
+		for _, c := range controls {
+			x, y := ebiten.CursorPosition()
+			if c.in(x, y) {
+				fmt.Printf("in control click %s\n", c.label)
+				c.startanimation()
+			}
 		}
 	}
 
@@ -152,7 +162,7 @@ func main() {
 	// g.state = inNormal
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
-	g.clock.cyclesSinceTick = int(ms.Milliseconds() * 60 / 1000) // assumes 60Hz
+	g.clock.cyclesSinceTick = int(ms.Milliseconds() * hz / 1000)
 
 	g.clock.timestring = now.Format("03:04")
 

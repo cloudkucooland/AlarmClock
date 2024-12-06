@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	// "image"
 	// "image/color"
 
@@ -23,6 +24,7 @@ type control struct {
 	x      int
 	y      int
 	do     func(*Game)
+	ani    *controlanimation
 }
 
 var controls = []control{
@@ -32,6 +34,7 @@ var controls = []control{
 		x:      700,
 		y:      20,
 		do:     defaultAction,
+		ani:    &controlanimation{},
 	},
 	{
 		sprite: &sprites[1],
@@ -39,6 +42,7 @@ var controls = []control{
 		x:      700,
 		y:      120,
 		do:     radioDialog,
+		ani:    &controlanimation{},
 	},
 	{
 		sprite: &sprites[2],
@@ -46,36 +50,39 @@ var controls = []control{
 		x:      700,
 		y:      220,
 		do:     defaultAction,
+		ani:    &controlanimation{},
 	},
 }
 
 func (g *Game) drawControls(screen *ebiten.Image) {
-	// white := color.RGBA{0xff, 0xff, 0xff, 0xdd}
-
 	if !g.inScreenSaver() {
 		for x := range controls {
 			if !controls[x].onscreen() {
 				continue
 			}
 
-			// vector.DrawFilledRect(screen, float32(controls[x].x), float32(controls[x].y), float32(50), float32(50), white, false)
-
-			// w, h := text.Measure(controls[x].label, controlfont, controlfontfont.Size*1.2)
-
-			op := &ebiten.DrawImageOptions{}
-			op.GeoM.Scale(controlScale, controlScale)
-			op.GeoM.Translate(float64(controls[x].x), float64(controls[x].y))
-			screen.DrawImage(controls[x].sprite.image, op)
-
-			top := &text.DrawOptions{}
-			top.GeoM.Translate(float64(controls[x].x), float64(controls[x].y+controlYspace))
-			top.LineSpacing = controlfont.Size * 1
-			text.Draw(screen, controls[x].label, controlfont, top)
+			if controls[x].ani.in {
+				controls[x].aniStep(screen)
+				continue
+			}
+			controls[x].stillIcon(screen)
 		}
 	}
 }
 
-func (c control) in(x, y int) bool {
+func (c *control) stillIcon(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(controlScale, controlScale)
+	op.GeoM.Translate(float64(c.x), float64(c.y))
+	screen.DrawImage(c.sprite.image, op)
+
+	top := &text.DrawOptions{}
+	top.GeoM.Translate(float64(c.x), float64(c.y+controlYspace))
+	top.LineSpacing = controlfont.Size * 1
+	text.Draw(screen, c.label, controlfont, top)
+}
+
+func (c *control) in(x, y int) bool {
 	if (x >= c.x && x <= c.x+controlIcony*controlScale) && (y >= c.y && y <= c.y+controlIcony*controlScale) {
 		return true
 	}
@@ -95,4 +102,59 @@ func (c *control) onscreen() bool {
 		return false
 	}
 	return true
+}
+
+type controlanimation struct {
+	in   bool
+	step int
+}
+
+func (c *control) aniStep (screen *ebiten.Image) {
+	c.ani.step = c.ani.step + 1
+
+	scale := controlScale + scaleWibble(float64(c.ani.step))
+	theta := thetaWibble(float64(c.ani.step))
+	recenterx, recentery := locWibble(float64(c.x), float64(c.y), float64(c.ani.step))
+
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(scale, scale)
+	op.GeoM.Rotate(theta)
+	op.GeoM.Translate(recenterx, recentery)
+	screen.DrawImage(c.sprite.image, op)
+
+	top := &text.DrawOptions{}
+	top.GeoM.Translate(float64(c.x), float64(c.y+controlYspace))
+	top.LineSpacing = controlfont.Size
+	text.Draw(screen, c.label, controlfont, top)
+
+	if c.ani.step > (hz/4) { // quarter of a second 
+		c.ani.step = 0
+		c.ani.in = false
+	}
+}
+
+func scaleWibble(i float64) float64 {
+	return math.Sin(i/4) / 3
+}
+
+func thetaWibble(i float64) float64 {
+	return math.Sin(i/6) / 6
+}
+
+func locWibble(x, y, step float64) (float64, float64) {
+	z := thetaWibble(step) * 25
+	return x + z, y + z
+}
+
+func (c *control) startanimation() {
+	if c.ani.step != 0 {
+		return
+	}
+	c.ani.step = 1
+	c.ani.in = true
+	c.playchirp()
+}
+
+func (c *control) playchirp() {
+	// TODO
 }

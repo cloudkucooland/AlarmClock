@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"image"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
@@ -18,38 +19,51 @@ type background struct {
 
 var backgrounds = []background{
 	{
-		name: "One",
+		name: "Flower Splash",
 		raw:  bgres.Default,
+	},
+	{
+		name: "Owl Moon",
+		raw:  bgres.Owlmoon,
+	},
+	{
+		name: "Owl Eyes",
+		raw:  bgres.Owleyes,
+	},
+	{
+		name: "Hummingbird",
+		raw:  bgres.Hummingbird,
 	},
 }
 
 func getBackground(name string) *background {
-	for x := range backgrounds {
-		if backgrounds[x].name == name {
-			return &backgrounds[x]
+	for idx := range backgrounds {
+		if backgrounds[idx].name == name {
+			return &backgrounds[idx]
 		}
 	}
 	return &backgrounds[0]
 }
 
 func randomBackground() *background {
-	return &backgrounds[0]
+	idx := rand.Intn(len(backgrounds))
+	return &backgrounds[idx]
 }
 
 func loadBackgrounds() error {
-	for x := range backgrounds {
-		img, _, err := image.Decode(bytes.NewReader(backgrounds[x].raw))
+	for idx := range backgrounds {
+		img, _, err := image.Decode(bytes.NewReader(backgrounds[idx].raw))
 		if err != nil {
 			return err
 		}
-		backgrounds[x].image = ebiten.NewImageFromImage(img)
+		backgrounds[idx].image = ebiten.NewImageFromImage(img)
 	}
 	return nil
 }
 
 func (g *Game) drawBackground(screen *ebiten.Image) {
 	alpha := 0.75
-	if g.inScreenSaver() {
+	if g.state == inScreenSaver {
 		alpha = 0.10
 	}
 

@@ -8,9 +8,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	// "github.com/hajimehoshi/ebiten/v2/vector"
 
 	"github.com/cloudkucooland/AlarmClock/resources"
 )
@@ -36,73 +34,11 @@ type Game struct {
 	background *background
 }
 
-func (g *Game) inScreenSaver() bool {
-	return g.state == inScreenSaver
-}
-
 var (
 	spaceMonoSource *text.GoTextFaceSource
 	clockfont       *text.GoTextFace
 	controlfont     *text.GoTextFace
 )
-
-func (g *Game) Update() error {
-	g.clock.cyclesSinceTick = (g.clock.cyclesSinceTick + 1) % (60 * hz)
-	if g.clock.cyclesSinceTick == 1 {
-		now := time.Now()
-		g.clock.timestring = now.Format("03:04")
-		if g.inScreenSaver() {
-			g.clock.screensaverClockLocation()
-		}
-		if !g.inScreenSaver() && now.After(g.lastAct.Add(5*time.Minute)) {
-			// start screen saver
-			g.state = inScreenSaver
-		}
-	}
-
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		if g.inScreenSaver() {
-			g.lastAct = time.Now()
-			g.leaveScreenSaver()
-		}
-
-		for _, c := range controls {
-			x, y := ebiten.CursorPosition()
-			if c.in(x, y) {
-				fmt.Printf("in control click %s\n", c.label)
-				c.startanimation()
-			}
-		}
-	}
-
-	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-		g.lastAct = time.Now()
-		if g.inScreenSaver() {
-			g.leaveScreenSaver()
-		}
-		x, y := ebiten.CursorPosition()
-
-		for _, s := range sprites {
-			if s.in(x, y) {
-				fmt.Printf("in sprite release %s\n", s.name)
-				s.do(&s)
-			}
-		}
-
-		for _, c := range controls {
-			if c.in(x, y) {
-				fmt.Printf("in control release %s\n", c.label)
-				c.do(g)
-			}
-		}
-	}
-
-	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
-		log.Fatal("shutting down")
-	}
-
-	return nil
-}
 
 func (g *Game) leaveScreenSaver() {
 	g.state = inNormal
@@ -114,11 +50,22 @@ func (g *Game) leaveScreenSaver() {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawBackground(screen)
 
-	if !g.inScreenSaver() {
+	switch g.state {
+	case inNormal:
 		g.drawControls(screen)
+		g.drawClock(screen)
+        case inAlarm:
+		g.drawClock(screen)
+        case inSnooze:
+		g.drawClock(screen)
+        case inScreenSaver:
+		g.drawClock(screen)
+        case inAlarmConfig:
+        case inWeather:
+        case inRadio:
+		g.drawRadio(screen)
 	}
 
-	g.drawClock(screen)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 }
 

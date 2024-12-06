@@ -27,15 +27,11 @@ func (c *clock) screensaverClockLocation() {
 }
 
 func (g *Game) drawClock(screen *ebiten.Image) {
-	c := g.clock
-
-	// w, h := text.Measure(g.clock.timestring, clockfont, clockfont.Size*1.2)
-	// vector.DrawFilledRect(screen, g.clock.clockLocationX, g.clock.clockLocationY, float32(w), float32(h), black, false)
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(float64(c.clockLocationX), float64(c.clockLocationY))
-	if g.inScreenSaver() {
+	op.GeoM.Translate(float64(g.clock.clockLocationX), float64(g.clock.clockLocationY))
+	if g.state == inScreenSaver {
 		op.ColorScale.ScaleAlpha(0.25)
 	}
 	op.LineSpacing = clockfont.Size * 1
-	text.Draw(screen, c.timestring, clockfont, op)
+	text.Draw(screen, g.clock.timestring, clockfont, op)
 }

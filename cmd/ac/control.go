@@ -55,7 +55,6 @@ var controls = []control{
 }
 
 func (g *Game) drawControls(screen *ebiten.Image) {
-	// if !g.inScreenSaver() { //
 	for x := range controls {
 		if !controls[x].onscreen() {
 			continue

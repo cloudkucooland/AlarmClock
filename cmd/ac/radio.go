@@ -14,8 +14,8 @@ type radiobutton struct {
 	sprite *sprite
 	label  string
 	url    string
-	x int
-	y int
+	x      int
+	y      int
 }
 
 var radiobuttons = []radiobutton{
@@ -83,8 +83,4 @@ func (g *Game) drawRadio(screen *ebiten.Image) {
 
 func (r radiobutton) in(x, y int) bool {
 	return (x >= r.x && x <= r.x+controlIconY*controlScale) && (y >= r.y && y <= r.y+controlIconY*controlScale)
-}
-
-func (r *radiobutton) onscreen() bool {
-	return !(r.x == 0 && r.y == 0)
 }

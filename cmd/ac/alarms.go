@@ -50,7 +50,3 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 func (r alarmbutton) in(x, y int) bool {
 	return (x >= r.x && x <= r.x+controlIconY*controlScale) && (y >= r.y && y <= r.y+controlIconY*controlScale)
 }
-
-func (r *alarmbutton) onscreen() bool {
-	return !(r.x == 0 && r.y == 0)
-}

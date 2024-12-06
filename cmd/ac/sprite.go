@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 
@@ -15,24 +14,15 @@ type sprite struct {
 	name  string
 	raw   []byte
 	image *ebiten.Image
-	alpha *image.Alpha // alpha chanel to quickly determine "in"
 	x     int          // current screen location
 	y     int          // current screen location
+	scale float32
 	do    func(*sprite)
 	ani   *spriteanimation
 }
 
-// probably remove all this biz. use the control.in()
 func (s *sprite) in(x, y int) bool {
-	return s.alpha.At(x-s.x, y-s.y).(color.Alpha).A > 0
-}
-
-// if has a location other than 0,0, it must be on sceen
-func (s *sprite) onscreen() bool {
-	if s.x == 0 && s.y == 0 {
-		return false
-	}
-	return true
+	return false
 }
 
 // should this be a map key'd off name?
@@ -107,13 +97,6 @@ func loadSprites() error {
 			return err
 		}
 		sprites[x].image = ebiten.NewImageFromImage(img)
-		b := img.Bounds()
-		sprites[x].alpha = image.NewAlpha(b)
-		for j := b.Min.Y; j < b.Max.Y; j++ {
-			for i := b.Min.X; i < b.Max.X; i++ {
-				sprites[x].alpha.Set(i, j, img.At(i, j))
-			}
-		}
 		if sprites[x].do == nil {
 			sprites[x].do = chirp
 		}

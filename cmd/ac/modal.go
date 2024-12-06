@@ -13,21 +13,21 @@ import (
 type modalbutton struct {
 	sprite *sprite
 	label  string
-	x int
-	y int
-	do func(*Game)
+	x      int
+	y      int
+	do     func(*Game)
 }
 
 var modalbuttons = []modalbutton{
 	{
 		sprite: getSprite("Indignent"),
 		label:  "Close",
-		do: modalclose,
+		do:     modalclose,
 	},
 	{
 		sprite: getSprite("Happy"),
 		label:  "OK",
-		do: modalok,
+		do:     modalok,
 	},
 }
 
@@ -40,7 +40,7 @@ func (g *Game) drawModal(screen *ebiten.Image) {
 
 	modalbuttons[0].x = 720
 	modalbuttons[0].y = 380
-	
+
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(controlScale, controlScale)
 	op.GeoM.Translate(float64(modalbuttons[0].x), float64(modalbuttons[0].y))

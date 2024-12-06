@@ -1,13 +1,18 @@
 package main
 
 import (
-	// "fmt"
+	"context"
+	"fmt"
 	// "image"
 	// "image/color"
+	"os"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	//"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	// "github.com/hajimehoshi/ebiten/v2/vector"
+
+	owm "github.com/briandowns/openweathermap"
 )
 
 type weatherbutton struct {
@@ -22,31 +27,49 @@ func weatherDialog(g *Game) {
 func (g *Game) drawWeather(screen *ebiten.Image) {
 	g.drawModal(screen)
 
-	/* x := 40
+	x := 40
 	y := 40
 
-	for idx := range weatherbuttons {
-		weatherbuttons[idx].x = x
-		weatherbuttons[idx].y = y
-
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(controlScale, controlScale)
-		op.GeoM.Translate(float64(x), float64(y))
-		screen.DrawImage(weatherbuttons[idx].sprite.image, op)
-
-		top := &text.DrawOptions{}
-		top.GeoM.Translate(float64(x), float64(y+controlYspace))
-		top.LineSpacing = controlfont.Size
-		text.Draw(screen, weatherbuttons[idx].label, controlfont, top)
-
-		x = x + 112
-		if (idx % 5) == 4 {
-			x = 40
-			y = y + 112
-		}
-	} */
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.LineSpacing = controlfont.Size * 1.5
+	text.Draw(screen, g.weather, controlfont, op)
 }
 
 func (r weatherbutton) in(x, y int) bool {
 	return (x >= r.x && x <= r.x+controlIconY*controlScale) && (y >= r.y && y <= r.y+controlIconY*controlScale)
+}
+
+func (g *Game) runWeather(ctx context.Context) error {
+	apikey := os.Getenv("OWM_API_KEY")
+	if apikey == "" {
+		err := fmt.Errorf("OWM_API_KEY not set; not running weather poller")
+		g.weather = err.Error()
+		return err
+	}
+	w, err := owm.NewCurrent("F", "EN", apikey)
+	if err != nil {
+		g.weather = err.Error()
+		return err
+	}
+
+	w.CurrentByName("Frisco,TX")
+	g.formatWeatherString(w)
+
+	ticker := time.NewTicker(time.Hour)
+
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			w.CurrentByName("Frisco,TX")
+			g.formatWeatherString(w)
+		}
+	}
+}
+
+func (g *Game) formatWeatherString(c *owm.CurrentWeatherData) {
+	fmt.Printf("%+v", c)
+	fmt.Sprintf(g.weather, " ... something from owm ...")
 }

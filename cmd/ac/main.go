@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"log"
 	"time"
 
@@ -30,6 +31,7 @@ type Game struct {
 	lastAct    time.Time
 	clock      *clock
 	background *background
+	weather    string
 }
 
 var (
@@ -81,6 +83,7 @@ func main() {
 			clockLocationX: defaultClockLocationX,
 			clockLocationY: defaultClockLocationY,
 		},
+		weather: "Not loaded",
 	}
 	g.background = randomBackground()
 
@@ -99,8 +102,12 @@ func main() {
 	ebiten.SetWindowSize(800, 480)
 	// ebiten.SetFullscreen(true)
 
+	// ctx, cancel := context.WithCancel(context.Background())
+	go g.runWeather(context.Background())
+
 	ebiten.SetWindowTitle("Alarm Clock")
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
+
 }

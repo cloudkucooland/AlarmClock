@@ -74,19 +74,19 @@ func (g *Game) Update() error {
 		case inScreenSaver:
 			g.leaveScreenSaver()
 		case inNormal:
-		for idx := range sprites {
-			if sprites[idx].in(x, y) {
-				fmt.Printf("in sprite release %s\n", sprites[idx].name)
-				sprites[idx].do(&sprites[idx])
+			for idx := range sprites {
+				if sprites[idx].in(x, y) {
+					fmt.Printf("in sprite release %s\n", sprites[idx].name)
+					sprites[idx].do(&sprites[idx])
+				}
 			}
-		}
 
-		for idx := range controls {
-			if controls[idx].in(x, y) {
-				fmt.Printf("in control release %s\n", controls[idx].label)
-				controls[idx].do(g)
+			for idx := range controls {
+				if controls[idx].in(x, y) {
+					fmt.Printf("in control release %s\n", controls[idx].label)
+					controls[idx].do(g)
+				}
 			}
-		}
 		case inRadio:
 			for idx := range radiobuttons {
 				if radiobuttons[idx].in(x, y) {

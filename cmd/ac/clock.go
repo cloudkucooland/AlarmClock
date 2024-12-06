@@ -17,7 +17,7 @@ type clock struct {
 	cyclesSinceTick int
 }
 
-const defaultClockLocationX = 50 
+const defaultClockLocationX = 50
 const defaultClockLocationY = 0
 
 func (c *clock) screensaverClockLocation() {

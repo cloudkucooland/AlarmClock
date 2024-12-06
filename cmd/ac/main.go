@@ -2,12 +2,10 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"github.com/cloudkucooland/AlarmClock/resources"
@@ -45,28 +43,6 @@ func (g *Game) leaveScreenSaver() {
 	g.clock.clockLocationX = defaultClockLocationX
 	g.clock.clockLocationY = defaultClockLocationY
 	g.background = randomBackground()
-}
-
-func (g *Game) Draw(screen *ebiten.Image) {
-	g.drawBackground(screen)
-
-	switch g.state {
-	case inNormal:
-		g.drawControls(screen)
-		g.drawClock(screen)
-        case inAlarm:
-		g.drawClock(screen)
-        case inSnooze:
-		g.drawClock(screen)
-        case inScreenSaver:
-		g.drawClock(screen)
-        case inAlarmConfig:
-        case inWeather:
-        case inRadio:
-		g.drawRadio(screen)
-	}
-
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

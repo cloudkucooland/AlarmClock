@@ -8,7 +8,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 
-	// "github.com/cloudkucooland/AlarmClock/resources"
 	spriteres "github.com/cloudkucooland/AlarmClock/resources/sprites"
 )
 
@@ -20,6 +19,7 @@ type sprite struct {
 	x     int          // current screen location
 	y     int          // current screen location
 	do    func(*sprite)
+	ani   *spriteanimation
 }
 
 // probably remove all this biz. use the control.in()
@@ -61,6 +61,43 @@ var sprites = []sprite{
 		name: "Love",
 		raw:  spriteres.LovePNG,
 	},
+	{
+		name: "Indignent",
+		raw:  spriteres.IndignentPNG,
+	},
+	{
+		name: "Love",
+		raw:  spriteres.LovePNG,
+	},
+	{
+		name: "Mad",
+		raw:  spriteres.MadPNG,
+	},
+	{
+		name: "Pinwheel",
+		raw:  spriteres.PinwheelPNG,
+	},
+	{
+		name: "Spring",
+		raw:  spriteres.SpringPNG,
+	},
+	{
+		name: "Swan Mommy",
+		raw:  spriteres.SwanmommyPNG,
+	},
+	{
+		name: "Tea Time",
+		raw:  spriteres.TeatimePNG,
+	},
+}
+
+func getSprite(name string) *sprite {
+	for x := range sprites {
+		if sprites[x].name == name {
+			return &sprites[x]
+		}
+	}
+	return &sprites[0]
 }
 
 func loadSprites() error {
@@ -85,5 +122,10 @@ func loadSprites() error {
 }
 
 func chirp(s *sprite) {
-	fmt.Println("play chirp", s.name)
+	fmt.Println("play sprite chirp", s.name)
+}
+
+type spriteanimation struct {
+	in   bool
+	step int
 }

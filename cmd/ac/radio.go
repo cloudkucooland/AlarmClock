@@ -54,16 +54,13 @@ func (g *Game) drawradio(screen *ebiten.Image) {
 			top.GeoM.Translate(float64(controls[x].x), float64(controls[x].y+controlYspace))
 			top.LineSpacing = controlfont.Size * 1
 			text.Draw(screen, controls[x].label, controlfont, top)
-			 */
+			*/
 		}
 	}
 }
 
 func (r radiobutton) in(x, y int) bool {
-	if (x >= r.x && x <= r.x+controlIcony*controlScale) && (y >= r.y && y <= r.y+controlIcony*controlScale) {
-		return true
-	}
-	return false
+	return (x >= r.x && x <= r.x+controlIconY*controlScale) && (y >= r.y && y <= r.y+controlIconY*controlScale)
 }
 
 func (r *radiobutton) onscreen() bool {

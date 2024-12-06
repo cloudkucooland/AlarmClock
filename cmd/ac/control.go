@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	controlScale  = 1.5
-	controlIcony  = 32
-	controlYspace = controlIcony * controlScale
+	controlScale  = 1.5                         // the default scale for the icons
+	controlIconY  = 32                          // how many pixles the icon is wide (should not be a const, determine from img)
+	controlYspace = controlIconY * controlScale // how far down to position the text below the icon
 )
 
 type control struct {
@@ -29,7 +29,7 @@ type control struct {
 
 var controls = []control{
 	{
-		sprite: &sprites[0],
+		sprite: getSprite("Mad"),
 		label:  "Alarms",
 		x:      700,
 		y:      20,
@@ -37,7 +37,7 @@ var controls = []control{
 		ani:    &controlanimation{},
 	},
 	{
-		sprite: &sprites[1],
+		sprite: getSprite("Happy"),
 		label:  "Radio",
 		x:      700,
 		y:      120,
@@ -45,7 +45,7 @@ var controls = []control{
 		ani:    &controlanimation{},
 	},
 	{
-		sprite: &sprites[2],
+		sprite: getSprite("Pinwheel"),
 		label:  "Weather",
 		x:      700,
 		y:      220,
@@ -55,18 +55,17 @@ var controls = []control{
 }
 
 func (g *Game) drawControls(screen *ebiten.Image) {
-	if !g.inScreenSaver() {
-		for x := range controls {
-			if !controls[x].onscreen() {
-				continue
-			}
-
-			if controls[x].ani.in {
-				controls[x].aniStep(screen)
-				continue
-			}
-			controls[x].stillIcon(screen)
+	// if !g.inScreenSaver() { //
+	for x := range controls {
+		if !controls[x].onscreen() {
+			continue
 		}
+
+		if controls[x].ani.in {
+			controls[x].aniStep(screen)
+			continue
+		}
+		controls[x].stillIcon(screen)
 	}
 }
 
@@ -83,10 +82,7 @@ func (c *control) stillIcon(screen *ebiten.Image) {
 }
 
 func (c *control) in(x, y int) bool {
-	if (x >= c.x && x <= c.x+controlIcony*controlScale) && (y >= c.y && y <= c.y+controlIcony*controlScale) {
-		return true
-	}
-	return false
+	return (x >= c.x && x <= c.x+controlIconY*controlScale) && (y >= c.y && y <= c.y+controlIconY*controlScale)
 }
 
 func buildControls() error {
@@ -109,7 +105,7 @@ type controlanimation struct {
 	step int
 }
 
-func (c *control) aniStep (screen *ebiten.Image) {
+func (c *control) aniStep(screen *ebiten.Image) {
 	c.ani.step = c.ani.step + 1
 
 	scale := controlScale + scaleWibble(float64(c.ani.step))
@@ -127,7 +123,7 @@ func (c *control) aniStep (screen *ebiten.Image) {
 	top.LineSpacing = controlfont.Size
 	text.Draw(screen, c.label, controlfont, top)
 
-	if c.ani.step > (hz/4) { // quarter of a second 
+	if c.ani.step > (hz / 4) { // quarter of a second
 		c.ani.step = 0
 		c.ani.in = false
 	}

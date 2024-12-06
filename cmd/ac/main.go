@@ -30,9 +30,10 @@ const (
 )
 
 type Game struct {
-	state   gameState
-	lastAct time.Time
-	clock   *clock
+	state      gameState
+	lastAct    time.Time
+	clock      *clock
+	background *background
 }
 
 func (g *Game) inScreenSaver() bool {
@@ -107,11 +108,11 @@ func (g *Game) leaveScreenSaver() {
 	g.state = inNormal
 	g.clock.clockLocationX = defaultClockLocationX
 	g.clock.clockLocationY = defaultClockLocationY
+	g.background = randomBackground()
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// black  := color.RGBA{0x00, 0x00, 0x00, 0x00}
-	// white := color.RGBA{0xff, 0xff, 0xff, 0x00}
+	g.drawBackground(screen)
 
 	if !g.inScreenSaver() {
 		g.drawControls(screen)
@@ -147,6 +148,9 @@ func main() {
 	if err = buildControls(); err != nil {
 		log.Fatal(err)
 	}
+	if err = loadBackgrounds(); err != nil {
+		log.Fatal(err)
+	}
 
 	g := &Game{
 		state: inNormal,
@@ -155,15 +159,18 @@ func main() {
 			clockLocationY: defaultClockLocationY,
 		},
 	}
+	g.background = randomBackground()
 
 	// setup clock
 	now := time.Now()
-	g.lastAct = now
+
+	// g.lastAct = now
 	// g.state = inNormal
+	g.state = inScreenSaver
+
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
 	g.clock.cyclesSinceTick = int(ms.Milliseconds() * hz / 1000)
-
 	g.clock.timestring = now.Format("03:04")
 
 	ebiten.SetWindowSize(800, 480)

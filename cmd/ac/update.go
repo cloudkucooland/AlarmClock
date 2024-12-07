@@ -22,7 +22,7 @@ func (g *Game) Update() error {
 		if g.state == inScreenSaver {
 			g.clock.screensaverClockLocation()
 		}
-		if g.state != inScreenSaver && now.After(g.lastAct.Add(2*time.Minute)) {
+		if g.state == inNormal && now.After(g.lastAct.Add(2*time.Minute)) {
 			g.startScreenSaver()
 		}
 	}

@@ -17,8 +17,6 @@ type background struct {
 	raw  []byte
 }
 
-var backgroundcache *ebiten.Image
-
 var backgrounds = []background{
 	{
 		name: "Flower Splash",
@@ -40,7 +38,7 @@ var backgrounds = []background{
 
 func (g *Game) setBackground() error {
 	if g.background != nil {
-		g.background.Dispose()
+		g.background.Deallocate()
 		g.background = nil
 	}
 	g.background = ebiten.NewImage(screensize.X, screensize.Y)

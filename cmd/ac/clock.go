@@ -29,7 +29,7 @@ func (c *clock) clearCache() {
 		return
 	}
 
-	c.cache.Dispose()
+	c.cache.Deallocate()
 	c.cache = nil
 }
 

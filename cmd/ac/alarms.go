@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	// "image/color"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	//"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -23,7 +24,7 @@ const snoozeduration = 9
 
 var alarms = []alarm{
 	{
-		alarmTime:   alarmTime{15, 00}, // when to wake up
+		alarmTime:   alarmTime{15, 40}, // when to wake up
 		enabled:     true,
 		station:     &radiobuttons[3],
 		triggered:   false,
@@ -57,25 +58,34 @@ func (g *Game) checkAlarms(hour int, minute int) {
 }
 
 func (g *Game) startAlarm(alarmID int) {
-	alarm := alarms[alarmID]
-	alarm.triggered = true
+	g.lastAct = time.Now()
+	if g.state == inScreenSaver {
+		g.leaveScreenSaver()
+	}
 	g.state = inAlarm
+
+	alarms[alarmID].triggered = true
 	fmt.Println("Starting", alarms[alarmID])
 	// start playing radio
 }
 
 func (g *Game) snooze(alarmID int) {
-	alarm := alarms[alarmID]
-	alarm.snooze = true
-	alarm.snoozeCount = alarm.snoozeCount + 1
-	// alarm.snoozeUntil =
-	panic("finish snoozeuntil logic")
+	g.lastAct = time.Now()
+	g.state = inSnooze
+
+	alarms[alarmID].snooze = true
+	alarms[alarmID].snoozeCount = alarms[alarmID].snoozeCount + 1
+	fmt.Println("snoozing", alarms[alarmID])
 }
 
 func (g *Game) wakeFromSnooze(alarmID int) {
-	alarm := alarms[alarmID]
-	alarm.triggered = true
+	g.lastAct = time.Now()
+	if g.state == inScreenSaver {
+		g.leaveScreenSaver()
+	}
 	g.state = inAlarm
+
+	alarms[alarmID].triggered = true
 	fmt.Println("unsnoozing", alarms[alarmID])
 	// start playing radio
 }

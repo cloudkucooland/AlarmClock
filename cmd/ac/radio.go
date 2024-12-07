@@ -78,9 +78,9 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 
 // for the main screen
 func (g *Game) drawRadioControls(screen *ebiten.Image) {
-	/* if g.radio == nil {
+	if g.radio == nil {
 		return
-	} */
+	}
 
 	grey := color.RGBA{0xaa, 0xaa, 0xaa, 0x99}
 	border := color.RGBA{0x66, 0x66, 0x66, 0x00}

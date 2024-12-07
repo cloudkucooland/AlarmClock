@@ -16,6 +16,9 @@ func (g *Game) Update() error {
 		g.clock.clearCache()
 		now := time.Now()
 		g.clock.timestring = now.Format("03:04")
+
+		g.checkAlarms(now.Hour(), now.Minute())
+
 		if g.state == inScreenSaver {
 			g.clock.screensaverClockLocation()
 		}

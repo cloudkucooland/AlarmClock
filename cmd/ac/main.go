@@ -39,8 +39,15 @@ type Game struct {
 	radio        *audio.Player
 }
 
+func (g *Game) startScreenSaver() {
+	g.state = inScreenSaver
+	g.clock.clearCache()
+	g.background = randomBackground()
+}
+
 func (g *Game) leaveScreenSaver() {
 	g.state = inNormal
+	g.clock.clearCache()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.background = randomBackground()

@@ -15,6 +15,7 @@ type clock struct {
 	image.Point
 	timestring      string
 	cyclesSinceTick int
+	cache *ebiten.Image
 }
 
 const defaultClockLocationX = 50
@@ -26,12 +27,23 @@ func (c *clock) screensaverClockLocation() {
 	c.Y = rand.Int() % 250
 }
 
+func (c *clock) clearCache() {
+	c.cache.Dispose()
+	c.cache = nil
+}
+
 func (g *Game) drawClock(screen *ebiten.Image) {
-	op := &text.DrawOptions{}
-	op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
-	if g.state == inScreenSaver {
-		op.ColorScale.ScaleAlpha(0.25)
+	if g.clock.cache == nil || g.clock.cyclesSinceTick == 1 {
+		if g.clock.cache == nil {
+			g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
+		}
+
+		op := &text.DrawOptions{}
+		op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
+		if g.state == inScreenSaver {
+			op.ColorScale.ScaleAlpha(0.25)
+		}
+		text.Draw(g.clock.cache, g.clock.timestring, clockfont, op)
 	}
-	op.LineSpacing = clockfont.Size * 0.25
-	text.Draw(screen, g.clock.timestring, clockfont, op)
+	screen.DrawImage(g.clock.cache, &ebiten.DrawImageOptions{})
 }

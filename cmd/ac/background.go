@@ -15,6 +15,7 @@ type background struct {
 	name  string
 	raw   []byte
 	image *ebiten.Image
+	// cache *ebiten.Image
 }
 
 var backgrounds = []background{
@@ -61,6 +62,7 @@ func loadBackgrounds() error {
 	return nil
 }
 
+// TODO implement cache so we don't do the alpha Blend every tick
 func (g *Game) drawBackground(screen *ebiten.Image) {
 	alpha := 0.75
 	if g.state == inScreenSaver {

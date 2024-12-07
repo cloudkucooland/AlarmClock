@@ -3,22 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	// "image"
-	// "image/color"
 	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	// "github.com/hajimehoshi/ebiten/v2/vector"
 
 	owm "github.com/briandowns/openweathermap"
 )
-
-type weatherbutton struct {
-	x int
-	y int
-}
 
 func weatherDialog(g *Game) {
 	g.state = inWeather
@@ -34,10 +26,6 @@ func (g *Game) drawWeather(screen *ebiten.Image) {
 	op.GeoM.Translate(float64(x), float64(y))
 	op.LineSpacing = controlfont.Size * 1.5
 	text.Draw(screen, g.weather, controlfont, op)
-}
-
-func (r weatherbutton) in(x, y int) bool {
-	return (x >= r.x && x <= r.x+controlIconY*controlScale) && (y >= r.y && y <= r.y+controlIconY*controlScale)
 }
 
 func (g *Game) runWeather(ctx context.Context) error {

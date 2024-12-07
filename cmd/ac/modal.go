@@ -1,20 +1,15 @@
 package main
 
 import (
-	// "fmt"
-	// "image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type modalbutton struct {
 	sprite *sprite
 	label  string
-	x      int
-	y      int
 	do     func(*Game)
 }
 
@@ -24,37 +19,23 @@ var modalbuttons = []modalbutton{
 		label:  "Close",
 		do:     modalclose,
 	},
-	{
-		sprite: getSprite("Happy"),
-		label:  "OK",
-		do:     modalok,
-	},
 }
 
 func (g *Game) drawModal(screen *ebiten.Image) {
 	grey := color.RGBA{0xaa, 0xaa, 0xaa, 0x99}
 	border := color.RGBA{0x66, 0x66, 0x66, 0x00}
-	vector.DrawFilledRect(screen, float32(20), float32(20), float32(760), float32(440), grey, false)
-	vector.StrokeRect(screen, float32(20), float32(20), float32(760), float32(440), float32(4), border, false)
-	vector.StrokeRect(screen, float32(30), float32(30), float32(740), float32(420), float32(2), border, false)
 
-	modalbuttons[0].x = 720
-	modalbuttons[0].y = 380
+	borderwidth := 20
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Scale(controlScale, controlScale)
-	op.GeoM.Translate(float64(modalbuttons[0].x), float64(modalbuttons[0].y))
-	screen.DrawImage(modalbuttons[0].sprite.image, op)
+	vector.DrawFilledRect(screen, float32(borderwidth), float32(borderwidth), float32(screensize.X-(borderwidth*2)), float32(screensize.Y-(borderwidth*2)), grey, false)
+	vector.StrokeRect(screen, float32(borderwidth), float32(borderwidth), float32(screensize.X-(borderwidth*2)), float32(screensize.Y-(borderwidth*2)), float32(4), border, false)
+	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(borderwidth)*1.5, float32(screensize.X-(borderwidth*3)), float32(screensize.Y-(borderwidth*3)), float32(2), border, false)
 
-	top := &text.DrawOptions{}
-	top.GeoM.Translate(float64(modalbuttons[0].x), float64(modalbuttons[0].y+controlYspace))
-	top.LineSpacing = controlfont.Size
-	text.Draw(screen, modalbuttons[0].label, controlfont, top)
-}
+	modalbuttons[0].sprite.setLocation(screensize.X-(borderwidth*4), screensize.Y-(borderwidth*5)) // should be based on image size not borderwidth
+	modalbuttons[0].sprite.setScale(spriteScale)
 
-func (r modalbutton) in(x, y int) bool {
-	return (x >= r.x && x <= r.x+controlIconY*controlScale) && (y >= r.y && y <= r.y+controlIconY*controlScale)
-	// return r.sprite.in(x, y)
+	modalbuttons[0].sprite.draw(screen)
+	modalbuttons[0].sprite.drawLabel(modalbuttons[0].label, screen)
 }
 
 func (m *modalbutton) modaldo(g *Game) {
@@ -62,9 +43,5 @@ func (m *modalbutton) modaldo(g *Game) {
 }
 
 func modalclose(g *Game) {
-	g.state = inNormal
-}
-
-func modalok(g *Game) {
 	g.state = inNormal
 }

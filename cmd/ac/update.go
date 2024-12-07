@@ -33,34 +33,13 @@ func (g *Game) Update() error {
 			g.leaveScreenSaver()
 		case inNormal:
 			for idx := range controls {
-				if controls[idx].in(x, y) {
-					controls[idx].startanimation()
+				if controls[idx].sprite.in(x, y) && !controls[idx].sprite.ani.in {
+					controls[idx].sprite.startanimation()
 				}
 			}
 		case inRadio:
-			for idx := range radiobuttons {
-				if radiobuttons[idx].in(x, y) {
-					fmt.Println("in radiobutton mousedown")
-				}
-			}
-			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
-					fmt.Println("in modal mousedown")
-				}
-			}
 		case inAlarmConfig:
-			/* for idx := range radiobuttons {
-				if radiobuttons[idx].in(x, y) {
-					fmt.Println("in radiobutton mousedown")
-				}
-			} */
-			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
-					fmt.Println("in modal mousedown")
-				}
-			}
 		case inWeather:
-			// nothing
 		default:
 			fmt.Println("mousedown in unknown state")
 		}
@@ -74,27 +53,23 @@ func (g *Game) Update() error {
 		case inScreenSaver:
 			g.leaveScreenSaver()
 		case inNormal:
-			for idx := range sprites {
-				if sprites[idx].in(x, y) {
-					fmt.Printf("in sprite release %s\n", sprites[idx].name)
-					sprites[idx].do(&sprites[idx])
-				}
-			}
-
 			for idx := range controls {
-				if controls[idx].in(x, y) {
+				if controls[idx].sprite.in(x, y) {
 					fmt.Printf("in control release %s\n", controls[idx].label)
+					if controls[idx].sprite.ani.in {
+						controls[idx].sprite.stopanimation()
+					}
 					controls[idx].do(g)
 				}
 			}
 		case inRadio:
 			for idx := range radiobuttons {
-				if radiobuttons[idx].in(x, y) {
-					fmt.Println("in radiobutton mouseup")
+				if radiobuttons[idx].sprite.in(x, y) {
+					fmt.Println("in radiobutton mouseup", radiobuttons[idx].label)
 				}
 			}
 			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
+				if modalbuttons[idx].sprite.in(x, y) {
 					fmt.Println("in modalbutton mouseup")
 					modalbuttons[idx].modaldo(g)
 				}
@@ -106,14 +81,14 @@ func (g *Game) Update() error {
 				}
 			} */
 			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
+				if modalbuttons[idx].sprite.in(x, y) {
 					fmt.Println("in modalbutton mouseup")
 					modalbuttons[idx].modaldo(g)
 				}
 			}
 		case inWeather:
 			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
+				if modalbuttons[idx].sprite.in(x, y) {
 					fmt.Println("in modalbutton mouseup")
 					modalbuttons[idx].modaldo(g)
 				}

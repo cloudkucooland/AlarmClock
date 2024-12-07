@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,8 +12,7 @@ import (
 )
 
 type clock struct {
-	clockLocationX  int
-	clockLocationY  int
+	image.Point
 	timestring      string
 	cyclesSinceTick int
 }
@@ -22,13 +22,13 @@ const defaultClockLocationY = 0
 
 func (c *clock) screensaverClockLocation() {
 	// get clock size, determine max range...
-	c.clockLocationX = rand.Int() % 100
-	c.clockLocationY = rand.Int() % 200
+	c.X = rand.Int() % 150
+	c.Y = rand.Int() % 250
 }
 
 func (g *Game) drawClock(screen *ebiten.Image) {
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(float64(g.clock.clockLocationX), float64(g.clock.clockLocationY))
+	op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
 	if g.state == inScreenSaver {
 		op.ColorScale.ScaleAlpha(0.25)
 	}

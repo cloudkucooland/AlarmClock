@@ -66,6 +66,7 @@ func (g *Game) Update() error {
 			for idx := range radiobuttons {
 				if radiobuttons[idx].sprite.in(x, y) {
 					fmt.Println("in radiobutton mouseup", radiobuttons[idx].label)
+					radiobuttons[idx].startPlayer(g)
 				}
 			}
 			for idx := range modalbuttons {

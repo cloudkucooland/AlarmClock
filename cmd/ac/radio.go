@@ -1,8 +1,16 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/vector"
+	// "github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+
+	"github.com/grafov/m3u8"
 )
 
 type radiobutton struct {
@@ -15,26 +23,27 @@ var radiobuttons = []radiobutton{
 	{
 		sprite: getSprite("Indignent"),
 		label:  "BBC 6Music",
+		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
 	},
 	{
 		sprite: getSprite("Love"),
 		label:  "WRR",
+		url:    "https://kera.streamguys1.com/wrrlive",
+	},
+	{
+		sprite: getSprite("Love"),
+		label:  "KERA",
+		url:    "https://kera.streamguys1.com/keralive",
 	},
 	{
 		sprite: getSprite("Pinwheel"),
 		label:  "BBC 4",
-	},
-	{
-		sprite: getSprite("Mad"),
-		label:  "/dev/io",
-	},
-	{
-		sprite: getSprite("Swan Mommy"),
-		label:  "Test",
+		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
 	},
 	{
 		sprite: getSprite("Spring"),
-		label:  "Another test",
+		label:  "Radio 1 Dance",
+		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_one_dance/bbc_radio_one_dance.isml/bbc_radio_one_dance-audio%3d96000.norewind.m3u8",
 	},
 }
 
@@ -55,7 +64,6 @@ func (g *Game) drawRadio(screen *ebiten.Image) {
 		radiobuttons[idx].sprite.draw(screen)
 		radiobuttons[idx].sprite.drawLabel(radiobuttons[idx].label, screen)
 
-		// draw label
 		// TODO: base this on sprite size not hardcoded values
 		perrow := 5       // make dynamic
 		rowspacing := 112 // make dynamic
@@ -65,4 +73,66 @@ func (g *Game) drawRadio(screen *ebiten.Image) {
 			y = y + rowspacing
 		}
 	}
+}
+
+func (r radiobutton) startPlayer(g *Game) {
+	if g.radio != nil {
+		g.radio.Pause()
+		fmt.Println("stopping current stream")
+		if err := g.radio.Close(); err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+	}
+
+	if strings.HasSuffix(r.url, ".m3u8") {
+		u, err := getPls(r.url)
+		if err != nil {
+			fmt.Println(err.Error())
+			return
+		}
+		r.url = u
+	}
+
+	fmt.Println("Starting stream", r.url)
+	stream, err := http.Get(r.url)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
+	g.radio, err = g.audioContext.NewPlayer(decoded)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	g.radio.Play()
+}
+
+func getPls(url string) (string, error) {
+	f, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+
+	p, listType, err := m3u8.DecodeFrom(bufio.NewReader(f.Body), true)
+	if err != nil {
+		return "", err
+	}
+
+	switch listType {
+	case m3u8.MEDIA:
+		mediapl := p.(*m3u8.MediaPlaylist)
+		fmt.Printf("%+v\n", mediapl)
+	case m3u8.MASTER:
+		masterpl := p.(*m3u8.MasterPlaylist)
+		fmt.Printf("%+v\n", masterpl)
+	}
+	return "something", nil
 }

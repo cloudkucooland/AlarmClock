@@ -193,7 +193,7 @@ func locWibble(x, y, step float64) (float64, float64) {
 }
 
 func (s *sprite) startanimation() {
-	if s.ani.step != 0 || s.ani.in == true {
+	if s.ani.step != 0 || s.ani.in {
 		return
 	}
 	s.ani.step = 1

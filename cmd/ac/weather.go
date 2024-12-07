@@ -58,6 +58,5 @@ func (g *Game) runWeather(ctx context.Context) error {
 }
 
 func (g *Game) formatWeatherString(c *owm.CurrentWeatherData) {
-	fmt.Printf("%+v", c)
-	fmt.Sprintf(g.weather, " ... something from owm ...")
+	g.weather = fmt.Sprintf("%+v", c)
 }

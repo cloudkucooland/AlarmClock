@@ -1,16 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"image"
 	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
-
-	"github.com/cloudkucooland/AlarmClock/resources"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 )
 
 const hz = 60
@@ -33,18 +30,14 @@ const (
 )
 
 type Game struct {
-	state      gameState
-	lastAct    time.Time
-	clock      *clock
-	background *background
-	weather    string
+	state        gameState
+	lastAct      time.Time
+	clock        *clock
+	background   *background
+	weather      string
+	audioContext *audio.Context
+	radio        *audio.Player
 }
-
-var (
-	spaceMonoSource *text.GoTextFaceSource
-	clockfont       *text.GoTextFace
-	controlfont     *text.GoTextFace
-)
 
 func (g *Game) leaveScreenSaver() {
 	g.state = inNormal
@@ -58,22 +51,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 func main() {
-	s, err := text.NewGoTextFaceSource(bytes.NewReader(resources.SpaceMonoBold_ttf))
-	if err != nil {
+	if err := loadfonts(); err != nil {
 		log.Fatal(err)
 	}
-	spaceMonoSource = s
 
-	clockfont = &text.GoTextFace{
-		Source: spaceMonoSource,
-		Size:   192,
-	}
-	controlfont = &text.GoTextFace{
-		Source: spaceMonoSource,
-		Size:   12,
-	}
-
-	if err = loadBackgrounds(); err != nil {
+	if err := loadBackgrounds(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -85,6 +67,7 @@ func main() {
 	g.background = randomBackground()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
+	g.audioContext = audio.NewContext(44100)
 
 	// setup clock
 	now := time.Now()

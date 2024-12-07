@@ -14,6 +14,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case inNormal:
 		g.drawControls(screen)
 		g.drawClock(screen)
+		g.drawRadioControls(screen)
 	case inAlarm:
 		g.drawClock(screen)
 	case inSnooze:
@@ -25,7 +26,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	case inWeather:
 		g.drawWeather(screen)
 	case inRadio:
-		g.drawRadio(screen)
+		g.drawRadioDialog(screen)
 	}
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))

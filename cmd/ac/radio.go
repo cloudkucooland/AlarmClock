@@ -3,12 +3,13 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"image/color"
 	"net/http"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 
 	"github.com/grafov/m3u8"
 )
@@ -51,7 +52,7 @@ func radioDialog(g *Game) {
 	g.state = inRadio
 }
 
-func (g *Game) drawRadio(screen *ebiten.Image) {
+func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	g.drawModal(screen)
 
 	paddedspritesize := 40 // spritesize * 1.5? modal border + 10?
@@ -73,6 +74,23 @@ func (g *Game) drawRadio(screen *ebiten.Image) {
 			y = y + rowspacing
 		}
 	}
+}
+
+// for the main screen
+func (g *Game) drawRadioControls(screen *ebiten.Image) {
+	/* if g.radio == nil {
+		return
+	} */
+
+	grey := color.RGBA{0xaa, 0xaa, 0xaa, 0x99}
+	border := color.RGBA{0x66, 0x66, 0x66, 0x00}
+
+	borderwidth := 20
+
+	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(140)), float32(160), grey, false)
+	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(140)), float32(160), float32(4), border, false)
+	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(260), float32(screensize.X-(160)), float32(120), float32(2), border, false)
+
 }
 
 func (r radiobutton) startPlayer(g *Game) {

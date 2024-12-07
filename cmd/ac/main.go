@@ -33,7 +33,7 @@ type Game struct {
 	state        gameState
 	lastAct      time.Time
 	clock        *clock
-	background   *background
+	background   *ebiten.Image
 	weather      string
 	audioContext *audio.Context
 	radio        *audio.Player
@@ -42,7 +42,7 @@ type Game struct {
 func (g *Game) startScreenSaver() {
 	g.state = inScreenSaver
 	g.clock.clearCache()
-	g.background = randomBackground()
+	g.setBackground()
 }
 
 func (g *Game) leaveScreenSaver() {
@@ -50,7 +50,7 @@ func (g *Game) leaveScreenSaver() {
 	g.clock.clearCache()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
-	g.background = randomBackground()
+	g.setBackground()
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -62,16 +62,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := loadBackgrounds(); err != nil {
-		log.Fatal(err)
-	}
-
 	g := &Game{
 		state:   inScreenSaver,
 		clock:   &clock{},
 		weather: "Not loaded",
 	}
-	g.background = randomBackground()
+	g.setBackground()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.audioContext = audio.NewContext(44100)

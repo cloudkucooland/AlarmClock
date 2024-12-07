@@ -5,17 +5,14 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	// "github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	// "github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type clock struct {
 	image.Point
 	timestring      string
 	cyclesSinceTick int
-	cache *ebiten.Image
+	cache           *ebiten.Image
 }
 
 const defaultClockLocationX = 50
@@ -28,16 +25,17 @@ func (c *clock) screensaverClockLocation() {
 }
 
 func (c *clock) clearCache() {
+	if c.cache == nil {
+		return
+	}
+
 	c.cache.Dispose()
 	c.cache = nil
 }
 
 func (g *Game) drawClock(screen *ebiten.Image) {
-	if g.clock.cache == nil || g.clock.cyclesSinceTick == 1 {
-		if g.clock.cache == nil {
-			g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
-		}
-
+	if g.clock.cache == nil {
+		g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
 		op := &text.DrawOptions{}
 		op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
 		if g.state == inScreenSaver {

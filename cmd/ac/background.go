@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"math/rand"
 
@@ -12,11 +13,11 @@ import (
 )
 
 type background struct {
-	name  string
-	raw   []byte
-	image *ebiten.Image
-	// cache *ebiten.Image
+	name string
+	raw  []byte
 }
+
+var backgroundcache *ebiten.Image
 
 var backgrounds = []background{
 	{
@@ -37,41 +38,40 @@ var backgrounds = []background{
 	},
 }
 
-func getBackground(name string) *background {
-	for idx := range backgrounds {
-		if backgrounds[idx].name == name {
-			return &backgrounds[idx]
-		}
+func (g *Game) setBackground() error {
+	if g.background != nil {
+		g.background.Dispose()
+		g.background = nil
 	}
-	return &backgrounds[0]
-}
+	g.background = ebiten.NewImage(screensize.X, screensize.Y)
 
-func randomBackground() *background {
+	// random for now, later we can do by season/weather/time-of-date, etc
 	idx := rand.Intn(len(backgrounds))
-	return &backgrounds[idx]
-}
-
-func loadBackgrounds() error {
-	for idx := range backgrounds {
-		img, _, err := image.Decode(bytes.NewReader(backgrounds[idx].raw))
-		if err != nil {
-			return err
-		}
-		backgrounds[idx].image = ebiten.NewImageFromImage(img)
+	raw, _, err := image.Decode(bytes.NewReader(backgrounds[idx].raw))
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
 	}
+	img := ebiten.NewImageFromImage(raw)
+
+	// cache dim for screensaver
+	if g.state == inScreenSaver {
+		op := &colorm.DrawImageOptions{}
+		op.Blend = ebiten.BlendCopy
+		var cm colorm.ColorM
+		cm.Scale(1.0, 1.0, 1.0, 0.10)
+		colorm.DrawImage(g.background, img, cm, op)
+		return nil
+	}
+
+	// cache normal
+	g.background.DrawImage(img, &ebiten.DrawImageOptions{})
 	return nil
 }
 
-// TODO implement cache so we don't do the alpha Blend every tick
 func (g *Game) drawBackground(screen *ebiten.Image) {
-	alpha := 0.75
-	if g.state == inScreenSaver {
-		alpha = 0.10
+	if g.background != nil {
+		screen.DrawImage(g.background, &ebiten.DrawImageOptions{})
+		return
 	}
-
-	op := &colorm.DrawImageOptions{}
-	op.Blend = ebiten.BlendCopy
-	var cm colorm.ColorM
-	cm.Scale(1.0, 1.0, 1.0, alpha)
-	colorm.DrawImage(screen, g.background.image, cm, op)
 }

@@ -13,12 +13,13 @@ func (g *Game) Update() error {
 	// update clock every minute
 	g.clock.cyclesSinceTick = (g.clock.cyclesSinceTick + 1) % (60 * hz)
 	if g.clock.cyclesSinceTick == 1 {
+		g.clock.clearCache()
 		now := time.Now()
 		g.clock.timestring = now.Format("03:04")
 		if g.state == inScreenSaver {
 			g.clock.screensaverClockLocation()
 		}
-		if g.state != inScreenSaver && now.After(g.lastAct.Add(5*time.Minute)) {
+		if g.state != inScreenSaver && now.After(g.lastAct.Add(2*time.Minute)) {
 			g.startScreenSaver()
 		}
 	}

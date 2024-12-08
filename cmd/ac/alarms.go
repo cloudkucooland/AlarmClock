@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
-	// "image/color"
+	"image/color"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -91,7 +91,10 @@ func (g *Game) wakeFromSnooze(alarmID int) {
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
-	// draw stop / snooze buttons
+	c := color.RGBA{0xff, 0x33, 0x77, 0xff}
+
+	roundbuttontext(screen, 60, 60, 60, 400, "Stop", c)
+	roundbuttontext(screen, 60, 160, 60, 400, "Snooze", c)
 }
 
 type alarmbutton struct {
@@ -104,4 +107,8 @@ func alarmConfigDialog(g *Game) {
 
 func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 	g.drawModal(screen)
+}
+
+func (g *Game) drawSnooze(screen *ebiten.Image) {
+	//
 }

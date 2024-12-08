@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -25,6 +26,7 @@ var radiobuttons = []radiobutton{
 		sprite: getSprite("Indignent"),
 		label:  "BBC 6Music",
 		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+		// url:    "http://lstn.lv/bbc.m3u8?station=bbc_6music&bitrate=96000",
 	},
 	{
 		sprite: getSprite("Love"),
@@ -90,7 +92,6 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(140)), float32(160), grey, false)
 	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(140)), float32(160), float32(4), border, false)
 	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(260), float32(screensize.X-(160)), float32(120), float32(2), border, false)
-
 }
 
 func (r radiobutton) startPlayer(g *Game) {
@@ -103,17 +104,17 @@ func (r radiobutton) startPlayer(g *Game) {
 		}
 	}
 
+	// if a playlist is requested, do that in a new goprocess
 	if strings.HasSuffix(r.url, ".m3u8") {
-		u, err := getPls(r.url)
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
-		r.url = u
+		go g.playlist(r.url)
+		return
 	}
+	g.fetchandplay(r.url)
+}
 
-	fmt.Println("Starting stream", r.url)
-	stream, err := http.Get(r.url)
+func (g *Game) fetchandplay(url string) {
+	fmt.Println("Starting stream", url)
+	stream, err := http.Get(url)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -133,24 +134,56 @@ func (r radiobutton) startPlayer(g *Game) {
 	g.radio.Play()
 }
 
-func getPls(url string) (string, error) {
-	f, err := http.Get(url)
+// TODO: https://www.youtube.com/watch?v=uhOAt-aao64
+func (g *Game) playlist(playlisturl string) {
+	f, err := http.Get(playlisturl)
 	if err != nil {
-		return "", err
+		fmt.Println(err.Error())
+		return
 	}
 
-	p, listType, err := m3u8.DecodeFrom(bufio.NewReader(f.Body), true)
+	split := strings.Split(playlisturl, "/")
+	base := strings.Join(split[:len(split)-1], "/")
+	fmt.Printf("playlist: %s\nbase: %s\n", playlisturl, base)
+
+	parsed, listType, err := m3u8.DecodeFrom(bufio.NewReader(f.Body), true)
 	if err != nil {
-		return "", err
+		fmt.Println(err.Error())
+		return
 	}
 
 	switch listType {
 	case m3u8.MEDIA:
-		mediapl := p.(*m3u8.MediaPlaylist)
-		fmt.Printf("%+v\n", mediapl)
+		mediapl := parsed.(*m3u8.MediaPlaylist)
+		for _, segment := range mediapl.Segments {
+			if segment != nil {
+				mediaurl, err := abs(segment.URI, base)
+				if err != nil {
+					fmt.Println(err.Error())
+					return
+				}
+				g.fetchandplayts(mediaurl)
+			}
+		}
 	case m3u8.MASTER:
-		masterpl := p.(*m3u8.MasterPlaylist)
-		fmt.Printf("%+v\n", masterpl)
+		fmt.Println("found master playlist: not implemented")
 	}
-	return "something", nil
+}
+
+func abs(mediaurl string, base string) (string, error) {
+	parsedmediaurl, err := url.Parse(mediaurl)
+	if err != nil {
+		return "", err
+	}
+
+	if parsedmediaurl.IsAbs() {
+		return parsedmediaurl.String(), nil
+	}
+
+	return fmt.Sprintf("%s/%s", base, mediaurl), nil
+
+}
+
+func (g *Game) fetchandplayts(url string) {
+	// TODO dunno how to do these yet
 }

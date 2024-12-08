@@ -14,7 +14,8 @@ import (
 
 type background struct {
 	name string
-	raw  []byte
+	// tags []string "Cold", "Night", "Rain", "Sunny" etc -- maybe as an enum?
+	raw []byte
 }
 
 var backgrounds = []background{

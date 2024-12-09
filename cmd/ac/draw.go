@@ -16,10 +16,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.drawControls(screen)
 		g.drawRadioControls(screen)
 	case inAlarm:
-		g.drawClock(screen)
 		g.drawAlarm(screen)
 	case inSnooze:
-		g.drawClock(screen)
 		g.drawSnooze(screen)
 	case inScreenSaver:
 		g.drawClock(screen)

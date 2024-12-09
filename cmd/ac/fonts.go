@@ -13,6 +13,7 @@ var (
 	spaceMonoSource *text.GoTextFaceSource
 	clockfont       *text.GoTextFace
 	controlfont     *text.GoTextFace
+	bigbuttonfont   *text.GoTextFace
 )
 
 func loadfonts() error {
@@ -29,6 +30,10 @@ func loadfonts() error {
 	controlfont = &text.GoTextFace{
 		Source: spaceMonoSource,
 		Size:   12,
+	}
+	bigbuttonfont = &text.GoTextFace{
+		Source: spaceMonoSource,
+		Size:   96,
 	}
 	return nil
 }

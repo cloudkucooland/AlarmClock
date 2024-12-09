@@ -40,9 +40,7 @@ func (g *Game) Update() error {
 					controls[idx].sprite.startanimation()
 				}
 			}
-		case inRadio:
-		case inAlarmConfig:
-		case inWeather:
+		case inRadio, inAlarmConfig, inWeather, inAlarm:
 		default:
 			fmt.Println("mousedown in unknown state")
 		}
@@ -95,6 +93,19 @@ func (g *Game) Update() error {
 				if modalbuttons[idx].sprite.in(x, y) {
 					fmt.Println("in modalbutton mouseup")
 					modalbuttons[idx].modaldo(g)
+				}
+			}
+		case inAlarm:
+			for idx := range alarmbuttons {
+				if alarmbuttons[idx].in(x, y) {
+					fmt.Println("in alarmbutton mouseup")
+					alarmbuttons[idx].do(g)
+				}
+			}
+		case inSnooze:
+			if b, ok := alarmbuttons["Stop"]; ok {
+				if b.in(x, y) {
+					b.do(g)
 				}
 			}
 		default:

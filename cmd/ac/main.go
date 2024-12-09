@@ -63,7 +63,7 @@ func main() {
 	}
 
 	g := &Game{
-		state:   inScreenSaver,
+		state:   inAlarm,
 		clock:   &clock{},
 		weather: "Not loaded",
 	}

@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"math"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	//"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	// "github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -24,7 +25,7 @@ const snoozeduration = 9
 
 var alarms = []alarm{
 	{
-		alarmTime:   alarmTime{15, 40}, // when to wake up
+		alarmTime:   alarmTime{20, 18}, // when to wake up
 		enabled:     true,
 		station:     &radiobuttons[3],
 		triggered:   false,
@@ -66,16 +67,59 @@ func (g *Game) startAlarm(alarmID int) {
 
 	alarms[alarmID].triggered = true
 	fmt.Println("Starting", alarms[alarmID])
+
 	// start playing radio
 }
 
-func (g *Game) snooze(alarmID int) {
+func snooze(g *Game) {
+	fmt.Println("snoozing")
+
 	g.lastAct = time.Now()
+
+	alarmID := -1
+	for idx := range alarms {
+		if alarms[idx].triggered {
+			alarmID = idx
+			break
+		}
+	}
+	if alarmID == -1 {
+		// no alarms in triggered state?
+		fmt.Println("no alarms triggered, bailing")
+		// stop playing?
+		g.state = inScreenSaver
+		return
+	}
+
+	if alarms[alarmID].snoozeCount >= 3 {
+		fmt.Println("snoozed too many times... disable")
+		// turn the volume up a click
+		// play "nope" sound
+		return
+	}
+
+	alarms[alarmID].snoozeCount = alarms[alarmID].snoozeCount + 1
 	g.state = inSnooze
 
+	alarms[alarmID].triggered = false
 	alarms[alarmID].snooze = true
 	alarms[alarmID].snoozeCount = alarms[alarmID].snoozeCount + 1
 	fmt.Println("snoozing", alarms[alarmID])
+
+	// stop playing radio
+}
+
+func stop(g *Game) {
+	fmt.Println("stopping ALL alarms")
+	g.lastAct = time.Now()
+	g.state = inNormal
+
+	// this is almost certainly wrong... brute force all alarms off
+	for idx := range alarms {
+		alarms[idx].triggered = false
+		alarms[idx].snooze = false
+		alarms[idx].snoozeCount = 0
+	}
 }
 
 func (g *Game) wakeFromSnooze(alarmID int) {
@@ -91,14 +135,82 @@ func (g *Game) wakeFromSnooze(alarmID int) {
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
-	c := color.RGBA{0xff, 0x33, 0x77, 0xff}
+	if len(alarmbuttons) == 0 {
+		setupAlarmButtons()
+	}
 
-	roundbuttontext(screen, 60, 60, 60, 400, "Stop", c)
-	roundbuttontext(screen, 60, 160, 60, 400, "Snooze", c)
+	if slp, ok := alarmbuttons["Stop"]; ok {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(slp.loc.Min.X), float64(slp.loc.Min.Y))
+		screen.DrawImage(slp.img, op)
+	}
+
+	if snz, ok := alarmbuttons["Snooze"]; ok {
+		// fmt.Println(snz)
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(snz.loc.Min.X), float64(snz.loc.Min.Y))
+		screen.DrawImage(snz.img, op)
+	}
+
+	// draw clock in middle
+	textwidth, textheight := text.Measure(g.clock.timestring, clockfont, 0)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(screensize.X/2)-float64(textwidth/2), float64(screensize.Y/2)-float64(textheight/2))
+	text.Draw(screen, g.clock.timestring, clockfont, op)
 }
 
 type alarmbutton struct {
-	image.Rectangle
+	img *ebiten.Image
+	loc image.Rectangle
+	do  func(g *Game)
+}
+
+func (a alarmbutton) in(x int, y int) bool {
+	return (x >= a.loc.Min.X && x <= a.loc.Max.X) && (y >= a.loc.Min.Y && y <= a.loc.Max.Y)
+}
+
+var alarmbuttons map[string]alarmbutton
+
+func setupAlarmButtons() {
+	pink := color.RGBA{0xff, 0x33, 0x77, 0xff}
+	green := color.RGBA{0x33, 0xff, 0x33, 0xff}
+	padding := float64(10)
+
+	alarmbuttons = make(map[string]alarmbutton)
+
+	{
+		btn := button("SNOOZE", green, bigbuttonfont)
+		btnsize := btn.Bounds()
+		x := int(math.Ceil(float64(screensize.X/2) - float64(btnsize.Max.X/2))) // centered
+		y := int(math.Ceil(float64(screensize.Y-btnsize.Max.Y) - padding))      // at bottom
+
+		q := alarmbutton{
+			img: btn,
+			loc: image.Rectangle{
+				Min: image.Point{X: x, Y: y},
+				Max: image.Point{X: x + btnsize.Max.X, Y: y + btnsize.Max.Y},
+			},
+			do: snooze,
+		}
+		alarmbuttons["Snooze"] = q
+	}
+
+	{
+		btn := button("STOP", pink, bigbuttonfont)
+		btnsize := btn.Bounds()
+		x := int(math.Ceil(float64(screensize.X/2) - float64(btnsize.Max.X/2))) // centered
+		y := int(padding)                                                       // at top
+
+		q := alarmbutton{
+			img: btn,
+			loc: image.Rectangle{
+				Min: image.Point{X: x, Y: y},
+				Max: image.Point{X: x + btnsize.Max.X, Y: y + btnsize.Max.Y},
+			},
+			do: stop,
+		}
+		alarmbuttons["Stop"] = q
+	}
 }
 
 func alarmConfigDialog(g *Game) {
@@ -110,5 +222,21 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 }
 
 func (g *Game) drawSnooze(screen *ebiten.Image) {
-	//
+	green := color.RGBA{0x33, 0xff, 0x33, 0xff}
+
+	if slp, ok := alarmbuttons["Stop"]; ok {
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(slp.loc.Min.X), float64(slp.loc.Min.Y))
+		screen.DrawImage(slp.img, op)
+	}
+
+	if g.clock.cache == nil {
+		g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
+		textwidth, textheight := text.Measure(g.clock.timestring, clockfont, 0)
+		op := &text.DrawOptions{}
+		op.ColorScale.ScaleWithColor(green)
+		op.GeoM.Translate(float64(screensize.X/2)-float64(textwidth/2), float64(screensize.Y/2)-float64(textheight/2))
+		text.Draw(g.clock.cache, g.clock.timestring, clockfont, op)
+	}
+	screen.DrawImage(g.clock.cache, &ebiten.DrawImageOptions{})
 }

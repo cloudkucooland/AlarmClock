@@ -25,9 +25,9 @@ const snoozeduration = 9
 
 var alarms = []alarm{
 	{
-		alarmTime:   alarmTime{20, 18}, // when to wake up
+		alarmTime:   alarmTime{21, 05}, // when to wake up
 		enabled:     true,
-		station:     &radiobuttons[3],
+		station:     &radiobuttons[1],
 		triggered:   false,
 		snooze:      false,
 		snoozeCount: 0,
@@ -68,7 +68,7 @@ func (g *Game) startAlarm(alarmID int) {
 	alarms[alarmID].triggered = true
 	fmt.Println("Starting", alarms[alarmID])
 
-	// start playing radio
+	alarms[alarmID].station.startPlayer(g)
 }
 
 func snooze(g *Game) {
@@ -106,19 +106,22 @@ func snooze(g *Game) {
 	alarms[alarmID].snoozeCount = alarms[alarmID].snoozeCount + 1
 	fmt.Println("snoozing", alarms[alarmID])
 
-	// stop playing radio
+	alarms[alarmID].station.stopPlayer(g)
 }
 
 func stop(g *Game) {
-	fmt.Println("stopping ALL alarms")
+	fmt.Println("stopping triggered alarms")
 	g.lastAct = time.Now()
 	g.state = inNormal
 
-	// this is almost certainly wrong... brute force all alarms off
+	// this is almost certainly wrong... brute force all triggered alarms to off
 	for idx := range alarms {
-		alarms[idx].triggered = false
-		alarms[idx].snooze = false
-		alarms[idx].snoozeCount = 0
+		if alarms[idx].triggered {
+			alarms[idx].station.stopPlayer(g)
+			alarms[idx].triggered = false
+			alarms[idx].snooze = false
+			alarms[idx].snoozeCount = 0
+		}
 	}
 }
 
@@ -131,7 +134,7 @@ func (g *Game) wakeFromSnooze(alarmID int) {
 
 	alarms[alarmID].triggered = true
 	fmt.Println("unsnoozing", alarms[alarmID])
-	// start playing radio
+	alarms[alarmID].station.startPlayer(g)
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
@@ -146,7 +149,6 @@ func (g *Game) drawAlarm(screen *ebiten.Image) {
 	}
 
 	if snz, ok := alarmbuttons["Snooze"]; ok {
-		// fmt.Println(snz)
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(snz.loc.Min.X), float64(snz.loc.Min.Y))
 		screen.DrawImage(snz.img, op)

@@ -10,8 +10,8 @@ import (
 )
 
 func (g *Game) Update() error {
-	// update clock every minute
-	g.clock.cyclesSinceTick = (g.clock.cyclesSinceTick + 1) % (60 * hz)
+	// update clock every 15 seconds
+	g.clock.cyclesSinceTick = (g.clock.cyclesSinceTick + 1) % (15 * hz)
 	if g.clock.cyclesSinceTick == 1 {
 		g.clock.clearCache()
 		now := time.Now()
@@ -40,7 +40,7 @@ func (g *Game) Update() error {
 					controls[idx].sprite.startanimation()
 				}
 			}
-		case inRadio, inAlarmConfig, inWeather, inAlarm:
+		case inRadio, inAlarmConfig, inWeather, inAlarm, inSnooze:
 		default:
 			fmt.Println("mousedown in unknown state")
 		}

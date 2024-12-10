@@ -29,6 +29,8 @@ const (
 	inRadio
 )
 
+const clockformat = "3:04"
+
 type Game struct {
 	state        gameState
 	lastAct      time.Time
@@ -79,7 +81,7 @@ func main() {
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
 	g.clock.cyclesSinceTick = int(ms.Milliseconds() * hz / 1000)
-	g.clock.timestring = now.Format("3:04")
+	g.clock.timestring = now.Format(clockformat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)
 	// ebiten.SetFullscreen(true)

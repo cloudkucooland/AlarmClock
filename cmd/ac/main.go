@@ -87,6 +87,7 @@ func main() {
 	go g.runWeather(context.Background())
 
 	ebiten.SetWindowTitle("Alarm Clock")
+	ebiten.SetTPS(hz)
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}

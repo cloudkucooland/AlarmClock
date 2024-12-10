@@ -54,7 +54,8 @@ func (g *Game) leaveScreenSaver() {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return ebiten.WindowSize()
+	return screensize.X, screensize.Y
+	// return ebiten.WindowSize()
 }
 
 func main() {
@@ -63,7 +64,7 @@ func main() {
 	}
 
 	g := &Game{
-		state:   inAlarm,
+		state:   inNormal,
 		clock:   &clock{},
 		weather: "Not loaded",
 	}
@@ -78,7 +79,7 @@ func main() {
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
 	g.clock.cyclesSinceTick = int(ms.Milliseconds() * hz / 1000)
-	g.clock.timestring = now.Format("03:04")
+	g.clock.timestring = now.Format("3:04")
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)
 	// ebiten.SetFullscreen(true)

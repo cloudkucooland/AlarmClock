@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,6 +11,7 @@ type control struct {
 	sprite   *sprite
 	label    string
 	labelimg *ebiten.Image
+	labelloc image.Point
 	do       func(*Game)
 }
 
@@ -42,17 +44,19 @@ func (g *Game) drawControls(screen *ebiten.Image) {
 		}
 		controls[x].sprite.setScale(spriteScale)
 		controls[x].sprite.draw(screen)
-		b := controls[x].sprite.image.Bounds()
-		spritecenterx := float64(controls[x].sprite.loc.X) + float64(b.Max.X)*spriteScale/2.0
 
-		lb := controls[x].labelimg.Bounds()
-		labelcenterx := float64(lb.Max.X / 2)
-		labelx := spritecenterx - labelcenterx
-		labely := float64(controls[x].sprite.loc.Y) + float64(b.Max.Y)*spriteScale + 4.0
+		if controls[x].labelloc.X == 0 {
+			b := controls[x].sprite.image.Bounds()
+			spritecenterx := int(float64(controls[x].sprite.loc.X) + float64(b.Max.X)*spriteScale/2.0)
+			lb := controls[x].labelimg.Bounds()
+			labelcenterx := lb.Max.X / 2
+			controls[x].labelloc.X = spritecenterx - labelcenterx
+			controls[x].labelloc.Y = controls[x].sprite.loc.Y + int(float64(b.Max.Y)*spriteScale + 4.0)
+		}
 
 		// center label below sprite
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(labelx, labely)
+		op.GeoM.Translate(float64(controls[x].labelloc.X), float64(controls[x].labelloc.Y))
 		screen.DrawImage(controls[x].labelimg, op)
 	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 
@@ -49,7 +48,17 @@ func (c *control) genlabel(bgcolor color.RGBA, font *text.GoTextFace) {
 	op.GeoM.Translate(float64(bsize.Max.X/2)-float64(textwidth/2), float64(bsize.Max.Y/2)-float64(textheight/2))
 	text.Draw(b, c.label, font, op)
 
-	fmt.Println("genlabel", c.label)
-
 	c.labelimg = b
+}
+
+func (m *modalbutton) genlabel(bgcolor color.RGBA, font *text.GoTextFace) {
+	textwidth, textheight := text.Measure(m.label, font, 0)
+	b := buttonbase(float32(textwidth), float32(textheight), bgcolor, vectorlabelpadding)
+	bsize := b.Bounds()
+
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(bsize.Max.X/2)-float64(textwidth/2), float64(bsize.Max.Y/2)-float64(textheight/2))
+	text.Draw(b, m.label, font, op)
+
+	m.labelimg = b
 }

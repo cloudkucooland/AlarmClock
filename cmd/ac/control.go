@@ -51,7 +51,7 @@ func (g *Game) drawControls(screen *ebiten.Image) {
 			lb := controls[x].labelimg.Bounds()
 			labelcenterx := lb.Max.X / 2
 			controls[x].labelloc.X = spritecenterx - labelcenterx
-			controls[x].labelloc.Y = controls[x].sprite.loc.Y + int(float64(b.Max.Y)*spriteScale + 4.0)
+			controls[x].labelloc.Y = controls[x].sprite.loc.Y + int(float64(b.Max.Y)*spriteScale+4.0)
 		}
 
 		// center label below sprite

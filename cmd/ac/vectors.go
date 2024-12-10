@@ -62,3 +62,15 @@ func (m *modalbutton) genlabel(bgcolor color.RGBA, font *text.GoTextFace) {
 
 	m.labelimg = b
 }
+
+func (r *radiobutton) genlabel(bgcolor color.RGBA, font *text.GoTextFace) {
+	textwidth, textheight := text.Measure(r.label, font, 0)
+	b := buttonbase(float32(textwidth), float32(textheight), bgcolor, vectorlabelpadding)
+	bsize := b.Bounds()
+
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(bsize.Max.X/2)-float64(textwidth/2), float64(bsize.Max.Y/2)-float64(textheight/2))
+	text.Draw(b, r.label, font, op)
+
+	r.labelimg = b
+}

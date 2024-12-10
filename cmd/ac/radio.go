@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"net/http"
 	"strings"
@@ -12,26 +13,28 @@ import (
 )
 
 type radiobutton struct {
-	sprite *sprite
-	label  string
-	url    string
+	sprite   *sprite
+	label    string
+	labelimg *ebiten.Image
+	labelloc image.Point
+	url      string
 }
 
 var radiobuttons = []radiobutton{
 	{
-		sprite: getSprite("Indignent"),
-		label:  "BBC 6Music",
-		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
-	},
-	{
-		sprite: getSprite("Love"),
+		sprite: getSprite("Tea Time"),
 		label:  "WRR",
 		url:    "https://kera.streamguys1.com/wrrlive",
 	},
 	{
-		sprite: getSprite("Love"),
+		sprite: getSprite("Swan Mommy"),
 		label:  "KERA",
 		url:    "https://kera.streamguys1.com/keralive",
+	},
+	{
+		sprite: getSprite("Indignent"),
+		label:  "BBC 6 Music",
+		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
 	},
 	{
 		sprite: getSprite("Pinwheel"),
@@ -52,21 +55,38 @@ func radioDialog(g *Game) {
 func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	g.drawModal(screen)
 
-	paddedspritesize := 40 // spritesize * 1.5? modal border + 10?
+	// TODO: base this on sprite size not hardcoded values
+	paddedspritesize := 60 // spritesize * 1.5? modal border + 10?
 	x := paddedspritesize
 	y := paddedspritesize
+	rowspacing := 112 // make dynamic
 
 	for idx := range radiobuttons {
 		radiobuttons[idx].sprite.setLocation(x, y)
 		radiobuttons[idx].sprite.setScale(spriteScale)
 		radiobuttons[idx].sprite.draw(screen)
-		radiobuttons[idx].sprite.drawLabel(radiobuttons[idx].label, screen)
 
-		// TODO: base this on sprite size not hardcoded values
-		perrow := 5       // make dynamic
-		rowspacing := 112 // make dynamic
+		if radiobuttons[idx].labelimg == nil {
+			radiobuttons[idx].genlabel(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+		}
+		radiobuttons[idx].sprite.setScale(spriteScale)
+		radiobuttons[idx].sprite.draw(screen)
+
+		if radiobuttons[idx].labelloc.X == 0 {
+			b := radiobuttons[idx].sprite.image.Bounds()
+			spritecenterx := int(float64(radiobuttons[idx].sprite.loc.X) + float64(b.Max.X)*spriteScale/2.0)
+			lb := radiobuttons[idx].labelimg.Bounds()
+			labelcenterx := lb.Max.X / 2
+			radiobuttons[idx].labelloc.X = spritecenterx - labelcenterx
+			radiobuttons[idx].labelloc.Y = radiobuttons[idx].sprite.loc.Y + int(float64(b.Max.Y)*spriteScale+4.0)
+		}
+
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(float64(radiobuttons[idx].labelloc.X), float64(radiobuttons[idx].labelloc.Y))
+		screen.DrawImage(radiobuttons[idx].labelimg, op)
+
 		x = x + rowspacing
-		if (idx % perrow) == (perrow - 1) {
+		if x > screensize.X-60 {
 			x = paddedspritesize
 			y = y + rowspacing
 		}

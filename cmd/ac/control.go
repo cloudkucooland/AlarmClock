@@ -15,6 +15,14 @@ type control struct {
 	do       func(*Game)
 }
 
+func (c *control) getlabel() string {
+	return c.label
+}
+
+func (c *control) setlabelimg(i *ebiten.Image) {
+	c.labelimg = i
+}
+
 var controls = []control{
 	{
 		sprite: getSprite("Mad"),
@@ -40,7 +48,7 @@ func (g *Game) drawControls(screen *ebiten.Image) {
 
 	for x := range controls {
 		if controls[x].labelimg == nil {
-			controls[x].genlabel(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+			genlabel(&(controls[x]), color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
 		}
 		controls[x].sprite.setScale(spriteScale)
 		controls[x].sprite.draw(screen)

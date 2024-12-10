@@ -20,6 +20,25 @@ type radiobutton struct {
 	url      string
 }
 
+func (r *radiobutton) getlabel() string {
+	return r.label
+}
+
+func (r *radiobutton) setlabelimg(i *ebiten.Image) {
+	r.labelimg = i
+}
+
+type radiocontrol struct {
+	sprite   *sprite
+	label    string
+	labelimg *ebiten.Image
+	labelloc image.Point
+}
+
+func (r *radiocontrol) getlabel() string {
+	return r.label
+}
+
 var radiobuttons = []radiobutton{
 	{
 		sprite: getSprite("Tea Time"),
@@ -67,7 +86,7 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 		radiobuttons[idx].sprite.draw(screen)
 
 		if radiobuttons[idx].labelimg == nil {
-			radiobuttons[idx].genlabel(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+			genlabel(&(radiobuttons[idx]), color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
 		}
 		radiobuttons[idx].sprite.setScale(spriteScale)
 		radiobuttons[idx].sprite.draw(screen)
@@ -104,9 +123,9 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 
 	borderwidth := 20
 
-	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(140)), float32(160), grey, false)
-	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(140)), float32(160), float32(4), border, false)
-	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(260), float32(screensize.X-(160)), float32(120), float32(2), border, false)
+	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(160)), float32(120), grey, false)
+	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(160)), float32(120), float32(4), border, false)
+	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(screensize.X-(180)), float32(100), float32(2), border, false)
 }
 
 func (r radiobutton) startPlayer(g *Game) {

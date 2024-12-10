@@ -16,6 +16,14 @@ type modalbutton struct {
 	do       func(*Game)
 }
 
+func (m *modalbutton) getlabel() string {
+	return m.label
+}
+
+func (m *modalbutton) setlabelimg(i *ebiten.Image) {
+	m.labelimg = i
+}
+
 var modalbuttons = []modalbutton{
 	{
 		sprite: getSprite("Indignent"),
@@ -38,7 +46,7 @@ func (g *Game) drawModal(screen *ebiten.Image) {
 	modalbuttons[0].sprite.setScale(spriteScale)
 
 	if modalbuttons[0].labelimg == nil {
-		modalbuttons[0].genlabel(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+		genlabel(&modalbuttons[0], color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
 		modalbuttons[0].sprite.setScale(spriteScale)
 		modalbuttons[0].sprite.draw(screen)
 		b := modalbuttons[0].sprite.image.Bounds()

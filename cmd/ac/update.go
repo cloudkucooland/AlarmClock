@@ -15,7 +15,7 @@ func (g *Game) Update() error {
 	if g.clock.cyclesSinceTick == 1 {
 		g.clock.clearCache()
 		now := time.Now()
-		g.clock.timestring = now.Format("3:04")
+		g.clock.timestring = now.Format(clockformat)
 
 		g.checkAlarms(now.Hour(), now.Minute())
 

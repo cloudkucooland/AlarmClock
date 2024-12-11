@@ -129,10 +129,14 @@ func (r radiobutton) startPlayer(g *Game) {
 }
 
 func (r radiobutton) stopPlayer(g *Game) {
+	stopPlayer(g)
+}
+
+func stopPlayer(g *Game) {
 	if g.radio == nil {
 		return
 	}
-	if !g.radio.IsPlaying() {
+	if g.radio.IsPlaying() {
 		g.radio.Pause()
 	}
 	fmt.Println("stopping current stream")
@@ -141,4 +145,24 @@ func (r radiobutton) stopPlayer(g *Game) {
 		return
 	}
 	g.radio = nil
+}
+
+func pausePlayer(g *Game) {
+	if g.radio == nil {
+		return
+	}
+	if g.radio.IsPlaying() {
+		g.radio.Pause()
+	}
+	fmt.Println("pausing current stream")
+}
+
+func resumePlayer(g *Game) {
+	if g.radio == nil {
+		return
+	}
+	if !g.radio.IsPlaying() {
+		g.radio.Play()
+	}
+	fmt.Println("resuming current stream")
 }

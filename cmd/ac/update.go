@@ -40,6 +40,13 @@ func (g *Game) Update() error {
 					controls[idx].sprite.startanimation()
 				}
 			}
+			if g.radio != nil {
+				for idx := range radiocontrols {
+					if radiocontrols[idx].sprite.in(x, y) && !radiocontrols[idx].sprite.ani.in {
+						radiocontrols[idx].sprite.startanimation()
+					}
+				}
+			}
 		case inRadio, inAlarmConfig, inWeather, inAlarm, inSnooze:
 		default:
 			fmt.Println("mousedown in unknown state")
@@ -61,6 +68,18 @@ func (g *Game) Update() error {
 						controls[idx].sprite.stopanimation()
 					}
 					controls[idx].do(g)
+				}
+			}
+
+			if g.radio != nil {
+				for idx := range radiocontrols {
+					if radiocontrols[idx].sprite.in(x, y) {
+						fmt.Printf("in control release %s\n", radiocontrols[idx].label)
+						if radiocontrols[idx].sprite.ani.in {
+							radiocontrols[idx].sprite.stopanimation()
+						}
+						radiocontrols[idx].do(g)
+					}
 				}
 			}
 		case inRadio:

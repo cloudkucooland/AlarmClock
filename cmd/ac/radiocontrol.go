@@ -14,6 +14,7 @@ type radiocontrol struct {
 	label    string
 	labelimg *ebiten.Image
 	labelloc image.Point
+	do       func(*Game)
 }
 
 func (r *radiocontrol) getlabel() string {
@@ -28,14 +29,17 @@ var radiocontrols = []radiocontrol{
 	{
 		sprite: getSprite("Tea Time"),
 		label:  "Pause",
+		do:     pausePlayer,
 	},
 	{
 		sprite: getSprite("Swan Mommy"),
 		label:  "Play",
+		do:     resumePlayer,
 	},
 	{
 		sprite: getSprite("Spring"),
 		label:  "Stop",
+		do:     stopPlayer,
 	},
 }
 
@@ -44,19 +48,28 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		return
 	}
 
+	boxwidth := 160
+	boxheight := 120
+	borderwidth := 20
+
 	// TODO: base this on sprite size not hardcoded values
 	grey := color.RGBA{0xaa, 0xaa, 0xaa, 0x99}
 	border := color.RGBA{0x66, 0x66, 0x66, 0x00}
 
-	borderwidth := 20
+	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(boxwidth)), float32(boxheight), grey, false)
+	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(boxwidth)), float32(boxheight), float32(4), border, false)
+	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(screensize.X-(boxwidth+borderwidth)), float32(boxheight-borderwidth), float32(2), border, false)
 
-	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(160)), float32(120), grey, false)
-	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(160)), float32(120), float32(4), border, false)
-	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(screensize.X-(180)), float32(100), float32(2), border, false)
-
-	x := 200
+	x := (screensize.X - boxwidth) / 2
 
 	for idx := range radiocontrols {
+		if radiocontrols[idx].label == "Play" && g.radio.IsPlaying() {
+			continue
+		}
+		if radiocontrols[idx].label == "Pause" && !g.radio.IsPlaying() {
+			continue
+		}
+
 		radiocontrols[idx].sprite.setLocation(x, 270)
 		radiocontrols[idx].sprite.setScale(spriteScale)
 		radiocontrols[idx].sprite.draw(screen)
@@ -80,4 +93,3 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		x = x + 100
 	}
 }
-

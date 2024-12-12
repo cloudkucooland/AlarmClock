@@ -39,9 +39,45 @@ var radiobuttons = []radiobutton{
 		url:    "https://kera.streamguys1.com/keralive",
 	},
 	{
+		sprite: getSprite("Spring"),
+		label:  "90s90s Dance",
+		url:    "https://streams.90s90s.de/danceradio/mp3-192/",
+	},
+	{
+		sprite: getSprite("Spring"),
+		label:  "90s90s Techno",
+		url:    "http://streams.90s90s.de/techno/mp3-192/",
+	},
+	{
+		sprite: getSprite("Spring"),
+		label:  "Sunshine Live",
+		url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
+	},
+	{
+		sprite: getSprite("Spring"),
+		label:  "Dub Techno",
+		url:    "http://94.130.113.214:8000/dubtechno",
+	},
+	{
+		sprite: getSprite("Spring"),
+		label:  "Chillout",
+		url:    "http://144.76.106.52:7000/chillout.mp3",
+	},
+	{
+		sprite: getSprite("Spring"),
+		label:  "Ambient Sleeping Pill",
+		url:    "http://radio.stereoscenic.com:80/asp-l.mp3",
+	},
+	{
+		sprite: getSprite("Swan Mommy"),
+		label:  "Radio Frisky",
+		url:    "https://stream.friskyradio.com",
+	},
+	{
 		sprite: getSprite("Indignent"),
 		label:  "BBC 6 Music",
-		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+		// url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+		url: "http://lstn.lv/bbc.m3u8?station=bbc_6music&bitrate=320000",
 	},
 	{
 		sprite: getSprite("Pinwheel"),
@@ -52,6 +88,12 @@ var radiobuttons = []radiobutton{
 		sprite: getSprite("Spring"),
 		label:  "Radio 1 Dance",
 		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_one_dance/bbc_radio_one_dance.isml/bbc_radio_one_dance-audio%3d96000.norewind.m3u8",
+	},
+	{
+		sprite: getSprite("Spring"),
+		label:  "BBC World Service",
+		// url:    "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
+		url: "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
 	},
 }
 
@@ -102,7 +144,7 @@ func (r radiobutton) startPlayer(g *Game) {
 	r.stopPlayer(g)
 
 	// if a playlist is requested, do that in a new goprocess
-	if strings.HasSuffix(r.url, ".m3u8") || strings.HasSuffix(r.url, ".m3u") {
+	if strings.Contains(r.url, "m3u") {
 		go g.playhls(r.url)
 		return
 	}

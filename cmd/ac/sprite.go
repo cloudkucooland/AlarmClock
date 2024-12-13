@@ -18,7 +18,6 @@ const (
 
 type sprite struct {
 	name  string
-	raw   []byte
 	image *ebiten.Image
 	image.Point
 	scale float64
@@ -28,115 +27,64 @@ type sprite struct {
 }
 
 func (s *sprite) in(x, y int) bool {
-	h := float64(32) // get from image
-	w := float64(32) // get from image
-	return (x >= s.X &&
-		float64(x) <= float64(s.X)+w*s.scale) &&
-		(y >= s.Y && float64(y) <= float64(s.Y)+h*s.scale)
+	b := s.image.Bounds()
+	h := int((float64(b.Max.X) * s.scale))
+	w := int((float64(b.Max.Y) * s.scale))
+	return (x >= s.X && x <= s.X+w && y >= s.Y && y <= s.Y+h)
 }
 
 func (s *sprite) setLocation(x, y int) {
 	s.X = x
 	s.Y = y
+	// s.setlabelloc()
 }
 
-func (s *sprite) setScale(scale float64) {
-	s.scale = scale
-}
-
-// should this be a map key'd off name?
-var sprites = []sprite{
-	{
-		name: "Artist",
-		raw:  spriteres.ArtistPNG,
-	},
-	{
-		name: "Baby",
-		raw:  spriteres.BabyPNG,
-	},
-	{
-		name: "Bathtime",
-		raw:  spriteres.BathtimePNG,
-	},
-	{
-		name: "Confused",
-		raw:  spriteres.ConfusedPNG,
-	},
-	{
-		name: "Happy",
-		raw:  spriteres.HappyPNG,
-	},
-	{
-		name: "Love",
-		raw:  spriteres.LovePNG,
-	},
-	{
-		name: "Indignent",
-		raw:  spriteres.IndignentPNG,
-	},
-	{
-		name: "Love",
-		raw:  spriteres.LovePNG,
-	},
-	{
-		name: "Mad",
-		raw:  spriteres.MadPNG,
-	},
-	{
-		name: "Pinwheel",
-		raw:  spriteres.PinwheelPNG,
-	},
-	{
-		name: "Spring",
-		raw:  spriteres.SpringPNG,
-	},
-	{
-		name: "Swan Mommy",
-		raw:  spriteres.SwanmommyPNG,
-	},
-	{
-		name: "Tea Time",
-		raw:  spriteres.TeatimePNG,
-	},
+var rawsprites = map[string][]byte{
+	"Artist":     spriteres.ArtistPNG,
+	"Baby":       spriteres.BabyPNG,
+	"Bathtime":   spriteres.BathtimePNG,
+	"Confused":   spriteres.ConfusedPNG,
+	"Happy":      spriteres.HappyPNG,
+	"Indignent":  spriteres.IndignentPNG,
+	"Love":       spriteres.LovePNG,
+	"Mad":        spriteres.MadPNG,
+	"Pinwheel":   spriteres.PinwheelPNG,
+	"Spring":     spriteres.SpringPNG,
+	"Swan Mommy": spriteres.SwanmommyPNG,
+	"Tea Time":   spriteres.TeatimePNG,
 }
 
 func getSprite(name string, label string, do func(*Game)) *sprite {
 	out := sprite{
-		name:        "Uninitialized",
+		name:        name,
 		ani:         &spriteanimation{},
 		do:          do,
 		scale:       spriteScale,
 		spritelabel: &spritelabel{label: label},
 	}
 
-	for x := range sprites {
-		if sprites[x].name == name {
-			out.name = sprites[x].name
-			out.ani = &spriteanimation{}
-			img, _, err := image.Decode(bytes.NewReader(sprites[x].raw))
-			if err != nil {
-				panic(err.Error())
-			}
-			out.image = ebiten.NewImageFromImage(img)
-
-			if out.do == nil {
-				out.do = chirp
-			}
-			out.label = label
-			// out.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
-			return &out
-		}
+	raw, ok := rawsprites[name]
+	if !ok {
+		panic("unable to find sprite")
 	}
-	panic("unable to find sprite")
+
+	img, _, err := image.Decode(bytes.NewReader(raw))
+	if err != nil {
+		panic(err.Error())
+	}
+	out.image = ebiten.NewImageFromImage(img)
+
+	if out.do == nil {
+		out.do = chirp
+	}
+	out.label = label
+	if out.label != "" {
+		// out.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+	}
 	return &out
 }
 
 func (s *sprite) draw(screen *ebiten.Image) {
-	if s.image == nil {
-		fmt.Printf("%+v\n", s)
-		panic("null sprite image")
-	}
-
 	if s.ani.in {
 		s.aniStep(screen)
 	} else {
@@ -149,23 +97,39 @@ func (s *sprite) draw(screen *ebiten.Image) {
 }
 
 func (s *sprite) drawlabel(screen *ebiten.Image) {
+	if s.label == "" {
+		return
+	}
+
 	if s.labelimg == nil {
 		s.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
 	}
 
 	if s.labelloc.X == 0 {
-		b := s.image.Bounds()
-		spritecenterx := int(float64(s.X) + float64(b.Max.X)*spriteScale/2.0)
-		lb := s.labelimg.Bounds()
-		labelcenterx := lb.Max.X / 2
-		s.labelloc.X = spritecenterx - labelcenterx
-		s.labelloc.Y = s.Y + int(float64(b.Max.Y)*spriteScale+4.0)
+		s.setlabelloc()
 	}
 
 	// center label below sprite
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(s.labelloc.X), float64(s.labelloc.Y))
 	screen.DrawImage(s.labelimg, op)
+}
+
+func (s *sprite) setlabelloc() {
+	if s.label == "" {
+		return
+	}
+
+	if s.image == nil {
+		return
+	}
+
+	b := s.image.Bounds()
+	spritecenterx := int(float64(s.X) + float64(b.Max.X)*spriteScale/2.0)
+	lb := s.labelimg.Bounds()
+	labelcenterx := lb.Max.X / 2
+	s.labelloc.X = spritecenterx - labelcenterx
+	s.labelloc.Y = s.Y + int(float64(b.Max.Y)*spriteScale) + 4
 }
 
 func (s *sprite) drawWithLabel(screen *ebiten.Image) {

@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	spriteres "github.com/cloudkucooland/AlarmClock/resources/sprites"
 )
@@ -20,23 +20,24 @@ type sprite struct {
 	name  string
 	raw   []byte
 	image *ebiten.Image
-	loc   image.Point
+	image.Point
 	scale float64
 	do    func(*Game)
 	ani   *spriteanimation
+	*spritelabel
 }
 
 func (s *sprite) in(x, y int) bool {
 	h := float64(32) // get from image
 	w := float64(32) // get from image
-	return (x >= s.loc.X &&
-		float64(x) <= float64(s.loc.X)+w*s.scale) &&
-		(y >= s.loc.Y && float64(y) <= float64(s.loc.Y)+h*s.scale)
+	return (x >= s.X &&
+		float64(x) <= float64(s.X)+w*s.scale) &&
+		(y >= s.Y && float64(y) <= float64(s.Y)+h*s.scale)
 }
 
 func (s *sprite) setLocation(x, y int) {
-	s.loc.X = x
-	s.loc.Y = y
+	s.X = x
+	s.Y = y
 }
 
 func (s *sprite) setScale(scale float64) {
@@ -99,11 +100,13 @@ var sprites = []sprite{
 	},
 }
 
-func getSprite(name string, do func(*Game)) *sprite {
+func getSprite(name string, label string, do func(*Game)) *sprite {
 	out := sprite{
-		name: "Uninitialized",
-		ani:  &spriteanimation{},
-		do:   do,
+		name:        "Uninitialized",
+		ani:         &spriteanimation{},
+		do:          do,
+		scale:       spriteScale,
+		spritelabel: &spritelabel{label: label},
 	}
 
 	for x := range sprites {
@@ -115,9 +118,12 @@ func getSprite(name string, do func(*Game)) *sprite {
 				panic(err.Error())
 			}
 			out.image = ebiten.NewImageFromImage(img)
+
 			if out.do == nil {
 				out.do = chirp
 			}
+			out.label = label
+			// out.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
 			return &out
 		}
 	}
@@ -137,18 +143,34 @@ func (s *sprite) draw(screen *ebiten.Image) {
 		// draw still
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Scale(s.scale, s.scale)
-		op.GeoM.Translate(float64(s.loc.X), float64(s.loc.Y))
+		op.GeoM.Translate(float64(s.X), float64(s.Y))
 		screen.DrawImage(s.image, op)
 	}
 }
 
-func (s *sprite) drawLabel(label string, screen *ebiten.Image) {
-	space := float64(s.image.Bounds().Max.Y) * s.scale
+func (s *sprite) drawlabel(screen *ebiten.Image) {
+	if s.labelimg == nil {
+		s.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+	}
 
-	top := &text.DrawOptions{}
-	top.GeoM.Translate(float64(s.loc.X), float64(s.loc.Y)+space)
-	top.LineSpacing = controlfont.Size
-	text.Draw(screen, label, controlfont, top)
+	if s.labelloc.X == 0 {
+		b := s.image.Bounds()
+		spritecenterx := int(float64(s.X) + float64(b.Max.X)*spriteScale/2.0)
+		lb := s.labelimg.Bounds()
+		labelcenterx := lb.Max.X / 2
+		s.labelloc.X = spritecenterx - labelcenterx
+		s.labelloc.Y = s.Y + int(float64(b.Max.Y)*spriteScale+4.0)
+	}
+
+	// center label below sprite
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(float64(s.labelloc.X), float64(s.labelloc.Y))
+	screen.DrawImage(s.labelimg, op)
+}
+
+func (s *sprite) drawWithLabel(screen *ebiten.Image) {
+	s.draw(screen)
+	s.drawlabel(screen)
 }
 
 func chirp(g *Game) {
@@ -165,7 +187,7 @@ func (s *sprite) aniStep(screen *ebiten.Image) {
 
 	scale := spriteScale + scaleWibble(float64(s.ani.step))
 	theta := thetaWibble(float64(s.ani.step))
-	recenterx, recentery := locWibble(float64(s.loc.X), float64(s.loc.Y), float64(s.ani.step))
+	recenterx, recentery := locWibble(float64(s.X), float64(s.Y), float64(s.ani.step))
 
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Scale(scale, scale)

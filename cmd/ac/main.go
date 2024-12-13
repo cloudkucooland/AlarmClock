@@ -57,7 +57,6 @@ func (g *Game) leaveScreenSaver() {
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return screensize.X, screensize.Y
-	// return ebiten.WindowSize()
 }
 
 func main() {

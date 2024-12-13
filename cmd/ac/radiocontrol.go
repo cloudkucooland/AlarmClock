@@ -9,22 +9,18 @@ import (
 )
 
 type radiocontrol struct {
-	*spritelabel
 	*sprite
 }
 
 var radiocontrols = []radiocontrol{
 	{
-		sprite:      getSprite("Tea Time", pausePlayer),
-		spritelabel: &spritelabel{label: "Pause"},
+		sprite: getSprite("Tea Time", "Pause", pausePlayer),
 	},
 	{
-		sprite:      getSprite("Swan Mommy", resumePlayer),
-		spritelabel: &spritelabel{label: "Play"},
+		sprite: getSprite("Swan Mommy", "Play", resumePlayer),
 	},
 	{
-		sprite:      getSprite("Spring", stopPlayer),
-		spritelabel: &spritelabel{label: "Stop"},
+		sprite: getSprite("Spring", "Stop", stopPlayer),
 	},
 }
 
@@ -45,7 +41,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(boxwidth)), float32(boxheight), float32(4), border, false)
 	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(screensize.X-(boxwidth+borderwidth)), float32(boxheight-borderwidth), float32(2), border, false)
 
-	x := (screensize.X - boxwidth) / 2
+	x := (screensize.X - boxwidth - (32 * spriteScale)) / 2
 
 	for idx := range radiocontrols {
 		if radiocontrols[idx].label == "Play" && g.radio.IsPlaying() {
@@ -56,25 +52,8 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		}
 
 		radiocontrols[idx].setLocation(x, 270)
-		radiocontrols[idx].setScale(spriteScale)
-		radiocontrols[idx].draw(screen)
+		radiocontrols[idx].drawWithLabel(screen)
 
-		if radiocontrols[idx].labelimg == nil {
-			genlabel(&(radiocontrols[idx]), color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
-		}
-
-		if radiocontrols[idx].labelloc.X == 0 {
-			b := radiocontrols[idx].image.Bounds()
-			spritecenterx := int(float64(radiocontrols[idx].loc.X) + float64(b.Max.X)*spriteScale/2.0)
-			lb := radiocontrols[idx].labelimg.Bounds()
-			labelcenterx := lb.Max.X / 2
-			radiocontrols[idx].labelloc.X = spritecenterx - labelcenterx
-			radiocontrols[idx].labelloc.Y = radiocontrols[idx].loc.Y + int(float64(b.Max.Y)*spriteScale+4.0)
-		}
-
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(radiocontrols[idx].labelloc.X), float64(radiocontrols[idx].labelloc.Y))
-		screen.DrawImage(radiocontrols[idx].labelimg, op)
 		x = x + 100
 	}
 }

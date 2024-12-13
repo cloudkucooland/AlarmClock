@@ -47,10 +47,11 @@ func (g *Game) checkAlarms(hour int, minute int) {
 		if a.enabled && a.snooze {
 			snoozehour := a.alarmTime.hour
 			snoozemin := a.alarmTime.minute + (snoozeduration * a.snoozeCount)
-			if snoozemin >= 60 { // XXX assumes you don't mash on it more than a dozen times
+			if snoozemin >= 60 {
 				snoozemin = snoozemin - 60
 				snoozehour = snoozehour + 1
 			}
+			fmt.Println("snoozing until %d:%d (%d)", snoozehour, snoozemin, a.snoozeCount)
 			if snoozehour == hour && snoozemin == minute {
 				g.wakeFromSnooze(idx)
 			}
@@ -114,7 +115,7 @@ func stop(g *Game) {
 	g.lastAct = time.Now()
 	g.state = inNormal
 
-	// this is almost certainly wrong... brute force all triggered alarms to off
+	// brute force all triggered alarms to off, should only be one
 	for idx := range alarms {
 		if alarms[idx].triggered {
 			alarms[idx].station.stopPlayer(g)

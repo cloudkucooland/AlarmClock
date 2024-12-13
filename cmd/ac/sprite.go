@@ -22,7 +22,7 @@ type sprite struct {
 	image *ebiten.Image
 	loc   image.Point
 	scale float64
-	do    func(*sprite)
+	do    func(*Game)
 	ani   *spriteanimation
 }
 
@@ -99,10 +99,11 @@ var sprites = []sprite{
 	},
 }
 
-func getSprite(name string) *sprite {
+func getSprite(name string, do func(*Game)) *sprite {
 	out := sprite{
 		name: "Uninitialized",
 		ani:  &spriteanimation{},
+		do:   do,
 	}
 
 	for x := range sprites {
@@ -114,7 +115,6 @@ func getSprite(name string) *sprite {
 				panic(err.Error())
 			}
 			out.image = ebiten.NewImageFromImage(img)
-			out.do = sprites[x].do
 			if out.do == nil {
 				out.do = chirp
 			}
@@ -151,8 +151,8 @@ func (s *sprite) drawLabel(label string, screen *ebiten.Image) {
 	text.Draw(screen, label, controlfont, top)
 }
 
-func chirp(s *sprite) {
-	fmt.Println("play sprite chirp", s.name)
+func chirp(g *Game) {
+	fmt.Println("play sprite chirp")
 }
 
 type spriteanimation struct {
@@ -198,14 +198,9 @@ func (s *sprite) startanimation() {
 	}
 	s.ani.step = 1
 	s.ani.in = true
-	s.playchirp()
 }
 
 func (s *sprite) stopanimation() {
 	s.ani.step = 0
 	s.ani.in = false
-}
-
-func (s *sprite) playchirp() {
-	// TODO
 }

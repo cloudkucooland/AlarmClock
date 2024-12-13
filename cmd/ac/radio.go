@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image"
 	"image/color"
 	"net/http"
 	"strings"
@@ -12,86 +11,76 @@ import (
 )
 
 type radiobutton struct {
-	sprite   *sprite
-	label    string
-	labelimg *ebiten.Image
-	labelloc image.Point
-	url      string
-}
-
-func (r *radiobutton) getlabel() string {
-	return r.label
-}
-
-func (r *radiobutton) setlabelimg(i *ebiten.Image) {
-	r.labelimg = i
+	*spritelabel
+	*sprite
+	url string
 }
 
 var radiobuttons = []radiobutton{
 	{
-		sprite: getSprite("Tea Time"),
-		label:  "WRR",
-		url:    "https://kera.streamguys1.com/wrrlive",
+		sprite:      getSprite("Tea Time", chirp),
+		spritelabel: &spritelabel{label: "WRR"},
+		url:         "https://kera.streamguys1.com/wrrlive",
 	},
 	{
-		sprite: getSprite("Swan Mommy"),
-		label:  "KERA",
-		url:    "https://kera.streamguys1.com/keralive",
+		sprite:      getSprite("Swan Mommy", chirp),
+		spritelabel: &spritelabel{label: "KERA"},
+		url:         "https://kera.streamguys1.com/keralive",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "90s90s Dance",
-		url:    "https://streams.90s90s.de/danceradio/mp3-192/",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "90s90s Dance"},
+		url:         "https://streams.90s90s.de/danceradio/mp3-192/",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "90s90s Techno",
-		url:    "http://streams.90s90s.de/techno/mp3-192/",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "90s90s Techno"},
+		url:         "http://streams.90s90s.de/techno/mp3-192/",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "Sunshine Live",
-		url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "Sunshine Live"},
+		url:         "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "Dub Techno",
-		url:    "http://94.130.113.214:8000/dubtechno",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "Dub Techno"},
+		url:         "http://94.130.113.214:8000/dubtechno",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "Chillout",
-		url:    "http://144.76.106.52:7000/chillout.mp3",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "Chillout"},
+		url:         "http://144.76.106.52:7000/chillout.mp3",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "Ambient Sleeping Pill",
-		url:    "http://radio.stereoscenic.com:80/asp-l.mp3",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "Ambient Sleeping Pill"},
+		url:         "http://radio.stereoscenic.com:80/asp-l.mp3",
 	},
 	{
-		sprite: getSprite("Swan Mommy"),
-		label:  "Radio Frisky",
-		url:    "https://stream.friskyradio.com",
+		sprite:      getSprite("Swan Mommy", chirp),
+		spritelabel: &spritelabel{label: "Radio Frisky"},
+		url:         "https://stream.friskyradio.com",
 	},
 	{
-		sprite: getSprite("Indignent"),
-		label:  "BBC 6 Music",
+		sprite:      getSprite("Indignent", chirp),
+		spritelabel: &spritelabel{label: "BBC 6 Music"},
 		// url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
 		url: "http://lstn.lv/bbc.m3u8?station=bbc_6music&bitrate=320000",
 	},
 	{
-		sprite: getSprite("Pinwheel"),
-		label:  "BBC 4",
-		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
+		sprite:      getSprite("Pinwheel", chirp),
+		spritelabel: &spritelabel{label: "BBC 4"},
+		url:         "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "Radio 1 Dance",
-		url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_one_dance/bbc_radio_one_dance.isml/bbc_radio_one_dance-audio%3d96000.norewind.m3u8",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "Radio 1 Dance"},
+		url:         "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_one_dance/bbc_radio_one_dance.isml/bbc_radio_one_dance-audio%3d96000.norewind.m3u8",
 	},
 	{
-		sprite: getSprite("Spring"),
-		label:  "BBC World Service",
+		sprite:      getSprite("Spring", chirp),
+		spritelabel: &spritelabel{label: "BBC World Service"},
 		// url:    "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
 		url: "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
 	},
@@ -111,21 +100,21 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	rowspacing := 112 // make dynamic
 
 	for idx := range radiobuttons {
-		radiobuttons[idx].sprite.setLocation(x, y)
-		radiobuttons[idx].sprite.setScale(spriteScale)
-		radiobuttons[idx].sprite.draw(screen)
+		radiobuttons[idx].setLocation(x, y)
+		radiobuttons[idx].setScale(spriteScale)
+		radiobuttons[idx].draw(screen)
 
 		if radiobuttons[idx].labelimg == nil {
 			genlabel(&(radiobuttons[idx]), color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
 		}
 
 		if radiobuttons[idx].labelloc.X == 0 {
-			b := radiobuttons[idx].sprite.image.Bounds()
-			spritecenterx := int(float64(radiobuttons[idx].sprite.loc.X) + float64(b.Max.X)*spriteScale/2.0)
+			b := radiobuttons[idx].image.Bounds()
+			spritecenterx := int(float64(radiobuttons[idx].loc.X) + float64(b.Max.X)*spriteScale/2.0)
 			lb := radiobuttons[idx].labelimg.Bounds()
 			labelcenterx := lb.Max.X / 2
 			radiobuttons[idx].labelloc.X = spritecenterx - labelcenterx
-			radiobuttons[idx].labelloc.Y = radiobuttons[idx].sprite.loc.Y + int(float64(b.Max.Y)*spriteScale+4.0)
+			radiobuttons[idx].labelloc.Y = radiobuttons[idx].loc.Y + int(float64(b.Max.Y)*spriteScale+4.0)
 		}
 
 		op := &ebiten.DrawImageOptions{}

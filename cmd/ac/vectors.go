@@ -11,13 +11,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-type labelhaver interface {
-	getlabel() string
-	setlabelimg(*ebiten.Image)
-}
-
 const vectorbuttonpadding = float32(10.0)
-const vectorlabelpadding = float32(1.0)
 
 func button(label string, bgcolor color.RGBA, font *text.GoTextFace) *ebiten.Image {
 	textwidth, textheight := text.Measure(label, font, 0)
@@ -42,16 +36,4 @@ func buttonbase(textwidth float32, textheight float32, bgcolor color.RGBA, paddi
 	vector.DrawFilledCircle(img, totalwidth-radius, radius, radius, bgcolor, true)
 	vector.DrawFilledRect(img, radius, 0, totalwidth-diameter, totalheight, bgcolor, true)
 	return img
-}
-
-func genlabel(c labelhaver, bgcolor color.RGBA, font *text.GoTextFace) {
-	textwidth, textheight := text.Measure(c.getlabel(), font, 0)
-	b := buttonbase(float32(textwidth), float32(textheight), bgcolor, vectorlabelpadding)
-	bsize := b.Bounds()
-
-	op := &text.DrawOptions{}
-	op.GeoM.Translate(float64(bsize.Max.X/2)-float64(textwidth/2), float64(bsize.Max.Y/2)-float64(textheight/2))
-	text.Draw(b, c.getlabel(), font, op)
-
-	c.setlabelimg(b)
 }

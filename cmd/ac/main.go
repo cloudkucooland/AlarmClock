@@ -4,6 +4,7 @@ import (
 	"context"
 	"image"
 	"log"
+	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -84,7 +85,9 @@ func main() {
 	g.clock.timestring = now.Format(clockformat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)
-	// ebiten.SetFullscreen(true)
+	if hostname, _ := os.Hostname(); hostname == "Birdhouse" {
+		ebiten.SetFullscreen(true)
+	}
 
 	// ctx, cancel := context.WithCancel(context.Background())
 	go g.runWeather(context.Background())

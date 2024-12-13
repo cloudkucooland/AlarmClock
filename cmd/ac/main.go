@@ -5,6 +5,7 @@ import (
 	"image"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -85,7 +86,7 @@ func main() {
 	g.clock.timestring = now.Format(clockformat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)
-	if hostname, _ := os.Hostname(); hostname == "Birdhouse" {
+	if hostname, _ := os.Hostname(); strings.EqualFold(hostname, "birdhouse") {
 		ebiten.SetFullscreen(true)
 	}
 

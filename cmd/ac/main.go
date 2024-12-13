@@ -8,6 +8,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+
+	owm "github.com/briandowns/openweathermap"
 )
 
 const hz = 60
@@ -25,7 +27,6 @@ const (
 	inSnooze
 	inScreenSaver
 	inAlarmConfig
-	inWeather
 	inRadio
 )
 
@@ -36,7 +37,7 @@ type Game struct {
 	lastAct      time.Time
 	clock        *clock
 	background   *ebiten.Image
-	weather      string
+	weather      *owm.CurrentWeatherData
 	audioContext *audio.Context
 	radio        *audio.Player
 }
@@ -67,7 +68,7 @@ func main() {
 	g := &Game{
 		state:   inNormal,
 		clock:   &clock{},
-		weather: "Not loaded",
+		weather: nil,
 	}
 	g.setBackground()
 	g.clock.X = defaultClockLocationX

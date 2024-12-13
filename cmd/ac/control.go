@@ -15,17 +15,16 @@ var controls = []control{
 	{
 		sprite: getSprite("Happy", "Radio", radioDialog),
 	},
-	{
-		sprite: getSprite("Pinwheel", "Weather", weatherDialog),
-	},
 }
 
 func (g *Game) drawControls(screen *ebiten.Image) {
-	controls[0].setLocation(screensize.X-100, 20)
-	controls[1].setLocation(screensize.X-100, 120)
-	controls[2].setLocation(screensize.X-100, 220)
+	x := screensize.X - 100
+	y := 30
+	spacing := 100
 
-	for x := range controls {
-		controls[x].drawWithLabel(screen)
+	for idx := range controls {
+		controls[idx].setLocation(x, y)
+		controls[idx].drawWithLabel(screen)
+		y = y + spacing
 	}
 }

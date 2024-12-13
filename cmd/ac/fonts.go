@@ -14,6 +14,7 @@ var (
 	clockfont       *text.GoTextFace
 	controlfont     *text.GoTextFace
 	bigbuttonfont   *text.GoTextFace
+	weatherfont     *text.GoTextFace
 )
 
 func loadfonts() error {
@@ -34,6 +35,10 @@ func loadfonts() error {
 	bigbuttonfont = &text.GoTextFace{
 		Source: spaceMonoSource,
 		Size:   96,
+	}
+	weatherfont = &text.GoTextFace{
+		Source: spaceMonoSource,
+		Size:   24,
 	}
 	return nil
 }

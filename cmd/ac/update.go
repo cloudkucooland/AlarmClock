@@ -34,7 +34,7 @@ func (g *Game) Update() error {
 		case inScreenSaver:
 			g.lastAct = time.Now()
 			g.leaveScreenSaver()
-		case inNormal:
+		case inNormal, inSnooze:
 			for idx := range controls {
 				if controls[idx].in(x, y) && !controls[idx].ani.in {
 					controls[idx].startanimation()
@@ -47,7 +47,13 @@ func (g *Game) Update() error {
 					}
 				}
 			}
-		case inRadio, inAlarmConfig, inWeather, inAlarm, inSnooze:
+		case inRadio:
+			for idx := range radiobuttons {
+				if radiobuttons[idx].in(x, y) && !radiobuttons[idx].ani.in {
+					radiobuttons[idx].startanimation()
+				}
+			}
+		case inAlarmConfig, inAlarm:
 		default:
 			fmt.Println("mousedown in unknown state")
 		}
@@ -101,13 +107,6 @@ func (g *Game) Update() error {
 					fmt.Println("in radiobutton mouseup")
 				}
 			} */
-			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
-					fmt.Println("in modalbutton mouseup")
-					modalbuttons[idx].do(g)
-				}
-			}
-		case inWeather:
 			for idx := range modalbuttons {
 				if modalbuttons[idx].in(x, y) {
 					fmt.Println("in modalbutton mouseup")

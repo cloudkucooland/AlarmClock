@@ -13,6 +13,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	switch g.state {
 	case inNormal:
 		g.drawClock(screen)
+		g.drawWeather(screen)
 		g.drawControls(screen)
 		g.drawRadioControls(screen)
 	case inAlarm:
@@ -23,8 +24,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.drawClock(screen)
 	case inAlarmConfig:
 		g.drawAlarmConfig(screen)
-	case inWeather:
-		g.drawWeather(screen)
 	case inRadio:
 		g.drawRadioDialog(screen)
 	}

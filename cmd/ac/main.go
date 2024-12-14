@@ -40,6 +40,7 @@ type Game struct {
 	clock        *clock
 	background   *ebiten.Image
 	weather      *owm.CurrentWeatherData
+	weathercache *ebiten.Image
 	audioContext *audio.Context
 	radio        *audio.Player
 }

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"image"
-	"image/color"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -79,7 +78,7 @@ func getSprite(name string, label string, do func(*Game)) *sprite {
 	}
 	out.label = label
 	if out.label != "" {
-		// out.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+		// out.genlabelimage(spritelabelgrey, controlfont)
 	}
 	return &out
 }
@@ -102,7 +101,7 @@ func (s *sprite) drawlabel(screen *ebiten.Image) {
 	}
 
 	if s.labelimg == nil {
-		s.genlabelimage(color.RGBA{0x33, 0x33, 0x33, 0xee}, controlfont)
+		s.genlabelimage(spritelabelgrey, controlfont)
 	}
 
 	if s.labelloc.X == 0 {

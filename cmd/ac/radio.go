@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	// "image/color"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
@@ -12,45 +12,55 @@ import (
 
 type radiobutton struct {
 	*sprite
-	url string
+	url   string
+	works bool
 }
 
 var radiobuttons = []radiobutton{
 	{
 		sprite: getSprite("Tea Time", "WRR", chirp),
 		url:    "https://kera.streamguys1.com/wrrlive",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Swan Mommy", "KERA", chirp),
 		url:    "https://kera.streamguys1.com/keralive",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Spring", "90s90s Dance", chirp),
 		url:    "https://streams.90s90s.de/danceradio/mp3-192/",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Spring", "90s90s Techno", chirp),
 		url:    "http://streams.90s90s.de/techno/mp3-192/",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Spring", "Sunshine Live", chirp),
 		url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Spring", "Dub Techno", chirp),
 		url:    "http://94.130.113.214:8000/dubtechno",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Spring", "Chillout", chirp),
 		url:    "http://144.76.106.52:7000/chillout.mp3",
+		works:  true,
 	},
 	{
-		sprite: getSprite("Spring", "Ambient Sleeping Pill", chirp),
+		sprite: getSprite("Spring", "Sleeping Pill", chirp),
 		url:    "http://radio.stereoscenic.com:80/asp-l.mp3",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Swan Mommy", "Radio Frisky", chirp),
 		url:    "https://stream.friskyradio.com",
+		works:  true,
 	},
 	{
 		sprite: getSprite("Indignent", "BBC 6 Music", chirp),
@@ -86,11 +96,14 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	rowspacing := 112 // make dynamic
 
 	for idx := range radiobuttons {
+		if !radiobuttons[idx].works {
+			continue
+		}
 		radiobuttons[idx].setLocation(x, y)
 		radiobuttons[idx].drawWithLabel(screen)
 
 		x = x + rowspacing
-		if x > screensize.X-60 {
+		if x > screensize.X-100 {
 			x = paddedspritesize
 			y = y + rowspacing
 		}
@@ -144,6 +157,13 @@ func stopPlayer(g *Game) {
 		return
 	}
 	g.radio = nil
+}
+
+func sleepStopPlayer(g *Game) {
+	go func(g *Game) {
+		time.Sleep(30 * time.Minute)
+		stopPlayer(g)
+	}(g)
 }
 
 func pausePlayer(g *Game) {

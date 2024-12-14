@@ -32,8 +32,6 @@ const (
 	inRadio
 )
 
-const clockformat = "3:04"
-
 type Game struct {
 	state            gameState
 	debugString      string
@@ -47,6 +45,7 @@ type Game struct {
 	enabledAlarmID   alarmid
 	selectedStation  *radiobutton
 	inSleepCountdown bool
+	config           *Config
 }
 
 func (g *Game) startScreenSaver() {
@@ -83,6 +82,7 @@ func main() {
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.audioContext = audio.NewContext(44100)
+	g.loadconfig()
 
 	// setup clock
 	now := time.Now()
@@ -90,7 +90,7 @@ func main() {
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
 	g.clock.cyclesSinceTick = int(ms.Milliseconds() * hz / 1000)
-	g.clock.timestring = now.Format(clockformat)
+	g.clock.timestring = now.Format(g.config.ClockFormat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)
 	if hostname, _ := os.Hostname(); strings.EqualFold(hostname, "birdhouse") {

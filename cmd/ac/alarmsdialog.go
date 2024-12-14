@@ -4,22 +4,12 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	// "math"
 	"slices"
-	// "time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
-
-/* type alarm struct {
-	alarmTime   alarmTime
-	triggered   bool
-	snooze      bool
-	snoozeCount int
-	dialogButton image.Rectangle
-} */
 
 // chaos reduction
 var ids []alarmid
@@ -29,8 +19,8 @@ func alarmConfigDialog(g *Game) {
 
 	// range over map doesn't always happen in the same order, causing chaos, this gives us a sorted list of alarmIDs to use
 	if len(ids) == 0 {
-		ids = make([]alarmid, 0, 5)
-		for id := range alarms {
+		ids = make([]alarmid, 0, len(g.config.Alarms))
+		for id := range g.config.Alarms {
 			ids = append(ids, id)
 		}
 		slices.SortFunc(ids, func(a, b alarmid) int {
@@ -48,13 +38,13 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 	rowheight := float32((screensize.Y - 64) / len(ids))
 
 	for _, id := range ids {
-		a := alarms[id]
+		a := g.config.Alarms[id]
 
 		if a.dialogButton.Min.X == 0 {
 			a.dialogButton = image.Rect(x, y, endx, y+int(rowheight))
 		}
 		vector.StrokeRect(screen, float32(a.dialogButton.Min.X), float32(a.dialogButton.Min.Y), float32(a.dialogButton.Max.X-a.dialogButton.Min.X), rowheight, float32(2), bordergrey, false)
-		alarmtime := fmt.Sprintf("%0.2d:%0.2d", a.alarmTime.hour, a.alarmTime.minute)
+		alarmtime := fmt.Sprintf("%0.2d:%0.2d", a.AlarmTime.Hour, a.AlarmTime.Minute)
 
 		textwidth, textheight := text.Measure(alarmtime, weatherfont, 0)
 
@@ -71,11 +61,10 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 			text.Draw(screen, "Enabled", weatherfont, op)
 		}
 
-		// fmt.Println(id, a, x, y)
 		y = y + int(rowheight) + 1
 	}
 }
 
-func (a alarm) in(x int, y int) bool {
+func (a Alarm) in(x int, y int) bool {
 	return (x >= a.dialogButton.Min.X && x <= a.dialogButton.Max.X) && (y >= a.dialogButton.Min.Y && y <= a.dialogButton.Max.Y)
 }

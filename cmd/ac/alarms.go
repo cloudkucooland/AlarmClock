@@ -12,44 +12,36 @@ import (
 )
 
 type alarmid int
-const disabledAlarmID = -1
-const snoozeduration = 9
 
-type alarm struct {
-	alarmTime    alarmTime
+const disabledAlarmID = -1
+
+type Alarm struct {
+	AlarmTime    AlarmTime
 	triggered    bool
 	snooze       bool
 	snoozeCount  int
 	dialogButton image.Rectangle
 }
 
-var alarms = map[alarmid]*alarm{
-	0: {alarmTime: alarmTime{7, 00}},
-	1: {alarmTime: alarmTime{8, 00}},
-	2: {alarmTime: alarmTime{5, 00}},
-	3: {alarmTime: alarmTime{6, 30}},
-	4: {alarmTime: alarmTime{4, 30}},
-}
-
-type alarmTime struct {
-	hour   int
-	minute int
+type AlarmTime struct {
+	Hour   int
+	Minute int
 }
 
 func (g *Game) checkAlarms(hour int, minute int) {
-	a, ok := alarms[g.enabledAlarmID]
+	a, ok := g.config.Alarms[g.enabledAlarmID]
 	if !ok {
 		return
 	}
 
-	if !a.snooze && a.alarmTime.hour == hour && a.alarmTime.minute == minute {
+	if !a.snooze && a.AlarmTime.Hour == hour && a.AlarmTime.Minute == minute {
 		g.startAlarm(g.enabledAlarmID)
 		return
 	}
 
 	if a.snooze {
-		snoozehour := a.alarmTime.hour
-		snoozemin := a.alarmTime.minute + (snoozeduration * a.snoozeCount)
+		snoozehour := a.AlarmTime.Hour
+		snoozemin := a.AlarmTime.Minute + (g.config.SnoozeDuration * a.snoozeCount)
 		if snoozemin >= 60 {
 			snoozemin = snoozemin - 60
 			snoozehour = snoozehour + 1
@@ -68,7 +60,7 @@ func (g *Game) startAlarm(a alarmid) {
 	}
 	g.state = inAlarm
 
-	aa, ok := alarms[a]
+	aa, ok := g.config.Alarms[a]
 	if !ok {
 		g.debug("cannot start unknown alarm?")
 		return
@@ -84,7 +76,7 @@ func snooze(g *Game) {
 
 	g.lastAct = time.Now()
 
-	a, ok := alarms[g.enabledAlarmID]
+	a, ok := g.config.Alarms[g.enabledAlarmID]
 	if !ok {
 		g.debug("no alarms enabled, bailing")
 		// no alarms enabled
@@ -114,7 +106,7 @@ func snooze(g *Game) {
 func stop(g *Game) {
 	g.debug("stopping triggered alarms")
 
-	a, ok := alarms[g.enabledAlarmID]
+	a, ok := g.config.Alarms[g.enabledAlarmID]
 	if !ok {
 		g.debug("alarm not enabled, nothing to stop")
 		return
@@ -140,7 +132,7 @@ func (g *Game) wakeFromSnooze(a alarmid) {
 	}
 	g.state = inAlarm
 
-	aa, ok := alarms[a]
+	aa, ok := g.config.Alarms[a]
 	if !ok {
 		g.debug("unable to wake from snooze for unknown alarm")
 		return

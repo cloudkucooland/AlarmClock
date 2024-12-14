@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,9 +10,6 @@ import (
 
 	owm "github.com/briandowns/openweathermap"
 )
-
-const owmzipcode = "75035"
-const owmcountry = "US"
 
 func (g *Game) drawWeather(screen *ebiten.Image) {
 	if g.weathercache == nil {
@@ -28,19 +24,18 @@ func (g *Game) drawWeather(screen *ebiten.Image) {
 }
 
 func (g *Game) runWeather(ctx context.Context) {
-	apikey := os.Getenv("OWM_API_KEY")
-	if apikey == "" {
-		g.debug("OWM_API_KEY not set; not running weather poller")
+	if g.config.OWM_API_key == "" {
+		g.debug("OWM API key not set; not running weather poller")
 		return
 	}
-	w, err := owm.NewCurrent("F", "EN", apikey)
+	w, err := owm.NewCurrent("F", "EN", g.config.OWM_API_key)
 	if err != nil {
 		g.debug(err.Error())
 		return
 	}
 	g.weather = w
 
-	if err := w.CurrentByZipcode(owmzipcode, owmcountry); err != nil {
+	if err := w.CurrentByZipcode(g.config.WeatherZipcode, g.config.WeatherCountry); err != nil {
 		g.debug(err.Error())
 	} else {
 		updateweathercache(g)
@@ -52,7 +47,7 @@ func (g *Game) runWeather(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			if err := w.CurrentByZipcode(owmzipcode, owmcountry); err != nil {
+			if err := w.CurrentByZipcode(g.config.WeatherZipcode, g.config.WeatherCountry); err != nil {
 				g.debug(err.Error())
 				if g.weathercache != nil {
 					g.weathercache.Deallocate()

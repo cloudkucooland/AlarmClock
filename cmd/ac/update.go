@@ -14,7 +14,7 @@ func (g *Game) Update() error {
 	if g.clock.cyclesSinceTick == 1 {
 		g.clock.clearCache()
 		now := time.Now()
-		g.clock.timestring = now.Format(clockformat)
+		g.clock.timestring = now.Format(g.config.ClockFormat)
 
 		g.checkAlarms(now.Hour(), now.Minute())
 
@@ -68,7 +68,6 @@ func (g *Game) Update() error {
 		case inNormal:
 			for idx := range controls {
 				if controls[idx].in(x, y) {
-					// g.debug(fmt.Sprintf("in control release %s\n", controls[idx].label))
 					if controls[idx].ani.in {
 						controls[idx].stopanimation()
 					}
@@ -79,7 +78,6 @@ func (g *Game) Update() error {
 			if g.radio != nil {
 				for idx := range radiocontrols {
 					if radiocontrols[idx].in(x, y) {
-						// g.debug(fmt.Sprintf("in control release %s\n", radiocontrols[idx].label))
 						if radiocontrols[idx].ani.in {
 							radiocontrols[idx].stopanimation()
 						}
@@ -90,29 +88,27 @@ func (g *Game) Update() error {
 		case inRadio:
 			for idx := range radiobuttons {
 				if radiobuttons[idx].in(x, y) {
-					// g.debug(fmt.Sprintln("in radiobutton mouseup", radiobuttons[idx].label))
 					radiobuttons[idx].startPlayer(g)
 				}
 			}
 			for idx := range modalbuttons {
 				if modalbuttons[idx].in(x, y) {
-					// g.debug(fmt.Sprintln("in modalbutton mouseup"))
 					modalbuttons[idx].do(g)
 				}
 			}
 		case inAlarmConfig:
-			for key := range alarms {
-				if alarms[key].in(x, y) {
-					g.debug("in alarm dialog mouseup")
+			for key := range g.config.Alarms {
+				if g.config.Alarms[key].in(x, y) {
 					if g.enabledAlarmID == key {
 						g.enabledAlarmID = disabledAlarmID
+					} else {
+						g.enabledAlarmID = key
 					}
-					g.enabledAlarmID = key
+					g.storeconfig()
 				}
 			}
 			for idx := range modalbuttons {
 				if modalbuttons[idx].in(x, y) {
-					// debug("in modalbutton mouseup")
 					modalbuttons[idx].do(g)
 				}
 			}

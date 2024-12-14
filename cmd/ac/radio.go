@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -39,8 +38,9 @@ var radiobuttons = []radiobutton{
 	},
 	{
 		sprite: getSprite("Spring", "Sunshine Live", chirp),
-		url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
-		works:  true,
+		// url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
+		url:   "http://stream.sunshine-live.de/techno/mp3-192/",
+		works: true,
 	},
 	{
 		sprite: getSprite("Spring", "Dub Techno", chirp),
@@ -60,7 +60,6 @@ var radiobuttons = []radiobutton{
 	{
 		sprite: getSprite("Swan Mommy", "Radio Frisky", chirp),
 		url:    "https://stream.friskyradio.com",
-		works:  true,
 	},
 	{
 		sprite: getSprite("Indignent", "BBC 6 Music", chirp),
@@ -110,37 +109,40 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	}
 }
 
-func (r radiobutton) startPlayer(g *Game) {
+func (r *radiobutton) startPlayer(g *Game) {
+	g.selectedStation = r
+
 	r.stopPlayer(g)
 
 	// if a playlist is requested, do that in a new goprocess
 	if strings.Contains(r.url, "m3u") {
+		g.debug("starting HLS player logic")
 		go g.playhls(r.url)
 		return
 	}
 
-	fmt.Println("Starting stream", r.url)
+	g.debug(r.url)
 	stream, err := http.Get(r.url)
 	if err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return
 	}
 
 	decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
 	if err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return
 	}
 
 	g.radio, err = g.audioContext.NewPlayer(decoded)
 	if err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return
 	}
 	g.radio.Play()
 }
 
-func (r radiobutton) stopPlayer(g *Game) {
+func (r *radiobutton) stopPlayer(g *Game) {
 	stopPlayer(g)
 }
 
@@ -151,17 +153,20 @@ func stopPlayer(g *Game) {
 	if g.radio.IsPlaying() {
 		g.radio.Pause()
 	}
-	fmt.Println("stopping current stream")
+	g.debug("stopping current stream")
 	if err := g.radio.Close(); err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return
 	}
 	g.radio = nil
 }
 
 func sleepStopPlayer(g *Game) {
+	g.inSleepCountdown = true
 	go func(g *Game) {
+		g.debug("sleep countdown")
 		time.Sleep(30 * time.Minute)
+		g.debug("stopping player from sleep countdown")
 		stopPlayer(g)
 	}(g)
 }
@@ -173,7 +178,7 @@ func pausePlayer(g *Game) {
 	if g.radio.IsPlaying() {
 		g.radio.Pause()
 	}
-	fmt.Println("pausing current stream")
+	g.debug("pausing current stream")
 }
 
 func resumePlayer(g *Game) {
@@ -183,5 +188,9 @@ func resumePlayer(g *Game) {
 	if !g.radio.IsPlaying() {
 		g.radio.Play()
 	}
-	fmt.Println("resuming current stream")
+	g.debug("resuming current stream")
+}
+
+func defaultStation() *radiobutton {
+	return &radiobuttons[0]
 }

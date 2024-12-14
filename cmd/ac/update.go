@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -55,7 +54,7 @@ func (g *Game) Update() error {
 			}
 		case inAlarmConfig, inAlarm:
 		default:
-			fmt.Println("mousedown in unknown state")
+			g.debug("mousedown in unknown state")
 		}
 	}
 
@@ -69,7 +68,7 @@ func (g *Game) Update() error {
 		case inNormal:
 			for idx := range controls {
 				if controls[idx].in(x, y) {
-					fmt.Printf("in control release %s\n", controls[idx].label)
+					// g.debug(fmt.Sprintf("in control release %s\n", controls[idx].label))
 					if controls[idx].ani.in {
 						controls[idx].stopanimation()
 					}
@@ -80,7 +79,7 @@ func (g *Game) Update() error {
 			if g.radio != nil {
 				for idx := range radiocontrols {
 					if radiocontrols[idx].in(x, y) {
-						fmt.Printf("in control release %s\n", radiocontrols[idx].label)
+						// g.debug(fmt.Sprintf("in control release %s\n", radiocontrols[idx].label))
 						if radiocontrols[idx].ani.in {
 							radiocontrols[idx].stopanimation()
 						}
@@ -91,43 +90,45 @@ func (g *Game) Update() error {
 		case inRadio:
 			for idx := range radiobuttons {
 				if radiobuttons[idx].in(x, y) {
-					fmt.Println("in radiobutton mouseup", radiobuttons[idx].label)
+					// g.debug(fmt.Sprintln("in radiobutton mouseup", radiobuttons[idx].label))
 					radiobuttons[idx].startPlayer(g)
 				}
 			}
 			for idx := range modalbuttons {
 				if modalbuttons[idx].in(x, y) {
-					fmt.Println("in modalbutton mouseup")
+					// g.debug(fmt.Sprintln("in modalbutton mouseup"))
 					modalbuttons[idx].do(g)
 				}
 			}
 		case inAlarmConfig:
-			/* for idx := range radiobuttons {
-				if radiobuttons[idx].in(x, y) {
-					fmt.Println("in radiobutton mouseup")
+			for key := range alarms {
+				if alarms[key].in(x, y) {
+					g.debug("in alarm dialog mouseup")
+					g.enabledAlarmID = key
 				}
-			} */
+			}
 			for idx := range modalbuttons {
 				if modalbuttons[idx].in(x, y) {
-					fmt.Println("in modalbutton mouseup")
+					// debug("in modalbutton mouseup")
 					modalbuttons[idx].do(g)
 				}
 			}
 		case inAlarm:
 			for idx := range alarmbuttons {
 				if alarmbuttons[idx].in(x, y) {
-					fmt.Println("in alarmbutton mouseup")
+					g.debug("in alarmbutton mouseup")
 					alarmbuttons[idx].do(g)
 				}
 			}
 		case inSnooze:
+			g.debug("mouseup in snooze")
 			if b, ok := alarmbuttons["Stop"]; ok {
 				if b.in(x, y) {
 					b.do(g)
 				}
 			}
 		default:
-			fmt.Println("mouseup in unknown state")
+			g.debug("mouseup in unknown state")
 		}
 
 	}

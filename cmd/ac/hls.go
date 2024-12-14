@@ -20,7 +20,7 @@ func (g *Game) playhls(url string) {
 		for _, track := range tracks {
 			ttrack := track
 
-			fmt.Printf("detected track with codec %T\n", track.Codec)
+			g.debug(fmt.Sprintf("detected track with codec %T\n", track.Codec))
 
 			// set a callback that is called when data is received
 			switch track.Codec.(type) {
@@ -63,7 +63,7 @@ func (g *Game) playhls(url string) {
 	// start reading
 	err := c.Start()
 	if err != nil {
-		fmt.Println("unable to start", err.Error())
+		g.debug(err.Error())
 		return
 	}
 	defer c.Close()
@@ -71,12 +71,12 @@ func (g *Game) playhls(url string) {
 
 	g.radio, err = g.audioContext.NewPlayer(&b)
 	if err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return
 	}
 	g.radio.Play()
 
 	// wait for a fatal error
 	err = <-c.Wait()
-	fmt.Println(err.Error())
+	g.debug(err.Error())
 }

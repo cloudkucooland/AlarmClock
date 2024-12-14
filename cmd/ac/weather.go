@@ -30,19 +30,18 @@ func (g *Game) drawWeather(screen *ebiten.Image) {
 func (g *Game) runWeather(ctx context.Context) {
 	apikey := os.Getenv("OWM_API_KEY")
 	if apikey == "" {
-		err := fmt.Errorf("OWM_API_KEY not set; not running weather poller")
-		fmt.Println(err.Error())
+		g.debug("OWM_API_KEY not set; not running weather poller")
 		return
 	}
 	w, err := owm.NewCurrent("F", "EN", apikey)
 	if err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return
 	}
 	g.weather = w
 
 	if err := w.CurrentByZipcode(owmzipcode, owmcountry); err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 	} else {
 		updateweathercache(g)
 	}
@@ -54,7 +53,7 @@ func (g *Game) runWeather(ctx context.Context) {
 			return
 		case <-ticker.C:
 			if err := w.CurrentByZipcode(owmzipcode, owmcountry); err != nil {
-				fmt.Println(err.Error())
+				g.debug(err.Error())
 				if g.weathercache != nil {
 					g.weathercache.Deallocate()
 					g.weathercache = nil

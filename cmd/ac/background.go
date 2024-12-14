@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"math/rand"
 
@@ -48,7 +47,7 @@ func (g *Game) setBackground() error {
 	idx := rand.Intn(len(backgrounds))
 	raw, _, err := image.Decode(bytes.NewReader(backgrounds[idx].raw))
 	if err != nil {
-		fmt.Println(err.Error())
+		g.debug(err.Error())
 		return err
 	}
 	img := ebiten.NewImageFromImage(raw)

@@ -1,10 +1,10 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -28,5 +28,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.drawRadioDialog(screen)
 	}
 
-	// ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.ActualTPS()))
+	if g.debugString != "" {
+		ebitenutil.DebugPrint(screen, g.debugString)
+	}
+}
+
+func (g *Game) debug(s string) {
+	g.debugString = fmt.Sprintf("%s\n%s", s, g.debugString)
+	fmt.Println(s)
 }

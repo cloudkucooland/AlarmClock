@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -46,6 +45,9 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 			continue
 		}
 		if radiocontrols[idx].label == "Pause" && !g.radio.IsPlaying() {
+			continue
+		}
+		if radiocontrols[idx].label == "Stop in 30 min" && g.inSleepCountdown {
 			continue
 		}
 

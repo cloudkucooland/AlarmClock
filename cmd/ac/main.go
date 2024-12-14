@@ -35,14 +35,18 @@ const (
 const clockformat = "3:04"
 
 type Game struct {
-	state        gameState
-	lastAct      time.Time
-	clock        *clock
-	background   *ebiten.Image
-	weather      *owm.CurrentWeatherData
-	weathercache *ebiten.Image
-	audioContext *audio.Context
-	radio        *audio.Player
+	state            gameState
+	debugString      string
+	lastAct          time.Time
+	clock            *clock
+	background       *ebiten.Image
+	weather          *owm.CurrentWeatherData
+	weathercache     *ebiten.Image
+	audioContext     *audio.Context
+	radio            *audio.Player
+	enabledAlarmID   alarmid
+	selectedStation  *radiobutton
+	inSleepCountdown bool
 }
 
 func (g *Game) startScreenSaver() {
@@ -69,10 +73,12 @@ func main() {
 	}
 
 	g := &Game{
-		state:   inNormal,
-		clock:   &clock{},
-		weather: nil,
+		state:          inNormal,
+		clock:          &clock{},
+		weather:        nil,
+		enabledAlarmID: -1,
 	}
+	g.selectedStation = defaultStation()
 	g.setBackground()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY

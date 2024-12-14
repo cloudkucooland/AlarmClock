@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"math"
 
@@ -78,7 +77,7 @@ func getSprite(name string, label string, do func(*Game)) *sprite {
 	}
 	out.label = label
 	if out.label != "" && controlfont != nil {
-		// controlfont doesn't seem to be loaded by this point?
+		// controlfont doesn't seem to be loaded early in the startup sequence
 		out.genlabelimage(spritelabelgrey, controlfont)
 	}
 	return &out
@@ -138,7 +137,7 @@ func (s *sprite) drawWithLabel(screen *ebiten.Image) {
 }
 
 func chirp(g *Game) {
-	fmt.Println("play sprite chirp")
+	g.debug("play sprite chirp")
 }
 
 type spriteanimation struct {

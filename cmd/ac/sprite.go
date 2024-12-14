@@ -77,8 +77,9 @@ func getSprite(name string, label string, do func(*Game)) *sprite {
 		out.do = chirp
 	}
 	out.label = label
-	if out.label != "" {
-		// out.genlabelimage(spritelabelgrey, controlfont)
+	if out.label != "" && controlfont != nil {
+		// controlfont doesn't seem to be loaded by this point?
+		out.genlabelimage(spritelabelgrey, controlfont)
 	}
 	return &out
 }

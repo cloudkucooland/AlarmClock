@@ -104,6 +104,9 @@ func (g *Game) Update() error {
 			for key := range alarms {
 				if alarms[key].in(x, y) {
 					g.debug("in alarm dialog mouseup")
+					if g.enabledAlarmID == key {
+						g.enabledAlarmID = disabledAlarmID
+					}
 					g.enabledAlarmID = key
 				}
 			}

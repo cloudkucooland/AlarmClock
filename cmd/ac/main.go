@@ -76,7 +76,7 @@ func main() {
 		state:          inNormal,
 		clock:          &clock{},
 		weather:        nil,
-		enabledAlarmID: -1,
+		enabledAlarmID: disabledAlarmID,
 	}
 	g.selectedStation = defaultStation()
 	g.setBackground()

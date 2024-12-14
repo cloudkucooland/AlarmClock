@@ -12,7 +12,7 @@ import (
 )
 
 type alarmid int
-
+const disabledAlarmID = -1
 const snoozeduration = 9
 
 type alarm struct {

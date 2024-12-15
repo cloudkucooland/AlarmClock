@@ -46,7 +46,7 @@ func (g *Game) checkAlarms(hour int, minute int) {
 			snoozemin = snoozemin - 60
 			snoozehour = snoozehour + 1
 		}
-		fmt.Println("snoozing until %d:%d (%d)", snoozehour, snoozemin, a.snoozeCount)
+		g.debug(fmt.Sprintf("snoozing until %d:%d (%d)\n", snoozehour, snoozemin, a.snoozeCount))
 		if snoozehour == hour && snoozemin == minute {
 			g.wakeFromSnooze(g.config.EnabledAlarmID)
 		}

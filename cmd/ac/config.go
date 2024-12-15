@@ -67,7 +67,9 @@ func (g *Game) loadconfig() {
 		defer f.Close()
 
 		decoder := json.NewDecoder(f)
-		decoder.Decode(&config)
+		if err := decoder.Decode(&config); err != nil {
+			panic(err)
+		}
 	}
 	g.config = &config
 }

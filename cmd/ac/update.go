@@ -104,7 +104,7 @@ func (g *Game) Update() error {
 					} else {
 						g.config.EnabledAlarmID = key
 					}
-					g.storeconfig()
+					_ = g.storeconfig()
 				}
 			}
 			for idx := range modalbuttons {

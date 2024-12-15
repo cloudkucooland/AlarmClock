@@ -36,7 +36,7 @@ var backgrounds = []background{
 	},
 }
 
-func (g *Game) setBackground() error {
+func (g *Game) setBackground() {
 	if g.background != nil {
 		g.background.Deallocate()
 		g.background = nil
@@ -48,7 +48,7 @@ func (g *Game) setBackground() error {
 	raw, _, err := image.Decode(bytes.NewReader(backgrounds[idx].raw))
 	if err != nil {
 		g.debug(err.Error())
-		return err
+		return
 	}
 	img := ebiten.NewImageFromImage(raw)
 
@@ -59,12 +59,10 @@ func (g *Game) setBackground() error {
 		var cm colorm.ColorM
 		cm.Scale(1.0, 1.0, 1.0, 0.10)
 		colorm.DrawImage(g.background, img, cm, op)
-		return nil
 	}
 
 	// cache normal
 	g.background.DrawImage(img, &ebiten.DrawImageOptions{})
-	return nil
 }
 
 func (g *Game) drawBackground(screen *ebiten.Image) {

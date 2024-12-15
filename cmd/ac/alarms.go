@@ -145,17 +145,13 @@ func (g *Game) wakeFromSnooze(a alarmid) {
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
-	if len(alarmbuttons) == 0 {
-		setupAlarmButtons()
-	}
-
-	if stp, ok := alarmbuttons["Stop"]; ok {
+	if stp, ok := g.alarmbuttons["Stop"]; ok {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(stp.loc.Min.X), float64(stp.loc.Min.Y))
 		screen.DrawImage(stp.img, op)
 	}
 
-	if snz, ok := alarmbuttons["Snooze"]; ok {
+	if snz, ok := g.alarmbuttons["Snooze"]; ok {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(snz.loc.Min.X), float64(snz.loc.Min.Y))
 		screen.DrawImage(snz.img, op)
@@ -178,12 +174,10 @@ func (a alarmbutton) in(x int, y int) bool {
 	return (x >= a.loc.Min.X && x <= a.loc.Max.X) && (y >= a.loc.Min.Y && y <= a.loc.Max.Y)
 }
 
-var alarmbuttons map[string]alarmbutton
-
-func setupAlarmButtons() {
+func (g *Game) setupAlarmButtons() {
 	padding := float64(10)
 
-	alarmbuttons = make(map[string]alarmbutton)
+	g.alarmbuttons = make(map[string]*alarmbutton)
 
 	{
 		btn := button("SNOOZE", green, bigbuttonfont)
@@ -199,7 +193,7 @@ func setupAlarmButtons() {
 			},
 			do: snooze,
 		}
-		alarmbuttons["Snooze"] = q
+		g.alarmbuttons["Snooze"] = &q
 	}
 
 	{
@@ -216,12 +210,12 @@ func setupAlarmButtons() {
 			},
 			do: stop,
 		}
-		alarmbuttons["Stop"] = q
+		g.alarmbuttons["Stop"] = &q
 	}
 }
 
 func (g *Game) drawSnooze(screen *ebiten.Image) {
-	if stp, ok := alarmbuttons["Stop"]; ok {
+	if stp, ok := g.alarmbuttons["Stop"]; ok {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(stp.loc.Min.X), float64(stp.loc.Min.Y))
 		screen.DrawImage(stp.img, op)

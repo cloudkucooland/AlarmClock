@@ -9,7 +9,7 @@ type modalbutton struct {
 	*sprite
 }
 
-var modalbuttons = []modalbutton{
+var modalbuttons = []*modalbutton{
 	{
 		sprite: getSprite("Indignent", "Close", modalclose),
 	},

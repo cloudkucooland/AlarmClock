@@ -12,28 +12,17 @@ import (
 )
 
 type background struct {
-	name string
-	// tags []string "Cold", "Night", "Rain", "Sunny" etc -- maybe as an enum?
-	raw []byte
+	raw  []byte
+	tags []string
 }
 
-var backgrounds = []background{
-	{
-		name: "Flower Splash",
-		raw:  bgres.Default,
-	},
-	{
-		name: "Owl Moon",
-		raw:  bgres.Owlmoon,
-	},
-	{
-		name: "Owl Eyes",
-		raw:  bgres.Owleyes,
-	},
-	{
-		name: "Hummingbird",
-		raw:  bgres.Hummingbird,
-	},
+func (g *Game) setupBackgrounds() {
+	g.backgrounds = map[uint8]*background{
+		0: {raw: bgres.Default, tags: []string{"Day", "Sunny"}},
+		1: {raw: bgres.Owlmoon, tags: []string{"Night"}},
+		2: {raw: bgres.Owleyes, tags: []string{"Night"}},
+		3: {raw: bgres.Hummingbird, tags: []string{"Day"}},
+	}
 }
 
 func (g *Game) setBackground() {
@@ -44,13 +33,18 @@ func (g *Game) setBackground() {
 	g.background = ebiten.NewImage(screensize.X, screensize.Y)
 
 	// random for now, later we can do by season/weather/time-of-date, etc
-	idx := rand.Intn(len(backgrounds))
-	raw, _, err := image.Decode(bytes.NewReader(backgrounds[idx].raw))
+	key := uint8(rand.Intn(len(g.backgrounds)))
+	bg, ok := g.backgrounds[key]
+	if !ok {
+		g.debug("backgrounds maps not keyed correctly")
+		return
+	}
+	decoded, _, err := image.Decode(bytes.NewReader(bg.raw))
 	if err != nil {
 		g.debug(err.Error())
 		return
 	}
-	img := ebiten.NewImageFromImage(raw)
+	img := ebiten.NewImageFromImage(decoded)
 
 	// cache dim for screensaver
 	if g.state == inScreenSaver {

@@ -14,8 +14,6 @@ import (
 
 func alarmConfigDialog(g *Game) {
 	g.state = inAlarmConfig
-
-	// range over map doesn't always happen in the same order, causing chaos, this gives us a sorted list of alarmIDs to use
 }
 
 func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
@@ -26,6 +24,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 	endx := screensize.X - 164 // defined by modal
 	rowheight := float32((screensize.Y - 64) / len(g.config.Alarms))
 
+	// range over map doesn't always happen in the same order, causing chaos, this gives us a sorted list of alarmIDs to use
 	for _, key := range slices.Sorted(maps.Keys(g.config.Alarms)) {
 		a := g.config.Alarms[key]
 

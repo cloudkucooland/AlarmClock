@@ -34,20 +34,20 @@ func (g *Game) Update() error {
 			g.lastAct = time.Now()
 			g.leaveScreenSaver()
 		case inNormal, inSnooze:
-			for idx := range controls {
-				if controls[idx].in(x, y) && !controls[idx].ani.in {
-					controls[idx].startanimation()
+			for _, c := range g.controls {
+				if c.in(x, y) && !c.ani.in {
+					c.startanimation()
 				}
 			}
 			if g.radio != nil {
-				for idx := range radiocontrols {
-					if radiocontrols[idx].in(x, y) && !radiocontrols[idx].ani.in {
-						radiocontrols[idx].startanimation()
+				for _, r := range g.radiocontrols {
+					if r.in(x, y) && !r.ani.in {
+						r.startanimation()
 					}
 				}
 			}
 		case inRadio:
-			for _, rb := range radiobuttons {
+			for _, rb := range g.radiobuttons {
 				if rb.in(x, y) && !rb.ani.in {
 					rb.startanimation()
 				}
@@ -66,34 +66,34 @@ func (g *Game) Update() error {
 		case inScreenSaver:
 			g.leaveScreenSaver()
 		case inNormal:
-			for idx := range controls {
-				if controls[idx].in(x, y) {
-					if controls[idx].ani.in {
-						controls[idx].stopanimation()
+			for _, c := range g.controls {
+				if c.in(x, y) {
+					if c.ani.in {
+						c.stopanimation()
 					}
-					controls[idx].do(g)
+					c.do(g)
 				}
 			}
 
 			if g.radio != nil {
-				for idx := range radiocontrols {
-					if radiocontrols[idx].in(x, y) {
-						if radiocontrols[idx].ani.in {
-							radiocontrols[idx].stopanimation()
+				for _, r := range g.radiocontrols {
+					if r.in(x, y) {
+						if r.ani.in {
+							r.stopanimation()
 						}
-						radiocontrols[idx].do(g)
+						r.do(g)
 					}
 				}
 			}
 		case inRadio:
-			for _, rb := range radiobuttons {
+			for _, rb := range g.radiobuttons {
 				if rb.in(x, y) {
 					rb.startPlayer(g)
 				}
 			}
-			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
-					modalbuttons[idx].do(g)
+			for _, m := range modalbuttons {
+				if m.in(x, y) {
+					m.do(g)
 				}
 			}
 		case inAlarmConfig:
@@ -107,21 +107,21 @@ func (g *Game) Update() error {
 					_ = g.storeconfig()
 				}
 			}
-			for idx := range modalbuttons {
-				if modalbuttons[idx].in(x, y) {
-					modalbuttons[idx].do(g)
+			for _, m := range modalbuttons {
+				if m.in(x, y) {
+					m.do(g)
 				}
 			}
 		case inAlarm:
-			for idx := range alarmbuttons {
-				if alarmbuttons[idx].in(x, y) {
+			for _, a := range g.alarmbuttons {
+				if a.in(x, y) {
 					g.debug("in alarmbutton mouseup")
-					alarmbuttons[idx].do(g)
+					a.do(g)
 				}
 			}
 		case inSnooze:
 			g.debug("mouseup in snooze")
-			if b, ok := alarmbuttons["Stop"]; ok {
+			if b, ok := g.alarmbuttons["Stop"]; ok {
 				if b.in(x, y) {
 					b.do(g)
 				}

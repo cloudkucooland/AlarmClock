@@ -8,13 +8,15 @@ type control struct {
 	*sprite
 }
 
-var controls = []control{
-	{
-		sprite: getSprite("Mad", "Alarms", alarmConfigDialog),
-	},
-	{
-		sprite: getSprite("Happy", "Radio", radioDialog),
-	},
+func (g *Game) setupControls() {
+	g.controls = []*control{
+		{
+			sprite: getSprite("Mad", "Alarms", alarmConfigDialog),
+		},
+		{
+			sprite: getSprite("Happy", "Radio", radioDialog),
+		},
+	}
 }
 
 func (g *Game) drawControls(screen *ebiten.Image) {
@@ -22,9 +24,9 @@ func (g *Game) drawControls(screen *ebiten.Image) {
 	y := 30
 	spacing := 100
 
-	for idx := range controls {
-		controls[idx].setLocation(x, y)
-		controls[idx].drawWithLabel(screen)
+	for _, c := range g.controls {
+		c.setLocation(x, y)
+		c.drawWithLabel(screen)
 		y = y + spacing
 	}
 }

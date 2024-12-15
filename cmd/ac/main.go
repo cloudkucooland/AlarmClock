@@ -38,13 +38,18 @@ type Game struct {
 	lastAct          time.Time
 	clock            *clock
 	background       *ebiten.Image
+	backgrounds      map[uint8]*background
 	weather          *owm.CurrentWeatherData
 	weathercache     *ebiten.Image
 	audioContext     *audio.Context
 	radio            *audio.Player
+	radiobuttons     map[string]*radiobutton
 	selectedStation  *radiobutton
 	inSleepCountdown bool
 	config           *Config
+	controls         []*control
+	radiocontrols    []*radiocontrol
+	alarmbuttons     map[string]*alarmbutton
 }
 
 func (g *Game) startScreenSaver() {
@@ -75,12 +80,17 @@ func main() {
 		clock:   &clock{},
 		weather: nil,
 	}
-	g.selectedStation = defaultStation()
-	g.setBackground()
+	g.selectedStation = g.defaultStation()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.audioContext = audio.NewContext(44100)
 	g.loadconfig()
+	g.setupBackgrounds()
+	g.setBackground()
+	g.setupControls()
+	g.setupRadioButtons()
+	g.setupAlarmButtons()
+	g.setupRadioControls()
 
 	// setup clock
 	now := time.Now()

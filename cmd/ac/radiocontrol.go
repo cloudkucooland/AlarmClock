@@ -9,19 +9,21 @@ type radiocontrol struct {
 	*sprite
 }
 
-var radiocontrols = []radiocontrol{
-	{
-		sprite: getSprite("Tea Time", "Pause", pausePlayer),
-	},
-	{
-		sprite: getSprite("Swan Mommy", "Play", resumePlayer),
-	},
-	{
-		sprite: getSprite("Spring", "Stop", stopPlayer),
-	},
-	{
-		sprite: getSprite("Spring", "Stop in 30 min", sleepStopPlayer),
-	},
+func (g *Game) setupRadioControls() {
+	g.radiocontrols = []*radiocontrol{
+		{
+			sprite: getSprite("Tea Time", "Pause", pausePlayer),
+		},
+		{
+			sprite: getSprite("Swan Mommy", "Play", resumePlayer),
+		},
+		{
+			sprite: getSprite("Spring", "Stop", stopPlayer),
+		},
+		{
+			sprite: getSprite("Spring", "Stop in 30 min", sleepStopPlayer),
+		},
+	}
 }
 
 func (g *Game) drawRadioControls(screen *ebiten.Image) {
@@ -40,19 +42,19 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 
 	x := (screensize.X - boxwidth - (32 * spriteScale)) / 2
 
-	for idx := range radiocontrols {
-		if radiocontrols[idx].label == "Play" && g.radio.IsPlaying() {
+	for _, r := range g.radiocontrols {
+		if r.label == "Play" && g.radio.IsPlaying() {
 			continue
 		}
-		if radiocontrols[idx].label == "Pause" && !g.radio.IsPlaying() {
+		if r.label == "Pause" && !g.radio.IsPlaying() {
 			continue
 		}
-		if radiocontrols[idx].label == "Stop in 30 min" && g.inSleepCountdown {
+		if r.label == "Stop in 30 min" && g.inSleepCountdown {
 			continue
 		}
 
-		radiocontrols[idx].setLocation(x, 270)
-		radiocontrols[idx].drawWithLabel(screen)
+		r.setLocation(x, 270)
+		r.drawWithLabel(screen)
 
 		x = x + 100
 	}

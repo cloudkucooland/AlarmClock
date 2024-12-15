@@ -3,9 +3,10 @@ module github.com/cloudkucooland/AlarmClock
 go 1.22.3
 
 require (
-	github.com/bluenviron/gohlslib/v2 v2.0.0
+	github.com/bluenviron/gohlslib/v2 v2.1.0
 	github.com/briandowns/openweathermap v0.21.0
 	github.com/hajimehoshi/ebiten/v2 v2.8.5
+	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 )
 
 require (

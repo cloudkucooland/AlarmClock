@@ -123,6 +123,7 @@ func stop(g *Game) {
 	a.triggered = false
 	a.snooze = false
 	a.snoozeCount = 0
+	g.config.EnabledAlarmID = disabledAlarmID
 }
 
 func (g *Game) wakeFromSnooze(a alarmid) {
@@ -148,10 +149,10 @@ func (g *Game) drawAlarm(screen *ebiten.Image) {
 		setupAlarmButtons()
 	}
 
-	if slp, ok := alarmbuttons["Stop"]; ok {
+	if stp, ok := alarmbuttons["Stop"]; ok {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(slp.loc.Min.X), float64(slp.loc.Min.Y))
-		screen.DrawImage(slp.img, op)
+		op.GeoM.Translate(float64(stp.loc.Min.X), float64(stp.loc.Min.Y))
+		screen.DrawImage(stp.img, op)
 	}
 
 	if snz, ok := alarmbuttons["Snooze"]; ok {
@@ -220,10 +221,10 @@ func setupAlarmButtons() {
 }
 
 func (g *Game) drawSnooze(screen *ebiten.Image) {
-	if slp, ok := alarmbuttons["Stop"]; ok {
+	if stp, ok := alarmbuttons["Stop"]; ok {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(slp.loc.Min.X), float64(slp.loc.Min.Y))
-		screen.DrawImage(slp.img, op)
+		op.GeoM.Translate(float64(stp.loc.Min.X), float64(stp.loc.Min.Y))
+		screen.DrawImage(stp.img, op)
 	}
 
 	if g.clock.cache == nil {

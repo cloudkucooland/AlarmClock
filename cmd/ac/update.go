@@ -47,9 +47,9 @@ func (g *Game) Update() error {
 				}
 			}
 		case inRadio:
-			for idx := range radiobuttons {
-				if radiobuttons[idx].in(x, y) && !radiobuttons[idx].ani.in {
-					radiobuttons[idx].startanimation()
+			for _, rb := range radiobuttons {
+				if rb.in(x, y) && !rb.ani.in {
+					rb.startanimation()
 				}
 			}
 		case inAlarmConfig, inAlarm:
@@ -86,9 +86,9 @@ func (g *Game) Update() error {
 				}
 			}
 		case inRadio:
-			for idx := range radiobuttons {
-				if radiobuttons[idx].in(x, y) {
-					radiobuttons[idx].startPlayer(g)
+			for _, rb := range radiobuttons {
+				if rb.in(x, y) {
+					rb.startPlayer(g)
 				}
 			}
 			for idx := range modalbuttons {

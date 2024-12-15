@@ -54,7 +54,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 
 		text.Draw(screen, alarmtime, weatherfont, op)
 
-		if id == g.enabledAlarmID {
+		if id == g.config.EnabledAlarmID {
 			op := &text.DrawOptions{}
 			op.GeoM.Translate(float64(x+128)+textwidth, float64(y)+float64(rowheight/2.0)-float64(textheight/2))
 			op.ColorScale.ScaleWithColor(pink)

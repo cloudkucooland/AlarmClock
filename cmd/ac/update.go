@@ -99,10 +99,10 @@ func (g *Game) Update() error {
 		case inAlarmConfig:
 			for key := range g.config.Alarms {
 				if g.config.Alarms[key].in(x, y) {
-					if g.enabledAlarmID == key {
-						g.enabledAlarmID = disabledAlarmID
+					if g.config.EnabledAlarmID == key {
+						g.config.EnabledAlarmID = disabledAlarmID
 					} else {
-						g.enabledAlarmID = key
+						g.config.EnabledAlarmID = key
 					}
 					g.storeconfig()
 				}

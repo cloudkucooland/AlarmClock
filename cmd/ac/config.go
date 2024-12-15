@@ -48,41 +48,42 @@ func (g *Game) loadconfig() {
 				4: {AlarmTime: AlarmTime{4, 30}},
 			},
 		}
-		fh, err := os.Create(configFile)
+		f, err := os.Create(configFile)
 		if err != nil {
 			panic(err)
 		}
-		defer fh.Close()
+		defer f.Close()
 
-		encoder := json.NewEncoder(fh)
+		encoder := json.NewEncoder(f)
 		if err := encoder.Encode(&config); err != nil {
 			panic(err)
 		}
 	} else {
 		// Load the existing file.
-		fh, err := os.Open(configFile)
+		f, err := os.Open(configFile)
 		if err != nil {
 			panic(err)
 		}
-		defer fh.Close()
+		defer f.Close()
 
-		decoder := json.NewDecoder(fh)
+		decoder := json.NewDecoder(f)
 		decoder.Decode(&config)
 	}
 	g.config = &config
 }
 
 func (g *Game) storeconfig() error {
-	fh, err := os.Open(configFile)
+	f, err := os.OpenFile(configFile, os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
-		g.debug(err.Error())
+		g.debug("unable to open file " + err.Error())
 		return err
 	}
-	defer fh.Close()
+	defer f.Close()
+	// f.Seek(0, io.SeekStart)
 
-	encoder := json.NewEncoder(fh)
+	encoder := json.NewEncoder(f)
 	if err := encoder.Encode(g.config); err != nil {
-		g.debug(err.Error())
+		g.debug("unable to write file: " + err.Error())
 		return err
 	}
 	return nil

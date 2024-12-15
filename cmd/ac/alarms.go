@@ -29,13 +29,13 @@ type AlarmTime struct {
 }
 
 func (g *Game) checkAlarms(hour int, minute int) {
-	a, ok := g.config.Alarms[g.enabledAlarmID]
+	a, ok := g.config.Alarms[g.config.EnabledAlarmID]
 	if !ok {
 		return
 	}
 
 	if !a.snooze && a.AlarmTime.Hour == hour && a.AlarmTime.Minute == minute {
-		g.startAlarm(g.enabledAlarmID)
+		g.startAlarm(g.config.EnabledAlarmID)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (g *Game) checkAlarms(hour int, minute int) {
 		}
 		fmt.Println("snoozing until %d:%d (%d)", snoozehour, snoozemin, a.snoozeCount)
 		if snoozehour == hour && snoozemin == minute {
-			g.wakeFromSnooze(g.enabledAlarmID)
+			g.wakeFromSnooze(g.config.EnabledAlarmID)
 		}
 	}
 }
@@ -76,7 +76,7 @@ func snooze(g *Game) {
 
 	g.lastAct = time.Now()
 
-	a, ok := g.config.Alarms[g.enabledAlarmID]
+	a, ok := g.config.Alarms[g.config.EnabledAlarmID]
 	if !ok {
 		g.debug("no alarms enabled, bailing")
 		// no alarms enabled
@@ -98,7 +98,7 @@ func snooze(g *Game) {
 	a.triggered = false
 	a.snooze = true
 	a.snoozeCount = a.snoozeCount + 1
-	g.debug(fmt.Sprintln("snoozing", g.enabledAlarmID))
+	g.debug(fmt.Sprintln("snoozing", g.config.EnabledAlarmID))
 
 	g.stopAlarmPlayer()
 }
@@ -106,7 +106,7 @@ func snooze(g *Game) {
 func stop(g *Game) {
 	g.debug("stopping triggered alarms")
 
-	a, ok := g.config.Alarms[g.enabledAlarmID]
+	a, ok := g.config.Alarms[g.config.EnabledAlarmID]
 	if !ok {
 		g.debug("alarm not enabled, nothing to stop")
 		return

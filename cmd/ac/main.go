@@ -42,7 +42,6 @@ type Game struct {
 	weathercache     *ebiten.Image
 	audioContext     *audio.Context
 	radio            *audio.Player
-	enabledAlarmID   alarmid
 	selectedStation  *radiobutton
 	inSleepCountdown bool
 	config           *Config
@@ -72,10 +71,9 @@ func main() {
 	}
 
 	g := &Game{
-		state:          inNormal,
-		clock:          &clock{},
-		weather:        nil,
-		enabledAlarmID: disabledAlarmID,
+		state:   inNormal,
+		clock:   &clock{},
+		weather: nil,
 	}
 	g.selectedStation = defaultStation()
 	g.setBackground()

@@ -92,7 +92,6 @@ func snooze(g *Game) {
 		return
 	}
 
-	a.snoozeCount = a.snoozeCount + 1
 	g.state = inSnooze
 
 	a.triggered = false

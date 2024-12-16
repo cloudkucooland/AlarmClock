@@ -53,6 +53,7 @@ func (g *Game) setBackground() {
 		var cm colorm.ColorM
 		cm.Scale(1.0, 1.0, 1.0, 0.10)
 		colorm.DrawImage(g.background, img, cm, op)
+		return
 	}
 
 	// cache normal

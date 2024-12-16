@@ -1,8 +1,12 @@
 # Birdhouse Alarm Clock
 
-This is part of a Chrsitmas present for my wife.
+This is part of a Chrsitmas present for my wife.  The only use I think others will have for it is as a source for examples.
 
-The only use I think others will have for it is as a source for examples.
+She had a Grace Digital Mondo that was a fantastic alarm clock for her. They quit supporting it and most of the features were shut down. She had a very detailed set of features she wants in an alarmclock. There was nothing in her list that I didn't think I couldn't code myself with a little effort.
+
+Back in the last 1990's and early 2000's she made a lot of [folder icons](https://totoro.org/jen/bluecat/icons/) and [desktop wallpaper](https://totoro.org/jen/bluecat/desktop.shtml). I thought it would be cool to repurpose these for this project.
+
+While trying to think of how to build the case, I had the idea of a birdhouse, using her bird icons for the GUI.
 
 # Parts
 
@@ -16,7 +20,7 @@ The only use I think others will have for it is as a source for examples.
 
 [Dayton Audio PC105-8 4-inch full-range driver](https://www.microcenter.com/product/633680/PC105-8_4%22_Full-Range_Poly_Cone_Driver) Selected because Microcenter had it in stock and the size was right. Sound quality is adequate but not great. Maybe it'll be better once the enclosure is finished.
 
-I used a small microsd card, there is no need in my usecase for a big one.
+I used a small microsd card, there is no need in my usecase for a big one. I bought a 128G Microcenter branded one with the Pi and speaker, but it was defective. I've not returned it yet because I'm lazy and it was only $10. I've never had a problem with Microcenter cards in the past, so I'm assuming this is a fluke. Why am I telling you this? I don't know. I don't know!
 
 # Need to add
 
@@ -30,9 +34,15 @@ Once, after disassembling to test fit, the touch on the display quit working. Af
 
 use raspi-config to switch to Wayland / lwc
 
-install go
-go get github.com/cloudkucooland/AlarmClock/cmd/ac
+[install go](https://go.dev/doc/install)
+
+Install the code
+```go get github.com/cloudkucooland/AlarmClock/cmd/ac```
 
 ~/config.../ whatever I did to make it start the clock on boot and nothing else
+
+# Code notes
+
+This is my first project using [ebiten](https://ebitengine.org) or using a game engine at all. It has been fun. I'm learning a lot and now have the urge to write and 8-bit-looking RPG...
 
 

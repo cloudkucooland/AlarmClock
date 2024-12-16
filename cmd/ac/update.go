@@ -97,13 +97,37 @@ func (g *Game) Update() error {
 				}
 			}
 		case inAlarmConfig:
+			processed := false
 			for key := range g.config.Alarms {
-				if g.config.Alarms[key].in(x, y) {
+				a := g.config.Alarms[key]
+				if a.dialogButton.hourUp.in(x, y) {
+					a.dialogButton.hourUp.do(g)
+					processed = true
+				}
+				if a.dialogButton.hourDn.in(x, y) {
+					a.dialogButton.hourDn.do(g)
+					processed = true
+				}
+				if a.dialogButton.minUp.in(x, y) {
+					a.dialogButton.minUp.do(g)
+					processed = true
+				}
+				if a.dialogButton.minDn.in(x, y) {
+					a.dialogButton.minDn.do(g)
+					processed = true
+				}
+
+				// check if we are in the body of the button, to enable/disable it
+				if !processed && a.in(x, y) {
 					if g.config.EnabledAlarmID == key {
 						g.config.EnabledAlarmID = disabledAlarmID
 					} else {
 						g.config.EnabledAlarmID = key
 					}
+					processed = true
+				}
+
+				if processed {
 					_ = g.storeconfig()
 				}
 			}

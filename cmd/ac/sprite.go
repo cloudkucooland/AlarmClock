@@ -50,6 +50,8 @@ var rawsprites = map[string][]byte{
 	"Spring":     spriteres.SpringPNG,
 	"Swan Mommy": spriteres.SwanmommyPNG,
 	"Tea Time":   spriteres.TeatimePNG,
+	"Up":         spriteres.UpPNG,
+	"Dn":         spriteres.DnPNG,
 }
 
 func getSprite(name string, label string, do func(*Game)) *sprite {

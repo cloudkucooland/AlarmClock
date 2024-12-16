@@ -12,6 +12,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+type alarmDialogButton struct {
+	bounds image.Rectangle
+	hourUp *sprite
+	hourDn *sprite
+	minUp  *sprite
+	minDn  *sprite
+}
+
 func alarmConfigDialog(g *Game) {
 	g.state = inAlarmConfig
 }
@@ -27,20 +35,54 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 	// range over map doesn't always happen in the same order, causing chaos, this gives us a sorted list of alarmIDs to use
 	for _, key := range slices.Sorted(maps.Keys(g.config.Alarms)) {
 		a := g.config.Alarms[key]
-
-		if a.dialogButton.Min.X == 0 {
-			a.dialogButton = image.Rect(x, y, endx, y+int(rowheight))
-		}
-		vector.StrokeRect(screen, float32(a.dialogButton.Min.X), float32(a.dialogButton.Min.Y), float32(a.dialogButton.Max.X-a.dialogButton.Min.X), rowheight, float32(2), bordergrey, false)
 		alarmtime := fmt.Sprintf("%0.2d:%0.2d", a.AlarmTime.Hour, a.AlarmTime.Minute)
-
 		textwidth, textheight := text.Measure(alarmtime, weatherfont, 0)
 
-		op := &text.DrawOptions{}
-		op.GeoM.Translate(float64(x+64), float64(y)+float64(rowheight/2.0)-float64(textheight/2))
-		op.ColorScale.ScaleWithColor(color.Black)
+		if a.dialogButton.bounds.Min.X == 0 { // uninitialized
+			a.dialogButton.bounds = image.Rect(x, y, endx, y+int(rowheight))
 
-		text.Draw(screen, alarmtime, weatherfont, op)
+			a.dialogButton.hourUp = getSprite("Up", "Hour Up", func(g *Game) {
+				g.debug("hour up")
+				a.AlarmTime.Hour = (a.AlarmTime.Hour + 1) % 24
+			})
+			a.dialogButton.hourUp.scale = 1
+			a.dialogButton.hourUp.setLocation(x+16, y-16+(int(rowheight/2)))
+
+			a.dialogButton.hourDn = getSprite("Dn", "Hour Down", func(g *Game) {
+				g.debug("hour dn")
+				a.AlarmTime.Hour = (a.AlarmTime.Hour - 1) % 24
+			})
+			a.dialogButton.hourDn.scale = 1
+			a.dialogButton.hourDn.setLocation(x+16, y+(int(rowheight/2)))
+
+			a.dialogButton.minUp = getSprite("Up", "Minute Up", func(g *Game) {
+				g.debug("min up")
+				a.AlarmTime.Minute = (a.AlarmTime.Minute + 15) % 60
+			})
+			a.dialogButton.minUp.scale = 1
+			a.dialogButton.minUp.setLocation(x+78+int(textwidth), y-16+(int(rowheight/2)))
+
+			a.dialogButton.minDn = getSprite("Dn", "Minute Down", func(g *Game) {
+				g.debug("min dn")
+				a.AlarmTime.Minute = (a.AlarmTime.Minute - 15) % 60
+			})
+			a.dialogButton.minDn.scale = 1
+			a.dialogButton.minDn.setLocation(x+78+int(textwidth), y+(int(rowheight/2)))
+
+		}
+		vector.StrokeRect(screen, float32(a.dialogButton.bounds.Min.X), float32(a.dialogButton.bounds.Min.Y), float32(a.dialogButton.bounds.Max.X-a.dialogButton.bounds.Min.X), rowheight, float32(2), bordergrey, false)
+
+		a.dialogButton.hourUp.draw(screen)
+		a.dialogButton.hourDn.draw(screen)
+		a.dialogButton.minUp.draw(screen)
+		a.dialogButton.minDn.draw(screen)
+
+		{
+			op := &text.DrawOptions{}
+			op.GeoM.Translate(float64(x+64), float64(y)+float64(rowheight/2.0)-float64(textheight/2))
+			op.ColorScale.ScaleWithColor(color.Black)
+			text.Draw(screen, alarmtime, weatherfont, op)
+		}
 
 		if key == g.config.EnabledAlarmID {
 			op := &text.DrawOptions{}
@@ -54,5 +96,5 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 }
 
 func (a Alarm) in(x int, y int) bool {
-	return (x >= a.dialogButton.Min.X && x <= a.dialogButton.Max.X) && (y >= a.dialogButton.Min.Y && y <= a.dialogButton.Max.Y)
+	return (x >= a.dialogButton.bounds.Min.X && x <= a.dialogButton.bounds.Max.X) && (y >= a.dialogButton.bounds.Min.Y && y <= a.dialogButton.bounds.Max.Y)
 }

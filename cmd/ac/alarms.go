@@ -20,7 +20,7 @@ type Alarm struct {
 	triggered    bool
 	snooze       bool
 	snoozeCount  int
-	dialogButton image.Rectangle
+	dialogButton alarmDialogButton
 }
 
 type AlarmTime struct {

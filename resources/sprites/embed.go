@@ -40,4 +40,10 @@ var (
 
 	//go:embed teatime.png
 	TeatimePNG []byte
+
+	//go:embed up.png
+	UpPNG []byte
+
+	//go:embed dn.png
+	DnPNG []byte
 )

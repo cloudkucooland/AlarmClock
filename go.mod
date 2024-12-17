@@ -13,7 +13,7 @@ require (
 	github.com/abema/go-mp4 v1.2.0 // indirect
 	github.com/asticode/go-astikit v0.51.1 // indirect
 	github.com/asticode/go-astits v1.13.0 // indirect
-	github.com/bluenviron/mediacommon v1.13.1 // indirect
+	github.com/bluenviron/mediacommon v1.13.2 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20241016134836-cc2e38a7c0ee // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/oto/v3 v3.3.1 // indirect

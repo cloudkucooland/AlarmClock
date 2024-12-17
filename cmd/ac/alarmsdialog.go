@@ -42,29 +42,35 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 			a.dialogButton.bounds = image.Rect(x, y, endx, y+int(rowheight))
 
 			a.dialogButton.hourUp = getSprite("Up", "Hour Up", func(g *Game) {
-				g.debug("hour up")
 				a.AlarmTime.Hour = (a.AlarmTime.Hour + 1) % 24
 			})
 			a.dialogButton.hourUp.scale = 1
 			a.dialogButton.hourUp.setLocation(x+16, y-16+(int(rowheight/2)))
 
 			a.dialogButton.hourDn = getSprite("Dn", "Hour Down", func(g *Game) {
-				g.debug("hour dn")
-				a.AlarmTime.Hour = (a.AlarmTime.Hour - 1) % 24
+				if a.AlarmTime.Hour <= 0 {
+					a.AlarmTime.Hour = 23
+				} else {
+					a.AlarmTime.Hour = a.AlarmTime.Hour - 1
+				}
 			})
 			a.dialogButton.hourDn.scale = 1
 			a.dialogButton.hourDn.setLocation(x+16, y+(int(rowheight/2)))
 
 			a.dialogButton.minUp = getSprite("Up", "Minute Up", func(g *Game) {
-				g.debug("min up")
 				a.AlarmTime.Minute = (a.AlarmTime.Minute + 15) % 60
+				// tick hour up if goes to 00?
 			})
 			a.dialogButton.minUp.scale = 1
 			a.dialogButton.minUp.setLocation(x+78+int(textwidth), y-16+(int(rowheight/2)))
 
 			a.dialogButton.minDn = getSprite("Dn", "Minute Down", func(g *Game) {
-				g.debug("min dn")
-				a.AlarmTime.Minute = (a.AlarmTime.Minute - 15) % 60
+				if a.AlarmTime.Minute <= 0 {
+					a.AlarmTime.Minute = 45
+					// a.AlarmTime.Hour = a.AlarmTime.Hour - 1
+				} else {
+					a.AlarmTime.Minute = (a.AlarmTime.Minute - 15) % 60
+				}
 			})
 			a.dialogButton.minDn.scale = 1
 			a.dialogButton.minDn.setLocation(x+78+int(textwidth), y+(int(rowheight/2)))
@@ -77,12 +83,10 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 		a.dialogButton.minUp.draw(screen)
 		a.dialogButton.minDn.draw(screen)
 
-		{
-			op := &text.DrawOptions{}
-			op.GeoM.Translate(float64(x+64), float64(y)+float64(rowheight/2.0)-float64(textheight/2))
-			op.ColorScale.ScaleWithColor(color.Black)
-			text.Draw(screen, alarmtime, weatherfont, op)
-		}
+		op := &text.DrawOptions{}
+		op.GeoM.Translate(float64(x+64), float64(y)+float64(rowheight/2.0)-float64(textheight/2))
+		op.ColorScale.ScaleWithColor(color.Black)
+		text.Draw(screen, alarmtime, weatherfont, op)
 
 		if key == g.config.EnabledAlarmID {
 			op := &text.DrawOptions{}

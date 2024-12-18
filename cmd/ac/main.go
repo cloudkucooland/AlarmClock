@@ -92,8 +92,6 @@ func main() {
 	g.setupAlarmButtons()
 	g.setupRadioControls()
 
-	ebiten.SetCursorMode(ebiten.CursorModeHidden)
-
 	// setup clock
 	now := time.Now()
 
@@ -105,6 +103,7 @@ func main() {
 	ebiten.SetWindowSize(screensize.X, screensize.Y)
 	if hostname, _ := os.Hostname(); strings.EqualFold(hostname, "birdhouse") {
 		ebiten.SetFullscreen(true)
+		ebiten.SetCursorMode(ebiten.CursorModeHidden)
 	}
 
 	// ctx, cancel := context.WithCancel(context.Background())

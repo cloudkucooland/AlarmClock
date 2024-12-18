@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -62,18 +64,19 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		x = x + 100
 	}
 	if !g.inSleepCountdown {
-		stop := g.radiocontrols["SleepCounter"]
+		stop := g.radiocontrols["SleepCountdown"]
 		stop.setLocation(x, y)
 		stop.drawWithLabel(screen)
 		x = x + 100
 	}
 	if g.radio.IsPlaying() {
-		up := g.radiocontrols["Up"]
-		up.setLocation(x-16, y) // make dynamic
+		up := g.radiocontrols["VolUp"]
+		up.setLocation(x, y-2) // make dynamic
 		up.draw(screen)
-		dn := g.radiocontrols["Dn"]
-		dn.setLocation(x, y) // make dynamic
-		dn.draw(screen)
+		dn := g.radiocontrols["VolDn"]
+		dn.setLocation(x, y+24) // make dynamic
+		dn.setLabel(fmt.Sprintf("%d", int(g.radio.Volume()*100.0)))
+		dn.drawWithLabel(screen)
 	}
 }
 
@@ -82,7 +85,10 @@ func volumeUp(g *Game) {
 	if vol > 0.89 {
 		return
 	}
-	g.radio.SetVolume(vol + 0.10)
+	vol = (vol + 0.10)
+	g.radio.SetVolume(vol)
+	dn := g.radiocontrols["VolDn"]
+	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
 }
 
 func volumeDn(g *Game) {
@@ -90,5 +96,8 @@ func volumeDn(g *Game) {
 	if vol < 0.11 {
 		return
 	}
-	g.radio.SetVolume(vol - 0.10)
+	vol = (vol - 0.10)
+	g.radio.SetVolume(vol)
+	dn := g.radiocontrols["VolDn"]
+	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
 }

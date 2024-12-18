@@ -41,6 +41,10 @@ Install the code
 
 ~/config.../ whatever I did to make it start the clock on boot and nothing else
 
+[set up for mono](https://askubuntu.com/questions/1439652/how-can-i-downmix-stereo-audio-output-to-mono-in-pipewire-on-22-10)
+
+```pactl set-default-sink 37```
+
 # Code notes
 
 This is my first project using [ebiten](https://ebitengine.org) or using a game engine at all. It has been fun. I'm learning a lot and now have the urge to write and 8-bit-looking RPG...

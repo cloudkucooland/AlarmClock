@@ -92,12 +92,14 @@ func main() {
 	g.setupAlarmButtons()
 	g.setupRadioControls()
 
+	ebiten.SetCursorMode(ebiten.CursorModeHidden)
+
 	// setup clock
 	now := time.Now()
 
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
-	g.clock.cyclesSinceTick = int(ms.Milliseconds() * hz / 1000)
+	g.clock.cyclesSinceTick = 1000 - int(ms.Milliseconds() * hz / 1000)
 	g.clock.timestring = now.Format(g.config.ClockFormat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)

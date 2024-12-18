@@ -10,18 +10,24 @@ type radiocontrol struct {
 }
 
 func (g *Game) setupRadioControls() {
-	g.radiocontrols = []*radiocontrol{
-		{
+	g.radiocontrols = map[string]*radiocontrol{
+		"Pause": {
 			sprite: getSprite("Tea Time", "Pause", pausePlayer),
 		},
-		{
+		"Play": {
 			sprite: getSprite("Swan Mommy", "Play", resumePlayer),
 		},
-		{
+		"Stop": {
 			sprite: getSprite("Spring", "Stop", stopPlayer),
 		},
-		{
+		"SleepCountdown": {
 			sprite: getSprite("Spring", "Stop in 30 min", sleepStopPlayer),
+		},
+		"VolUp": {
+			sprite: getSprite("Up", "", volumeUp),
+		},
+		"VolDn": {
+			sprite: getSprite("Dn", "", volumeDn),
 		},
 	}
 }
@@ -34,6 +40,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	boxwidth := 160
 	boxheight := 120
 	borderwidth := 20
+	y := 270
 
 	// TODO: base this on sprite size not hardcoded values
 	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(boxwidth)), float32(boxheight), modalgrey, false)
@@ -42,20 +49,46 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 
 	x := (screensize.X - boxwidth - (32 * spriteScale)) / 2
 
-	for _, r := range g.radiocontrols {
-		if r.label == "Play" && g.radio.IsPlaying() {
-			continue
-		}
-		if r.label == "Pause" && !g.radio.IsPlaying() {
-			continue
-		}
-		if r.label == "Stop in 30 min" && g.inSleepCountdown {
-			continue
-		}
-
-		r.setLocation(x, 270)
-		r.drawWithLabel(screen)
-
+	if !g.radio.IsPlaying() {
+		play := g.radiocontrols["Play"]
+		play.setLocation(x, y)
+		play.drawWithLabel(screen)
 		x = x + 100
 	}
+	if g.radio.IsPlaying() {
+		stop := g.radiocontrols["Stop"]
+		stop.setLocation(x, y)
+		stop.drawWithLabel(screen)
+		x = x + 100
+	}
+	if !g.inSleepCountdown {
+		stop := g.radiocontrols["SleepCounter"]
+		stop.setLocation(x, y)
+		stop.drawWithLabel(screen)
+		x = x + 100
+	}
+	if g.radio.IsPlaying() {
+		up := g.radiocontrols["Up"]
+		up.setLocation(x-16, y) // make dynamic
+		up.draw(screen)
+		dn := g.radiocontrols["Dn"]
+		dn.setLocation(x, y) // make dynamic
+		dn.draw(screen)
+	}
+}
+
+func volumeUp(g *Game) {
+	vol := g.radio.Volume()
+	if vol > 0.89 {
+		return
+	}
+	g.radio.SetVolume(vol + 0.10)
+}
+
+func volumeDn(g *Game) {
+	vol := g.radio.Volume()
+	if vol < 0.11 {
+		return
+	}
+	g.radio.SetVolume(vol - 0.10)
 }

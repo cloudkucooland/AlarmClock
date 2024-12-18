@@ -48,7 +48,7 @@ type Game struct {
 	inSleepCountdown bool
 	config           *Config
 	controls         []*control
-	radiocontrols    []*radiocontrol
+	radiocontrols    map[string]*radiocontrol
 	alarmbuttons     map[string]*alarmbutton
 }
 
@@ -99,7 +99,7 @@ func main() {
 
 	// attempt to get the minute-change correct...
 	ms := now.Sub(now.Truncate(time.Second))
-	g.clock.cyclesSinceTick = 1000 - int(ms.Milliseconds() * hz / 1000)
+	g.clock.cyclesSinceTick = 1000 - int(ms.Milliseconds()*hz/1000)
 	g.clock.timestring = now.Format(g.config.ClockFormat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)

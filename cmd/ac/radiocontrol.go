@@ -49,12 +49,28 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(boxwidth)), float32(boxheight), float32(4), bordergrey, false)
 	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(screensize.X-(boxwidth+borderwidth)), float32(boxheight-borderwidth), float32(2), bordergrey, false)
 
-	x := (screensize.X - boxwidth - (32 * spriteScale)) / 2
+	x := borderwidth*2
 
+	if g.radio.IsPlaying() {
+		up := g.radiocontrols["VolUp"]
+		up.setLocation(x, y-2) // make dynamic
+		up.draw(screen)
+		dn := g.radiocontrols["VolDn"]
+		dn.setLocation(x, y+24) // make dynamic
+		dn.setLabel(fmt.Sprintf("%d", int(g.radio.Volume()*100.0)))
+		dn.drawWithLabel(screen)
+		x = x + 100
+	}
 	if !g.radio.IsPlaying() {
 		play := g.radiocontrols["Play"]
 		play.setLocation(x, y)
 		play.drawWithLabel(screen)
+		x = x + 100
+	}
+	if g.radio.IsPlaying() {
+		pause := g.radiocontrols["Pause"]
+		pause.setLocation(x, y)
+		pause.drawWithLabel(screen)
 		x = x + 100
 	}
 	if g.radio.IsPlaying() {
@@ -68,15 +84,6 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		stop.setLocation(x, y)
 		stop.drawWithLabel(screen)
 		x = x + 100
-	}
-	if g.radio.IsPlaying() {
-		up := g.radiocontrols["VolUp"]
-		up.setLocation(x, y-2) // make dynamic
-		up.draw(screen)
-		dn := g.radiocontrols["VolDn"]
-		dn.setLocation(x, y+24) // make dynamic
-		dn.setLabel(fmt.Sprintf("%d", int(g.radio.Volume()*100.0)))
-		dn.drawWithLabel(screen)
 	}
 }
 

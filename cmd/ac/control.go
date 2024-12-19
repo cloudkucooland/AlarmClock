@@ -22,7 +22,7 @@ func (g *Game) setupControls() {
 func (g *Game) drawControls(screen *ebiten.Image) {
 	x := screensize.X - 100
 	y := 30
-	spacing := 100
+	spacing := 150
 
 	for _, c := range g.controls {
 		c.setLocation(x, y)

@@ -30,7 +30,7 @@ func loadfonts() error {
 	}
 	controlfont = &text.GoTextFace{
 		Source: spaceMonoSource,
-		Size:   12,
+		Size:   16,
 	}
 	bigbuttonfont = &text.GoTextFace{
 		Source: spaceMonoSource,

@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	spriteScale = 1.5 // the default scale for the icons
+	spriteScale = 2.5 // the default scale for the icons
 	drawhitbox  = false
 )
 

@@ -16,7 +16,8 @@ var modalbuttons = []*modalbutton{
 }
 
 func (g *Game) drawModal(screen *ebiten.Image) {
-	borderwidth := 20
+	// determine location from sprite size
+	borderwidth := 30
 
 	vector.DrawFilledRect(screen, float32(borderwidth), float32(borderwidth), float32(screensize.X-(borderwidth*2)), float32(screensize.Y-(borderwidth*2)), modalgrey, false)
 	vector.StrokeRect(screen, float32(borderwidth), float32(borderwidth), float32(screensize.X-(borderwidth*2)), float32(screensize.Y-(borderwidth*2)), float32(4), bordergrey, false)

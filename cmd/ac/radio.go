@@ -19,45 +19,55 @@ type radiobutton struct {
 
 func (g *Game) setupRadioButtons() {
 	g.radiobuttons = map[string]*radiobutton{
-		"WRR": {
+		" WRR": {
 			sprite: getSprite("Tea Time", "WRR", chirp),
 			url:    "https://kera.streamguys1.com/wrrlive",
 			works:  true,
 		},
-		"KERA": {
+		" KERA": {
 			sprite: getSprite("Swan Mommy", "KERA", chirp),
 			url:    "https://kera.streamguys1.com/keralive",
 			works:  true,
 		},
 		"90s90s Dance": {
-			sprite: getSprite("Spring", "90s90s Dance", chirp),
+			sprite: getSprite("Confused", "90s90s Dance", chirp),
 			url:    "https://streams.90s90s.de/danceradio/mp3-192/",
 			works:  true,
 		},
 		"90s90s Techno": {
-			sprite: getSprite("Spring", "90s90s Techno", chirp),
+			sprite: getSprite("Mad", "90s90s Techno", chirp),
 			url:    "http://streams.90s90s.de/techno/mp3-192/",
 			works:  true,
 		},
 		"Sunshine Live": {
-			sprite: getSprite("Spring", "Sunshine Live", chirp),
+			sprite: getSprite("Happy", "Sunshine Live", chirp),
 			// url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
 			url:   "http://stream.sunshine-live.de/techno/mp3-192/",
 			works: true,
 		},
 		"Dub Techno": {
-			sprite: getSprite("Spring", "Dub Techno", chirp),
+			sprite: getSprite("Bathtime", "Dub Techno", chirp),
 			url:    "http://94.130.113.214:8000/dubtechno",
 			works:  true,
 		},
 		"Chillout": {
-			sprite: getSprite("Spring", "Chillout", chirp),
+			sprite: getSprite("Baby", "Chillout", chirp),
 			url:    "http://144.76.106.52:7000/chillout.mp3",
 			works:  true,
 		},
 		"Sleeping Pill": {
-			sprite: getSprite("Spring", "Sleeping Pill", chirp),
-			url:    "http://radio.stereoscenic.com:80/asp-l.mp3",
+			sprite: getSprite("Artist", "Sleeping Pill", chirp),
+			url:    "http://radio.stereoscenic.com/asp-s",
+			works:  true,
+		},
+		"a.m. ambient": {
+			sprite: getSprite("Pinwheel", "a.m. ambient", chirp),
+			url:    "http://radio.stereoscenic.com/ama-s",
+			works:  true,
+		},
+		"modern ambient": {
+			sprite: getSprite("Indignent", "modern ambient", chirp),
+			url:    "http://radio.stereoscenic.com/mod-s",
 			works:  true,
 		},
 		"Radio Frisky": {
@@ -93,10 +103,10 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	g.drawModal(screen)
 
 	// TODO: base this on sprite size not hardcoded values
-	paddedspritesize := 60 // spritesize * 1.5? modal border + 10?
+	paddedspritesize := 70 // spritesize * 1.5? modal border + 10?
 	x := paddedspritesize
 	y := paddedspritesize
-	rowspacing := 112 // make dynamic
+	rowspacing := 142 // make dynamic
 
 	for _, k := range slices.Sorted(maps.Keys(g.radiobuttons)) {
 		rb, ok := g.radiobuttons[k]

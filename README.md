@@ -39,11 +39,20 @@ use raspi-config to switch to Wayland / lwc
 Install the code
 ```go get github.com/cloudkucooland/AlarmClock/cmd/ac```
 
-~/config.../ whatever I did to make it start the clock on boot and nothing else
+edit /etc/xdg/labwc/autostart (should use $HOME/.config/labwc/autostart but I did what I did)
+
+```
+/usr/bin/lwrespawn /home/scot/go/bin/ac &
+/usr/bin/kanshi &
+/usr/bin/lxsession-xdg-autostart
+```
+
 
 [set up for mono](https://askubuntu.com/questions/1439652/how-can-i-downmix-stereo-audio-output-to-mono-in-pipewire-on-22-10)
 
 ```pactl set-default-sink 37```
+
+
 
 # Code notes
 

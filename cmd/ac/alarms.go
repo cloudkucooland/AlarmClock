@@ -36,6 +36,7 @@ func (g *Game) checkAlarms(hour int, minute int) {
 
 	if !a.snooze && a.AlarmTime.Hour == hour && a.AlarmTime.Minute == minute {
 		g.startAlarm(g.config.EnabledAlarmID)
+		g.radio.SetVolume(30)
 		return
 	}
 
@@ -46,7 +47,6 @@ func (g *Game) checkAlarms(hour int, minute int) {
 			snoozemin = snoozemin - 60
 			snoozehour = snoozehour + 1
 		}
-		g.debug(fmt.Sprintf("snoozing until %d:%d (%d)\n", snoozehour, snoozemin, a.snoozeCount))
 		if snoozehour == hour && snoozemin == minute {
 			g.wakeFromSnooze(g.config.EnabledAlarmID)
 		}
@@ -66,14 +66,10 @@ func (g *Game) startAlarm(a alarmid) {
 		return
 	}
 	aa.triggered = true
-	g.debug(fmt.Sprintln("Starting", aa))
-
 	g.startAlarmPlayer()
 }
 
 func snooze(g *Game) {
-	g.debug("snoozing")
-
 	g.lastAct = time.Now()
 
 	a, ok := g.config.Alarms[g.config.EnabledAlarmID]
@@ -93,18 +89,13 @@ func snooze(g *Game) {
 	}
 
 	g.state = inSnooze
-
 	a.triggered = false
 	a.snooze = true
 	a.snoozeCount = a.snoozeCount + 1
-	g.debug(fmt.Sprintln("snoozing", g.config.EnabledAlarmID))
-
 	g.stopAlarmPlayer()
 }
 
 func stop(g *Game) {
-	g.debug("stopping triggered alarms")
-
 	a, ok := g.config.Alarms[g.config.EnabledAlarmID]
 	if !ok {
 		g.debug("alarm not enabled, nothing to stop")
@@ -138,9 +129,9 @@ func (g *Game) wakeFromSnooze(a alarmid) {
 		return
 	}
 	aa.triggered = true
-	g.debug(fmt.Sprintln("unsnoozing", a))
-
 	g.startAlarmPlayer()
+	// vol := float64((60 + (aa.snoozeCount * 10)) / 100)
+	g.radio.SetVolume(0.75)
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
@@ -232,9 +223,14 @@ func (g *Game) drawSnooze(screen *ebiten.Image) {
 }
 
 func (g *Game) startAlarmPlayer() {
-	g.debug("starting alarm player")
+	r := g.selectedStation
+	if r == nil {
+		r = g.defaultStation()
+		g.selectedStation = r
+	}
+	r.startPlayer(g)
 }
 
 func (g *Game) stopAlarmPlayer() {
-	g.debug("stopping alarm player")
+	stopPlayer(g)
 }

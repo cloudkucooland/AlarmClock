@@ -49,7 +49,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(screensize.X-(boxwidth)), float32(boxheight), float32(4), bordergrey, false)
 	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(screensize.X-(boxwidth+borderwidth)), float32(boxheight-borderwidth), float32(2), bordergrey, false)
 
-	x := borderwidth*2
+	x := borderwidth * 2
 
 	if g.radio.IsPlaying() {
 		up := g.radiocontrols["VolUp"]

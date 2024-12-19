@@ -158,7 +158,6 @@ func stopPlayer(g *Game) {
 	if g.radio.IsPlaying() {
 		g.radio.Pause()
 	}
-	g.debug("stopping current stream")
 	if err := g.radio.Close(); err != nil {
 		g.debug(err.Error())
 		return
@@ -169,9 +168,7 @@ func stopPlayer(g *Game) {
 func sleepStopPlayer(g *Game) {
 	g.inSleepCountdown = true
 	go func(g *Game) {
-		g.debug("sleep countdown")
 		time.Sleep(30 * time.Minute)
-		g.debug("stopping player from sleep countdown")
 		stopPlayer(g)
 	}(g)
 }
@@ -183,7 +180,6 @@ func pausePlayer(g *Game) {
 	if g.radio.IsPlaying() {
 		g.radio.Pause()
 	}
-	g.debug("pausing current stream")
 }
 
 func resumePlayer(g *Game) {
@@ -193,7 +189,6 @@ func resumePlayer(g *Game) {
 	if !g.radio.IsPlaying() {
 		g.radio.Play()
 	}
-	g.debug("resuming current stream")
 }
 
 func (g *Game) defaultStation() *radiobutton {

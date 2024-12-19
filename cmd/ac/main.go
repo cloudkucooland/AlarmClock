@@ -53,12 +53,14 @@ type Game struct {
 }
 
 func (g *Game) startScreenSaver() {
+	g.debugString = ""
 	g.state = inScreenSaver
 	g.clock.clearCache()
 	g.setBackground()
 }
 
 func (g *Game) leaveScreenSaver() {
+	g.debugString = ""
 	g.state = inNormal
 	g.clock.clearCache()
 	g.clock.X = defaultClockLocationX

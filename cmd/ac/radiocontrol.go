@@ -83,7 +83,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		stop := g.radiocontrols["SleepCountdown"]
 		stop.setLocation(x, y)
 		stop.drawWithLabel(screen)
-		x = x + 100
+		// x = x + 100
 	}
 }
 

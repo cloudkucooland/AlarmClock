@@ -17,6 +17,10 @@ var (
 	weatherfont     *text.GoTextFace
 )
 
+const (
+	weatherfontsize = 36
+)
+
 func loadfonts() error {
 	s, err := text.NewGoTextFaceSource(bytes.NewReader(resources.SpaceMonoBold_ttf))
 	if err != nil {
@@ -38,7 +42,7 @@ func loadfonts() error {
 	}
 	weatherfont = &text.GoTextFace{
 		Source: spaceMonoSource,
-		Size:   24,
+		Size:   weatherfontsize,
 	}
 	return nil
 }

@@ -18,8 +18,15 @@ func (g *Game) drawWeather(screen *ebiten.Image) {
 
 	b := g.weathercache.Bounds()
 
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(screensize.X/2)-float64(b.Max.X/2), float64(screensize.Y-40))
+	op := &ebiten.DrawImageOptions{
+		Blend: ebiten.Blend{
+			// BlendFactorSourceRGB: ebiten.BlendFactorOneMinusSourceColor,
+			BlendFactorSourceRGB:   ebiten.BlendFactorSourceColor,
+			BlendFactorSourceAlpha: ebiten.BlendFactorSourceAlpha,
+			// BlendFactorDestinationAlpha: ebiten.BlendFactorSourceAlpha,
+		},
+	}
+	op.GeoM.Translate(float64(screensize.X/2)-float64(b.Max.X/2), float64(screensize.Y-b.Max.Y-16.0))
 	screen.DrawImage(g.weathercache, op)
 }
 
@@ -61,8 +68,8 @@ func (g *Game) runWeather(ctx context.Context) {
 }
 
 func updateweathercache(g *Game) {
-	weatherstring := fmt.Sprintf("Current: %.1f Feels Like: %.1f High: %.1f Low: %.1f ", g.weather.Main.Temp, g.weather.Main.FeelsLike, g.weather.Main.TempMax, g.weather.Main.TempMin)
-	textwidth, textheight := text.Measure(weatherstring, weatherfont, 1)
+	weatherstring := fmt.Sprintf("Current: %.1f Feels Like: %.1f\nHigh: %.1f Low: %.1f", g.weather.Main.Temp, g.weather.Main.FeelsLike, g.weather.Main.TempMax, g.weather.Main.TempMin)
+	textwidth, textheight := text.Measure(weatherstring, weatherfont, weatherfontsize)
 
 	if g.weathercache != nil {
 		g.weathercache.Deallocate()
@@ -71,6 +78,12 @@ func updateweathercache(g *Game) {
 
 	g.weathercache = ebiten.NewImage(int(textwidth), int(textheight))
 
-	op := &text.DrawOptions{}
+	op := &text.DrawOptions{
+		LayoutOptions: text.LayoutOptions{
+			LineSpacing:  weatherfontsize,
+			PrimaryAlign: text.AlignCenter,
+		},
+	}
+	op.DrawImageOptions.GeoM.Translate(textwidth/2, 0)
 	text.Draw(g.weathercache, weatherstring, weatherfont, op)
 }

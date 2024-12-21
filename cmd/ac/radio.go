@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"maps"
 	"net/http"
 	"slices"
@@ -127,8 +128,11 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 }
 
 func (r *radiobutton) startPlayer(g *Game) {
-	g.selectedStation = r
+	if r == nil {
+		r = g.defaultStation()
+	}
 
+	g.selectedStation = r
 	r.stopPlayer(g)
 
 	// if a playlist is requested, do that in a new goprocess
@@ -204,5 +208,14 @@ func resumePlayer(g *Game) {
 }
 
 func (g *Game) defaultStation() *radiobutton {
-	return g.radiobuttons[defaultRadioStation]
+	s, ok := g.radiobuttons[defaultRadioStation]
+	if !ok {
+		g.debug("unable to get default station, getting a random one")
+		for name, rando := range g.radiobuttons {
+			// whatever happens to come first, which is nondeterministic
+			g.debug(fmt.Sprintf("Got %s", name))
+			return rando
+		}
+	}
+	return s
 }

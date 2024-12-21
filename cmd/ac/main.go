@@ -82,7 +82,6 @@ func main() {
 		clock:   &clock{},
 		weather: nil,
 	}
-	g.selectedStation = g.defaultStation()
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.audioContext = audio.NewContext(44100)
@@ -91,6 +90,7 @@ func main() {
 	g.setBackground()
 	g.setupControls()
 	g.setupRadioButtons()
+	g.selectedStation = g.defaultStation() // too early
 	g.setupAlarmButtons()
 	g.setupRadioControls()
 

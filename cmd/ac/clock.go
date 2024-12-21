@@ -37,6 +37,9 @@ func (g *Game) drawClock(screen *ebiten.Image) {
 	if g.clock.cache == nil {
 		g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
 		op := &text.DrawOptions{}
+		op.Blend = ebiten.Blend{
+			BlendFactorSourceRGB: ebiten.BlendFactorSourceColor,
+		}
 		op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
 		if g.state == inScreenSaver {
 			op.ColorScale.ScaleAlpha(0.25)

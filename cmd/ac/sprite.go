@@ -39,23 +39,6 @@ func (s *sprite) setLocation(x, y int) {
 	s.Y = y
 }
 
-var rawsprites = map[string][]byte{
-	"Artist":     spriteres.ArtistPNG,
-	"Baby":       spriteres.BabyPNG,
-	"Bathtime":   spriteres.BathtimePNG,
-	"Confused":   spriteres.ConfusedPNG,
-	"Happy":      spriteres.HappyPNG,
-	"Indignent":  spriteres.IndignentPNG,
-	"Love":       spriteres.LovePNG,
-	"Mad":        spriteres.MadPNG,
-	"Pinwheel":   spriteres.PinwheelPNG,
-	"Spring":     spriteres.SpringPNG,
-	"Swan Mommy": spriteres.SwanmommyPNG,
-	"Tea Time":   spriteres.TeatimePNG,
-	"Up":         spriteres.UpPNG,
-	"Dn":         spriteres.DnPNG,
-}
-
 func getSprite(name string, label string, do func(*Game)) *sprite {
 	out := sprite{
 		name:        name,
@@ -65,7 +48,7 @@ func getSprite(name string, label string, do func(*Game)) *sprite {
 		spritelabel: &spritelabel{label: label},
 	}
 
-	raw, ok := rawsprites[name]
+	raw, ok := spriteres.RawSprites[name]
 	if !ok {
 		panic("unable to find sprite")
 	}

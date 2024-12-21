@@ -1,14 +1,18 @@
 package main
 
 import (
-	// "fmt"
+	"bytes"
 	"image"
 	"math"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	// "github.com/hajimehoshi/ebiten/v2/vector"
+
+	"github.com/cloudkucooland/AlarmClock/resources/sounds"
 )
 
 type alarmid int
@@ -229,6 +233,44 @@ func (g *Game) startAlarmPlayer() {
 		g.selectedStation = r
 	}
 	r.startPlayer(g)
+
+	// backup alarm if internet is down
+	go func(g *Game) {
+		time.Sleep(2 * time.Second)
+		// if the radio isn't playing, but is triggered and not already snoozed
+		// !triggered means the stop button has been pushed
+		// snooze means the snooze button has been pushed
+		a, ok := g.config.Alarms[g.config.EnabledAlarmID]
+		if !ok {
+			g.debug("no enabled alarms in backup check")
+			return
+		}
+		if !g.radio.IsPlaying() && a.triggered && !a.snooze {
+			g.debug("PLAYING BACKUP ALARM!!!")
+			g.stopAlarmPlayer()
+
+			backup, ok := sounds.Sounds["BackupAlarm"]
+			if !ok {
+				g.debug("no backup alarm found")
+				return
+			}
+			backupAlarm, err := mp3.DecodeWithoutResampling(bytes.NewReader(backup))
+			if err != nil {
+				g.debug(err.Error())
+				return
+			}
+
+			loop := audio.NewInfiniteLoop(backupAlarm, backupAlarm.Length())
+			loopplayer, err := g.audioContext.NewPlayer(loop)
+			if err != nil {
+				// I guess we are sleeping in today...
+				g.debug(err.Error())
+				return
+			}
+			loopplayer.SetVolume(0.33)
+			loopplayer.Play()
+		}
+	}(g)
 }
 
 func (g *Game) stopAlarmPlayer() {

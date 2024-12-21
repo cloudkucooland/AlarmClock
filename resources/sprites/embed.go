@@ -47,3 +47,20 @@ var (
 	//go:embed dn.png
 	DnPNG []byte
 )
+
+var RawSprites = map[string][]byte{
+	"Artist":     ArtistPNG,
+	"Baby":       BabyPNG,
+	"Bathtime":   BathtimePNG,
+	"Confused":   ConfusedPNG,
+	"Happy":      HappyPNG,
+	"Indignent":  IndignentPNG,
+	"Love":       LovePNG,
+	"Mad":        MadPNG,
+	"Pinwheel":   PinwheelPNG,
+	"Spring":     SpringPNG,
+	"Swan Mommy": SwanmommyPNG,
+	"Tea Time":   TeatimePNG,
+	"Up":         UpPNG,
+	"Dn":         DnPNG,
+}

@@ -36,7 +36,11 @@ func (c *clock) clearCache() {
 func (g *Game) drawClock(screen *ebiten.Image) {
 	if g.clock.cache == nil {
 		g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
-		op := &text.DrawOptions{}
+		op := &text.DrawOptions{
+			LayoutOptions: text.LayoutOptions{
+				LineSpacing: 16,
+			},
+		}
 		op.Blend = ebiten.Blend{
 			BlendFactorSourceRGB: ebiten.BlendFactorSourceColor,
 		}

@@ -90,7 +90,7 @@ func main() {
 	g.setBackground()
 	g.setupControls()
 	g.setupRadioButtons()
-	g.selectedStation = g.defaultStation() // too early
+	g.selectedStation = g.defaultStation()
 	g.setupAlarmButtons()
 	g.setupRadioControls()
 

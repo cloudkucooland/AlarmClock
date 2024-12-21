@@ -39,17 +39,22 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		return
 	}
 
-	boxwidth := 480
+	boxwidth := 440
 	boxheight := 150
 	borderwidth := 20
-	y := 260
+	x := (screensize.X / 2) - (boxwidth / 2)
+	y := 230
+	ypadding := 16
+	xpadding := 10
 
 	// TODO: base this on sprite size not hardcoded values
-	vector.DrawFilledRect(screen, float32(borderwidth), float32(240), float32(boxwidth), float32(boxheight), modalgrey, false)
-	vector.StrokeRect(screen, float32(borderwidth), float32(240), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
-	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(250), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
+	vector.DrawFilledRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), modalgrey, false)
+	vector.StrokeRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
+	vector.StrokeRect(screen, float32(x+xpadding), float32(y+10), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
 
-	x := borderwidth * 2
+	// move from box corner to initial location fo icons
+	y = y + ypadding
+	x = x + 2*xpadding
 
 	if !g.radio.IsPlaying() {
 		play := g.radiocontrols["Play"]
@@ -57,27 +62,32 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		play.drawWithLabel(screen)
 		x = x + 100
 	}
+
 	if g.radio.IsPlaying() {
 		up := g.radiocontrols["VolUp"]
 		up.scale = 1.0
 		bounds := up.sprite.image.Bounds()
-		up.setLocation(x, y) // make dynamic
+		up.setLocation(x, y)
 		up.draw(screen)
+
 		dn := g.radiocontrols["VolDn"]
-		up.scale = 1.0
-		dn.setLocation(x, y+bounds.Max.Y) // make dynamic
+		dn.scale = 1.0
+		dn.setLocation(x, y+bounds.Max.Y+ypadding)
 		dn.setLabel(fmt.Sprintf("%d", int(g.radio.Volume()*100.0)))
 		dn.drawWithLabel(screen)
+
 		x = x + 100
 
 		pause := g.radiocontrols["Pause"]
 		pause.setLocation(x, y)
 		pause.drawWithLabel(screen)
+
 		x = x + 100
 
 		stop := g.radiocontrols["Stop"]
 		stop.setLocation(x, y)
 		stop.drawWithLabel(screen)
+
 		x = x + 100
 
 		if !g.inSleepCountdown {

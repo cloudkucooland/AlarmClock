@@ -59,10 +59,13 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	}
 	if g.radio.IsPlaying() {
 		up := g.radiocontrols["VolUp"]
-		up.setLocation(x, y-8) // make dynamic
+		up.scale = 1.0
+		bounds := up.sprite.image.Bounds()
+		up.setLocation(x, y) // make dynamic
 		up.draw(screen)
 		dn := g.radiocontrols["VolDn"]
-		dn.setLocation(x, y+30) // make dynamic
+		up.scale = 1.0
+		dn.setLocation(x, y+bounds.Max.Y) // make dynamic
 		dn.setLabel(fmt.Sprintf("%d", int(g.radio.Volume()*100.0)))
 		dn.drawWithLabel(screen)
 		x = x + 100

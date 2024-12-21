@@ -11,6 +11,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 )
 
+const defaultRadioStation = " KERA"
+
 type radiobutton struct {
 	*sprite
 	url   string
@@ -24,7 +26,7 @@ func (g *Game) setupRadioButtons() {
 			url:    "https://kera.streamguys1.com/wrrlive",
 			works:  true,
 		},
-		" KERA": {
+		defaultRadioStation: {
 			sprite: getSprite("Swan Mommy", "KERA", chirp),
 			url:    "https://kera.streamguys1.com/keralive",
 			works:  true,
@@ -202,5 +204,5 @@ func resumePlayer(g *Game) {
 }
 
 func (g *Game) defaultStation() *radiobutton {
-	return g.radiobuttons["KERA"]
+	return g.radiobuttons[defaultRadioStation]
 }

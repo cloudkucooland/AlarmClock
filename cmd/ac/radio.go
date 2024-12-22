@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"maps"
+	"math"
 	"net/http"
 	"slices"
 	"strings"
@@ -155,12 +156,12 @@ func (r *radiobutton) startPlayer(g *Game) {
 		return
 	}
 
-	g.radio, err = g.audioContext.NewPlayer(decoded)
+	g.audioPlayer, err = g.audioContext.NewPlayer(decoded)
 	if err != nil {
 		g.debug(err.Error())
 		return
 	}
-	g.radio.Play()
+	g.audioPlayer.Play()
 }
 
 func (r *radiobutton) stopPlayer(g *Game) {
@@ -168,42 +169,51 @@ func (r *radiobutton) stopPlayer(g *Game) {
 }
 
 func stopPlayer(g *Game) {
-	if g.radio == nil {
+	if g.audioPlayer == nil {
 		return
 	}
-	if g.radio.IsPlaying() {
-		g.radio.Pause()
+	if g.audioPlayer.IsPlaying() {
+		g.audioPlayer.Pause()
 	}
-	if err := g.radio.Close(); err != nil {
+	if err := g.audioPlayer.Close(); err != nil {
 		g.debug(err.Error())
 		return
 	}
-	g.radio = nil
+	g.audioPlayer = nil
 }
 
 func sleepStopPlayer(g *Game) {
 	g.inSleepCountdown = true
 	go func(g *Game) {
-		time.Sleep(30 * time.Minute)
+		c := time.Tick(10 * time.Minute)
+
+		i := 0
+		for i < 3 {
+			i = i + 1
+			vol := g.audioPlayer.Volume()
+			vol = math.Max(vol-0.10, 0.05)
+			g.audioPlayer.SetVolume(vol)
+			<-c
+		}
 		stopPlayer(g)
 	}(g)
 }
 
 func pausePlayer(g *Game) {
-	if g.radio == nil {
+	if g.audioPlayer == nil {
 		return
 	}
-	if g.radio.IsPlaying() {
-		g.radio.Pause()
+	if g.audioPlayer.IsPlaying() {
+		g.audioPlayer.Pause()
 	}
 }
 
 func resumePlayer(g *Game) {
-	if g.radio == nil {
+	if g.audioPlayer == nil {
 		return
 	}
-	if !g.radio.IsPlaying() {
-		g.radio.Play()
+	if !g.audioPlayer.IsPlaying() {
+		g.audioPlayer.Play()
 	}
 }
 

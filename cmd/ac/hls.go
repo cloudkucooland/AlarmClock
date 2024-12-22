@@ -69,12 +69,12 @@ func (g *Game) playhls(url string) {
 	defer c.Close()
 	// r.stopPlayer(g)
 
-	g.radio, err = g.audioContext.NewPlayer(&b)
+	g.audioPlayer, err = g.audioContext.NewPlayer(&b)
 	if err != nil {
 		g.debug(err.Error())
 		return
 	}
-	g.radio.Play()
+	g.audioPlayer.Play()
 
 	// wait for a fatal error
 	err = <-c.Wait()

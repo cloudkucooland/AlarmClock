@@ -70,7 +70,7 @@ func (g *Game) startAlarm(id alarmid) {
 	}
 	a.triggered = true
 	g.startAlarmPlayer()
-	g.radio.SetVolume(0.25)
+	g.audioPlayer.SetVolume(0.25)
 }
 
 func snoozeAlarm(g *Game) {
@@ -135,7 +135,7 @@ func (g *Game) wakeFromSnooze(id alarmid) {
 	a.triggered = true
 	g.startAlarmPlayer()
 	// vol := float64((60 + (aa.snoozeCount * 10)) / 100)
-	g.radio.SetVolume(0.50)
+	g.audioPlayer.SetVolume(0.50)
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
@@ -245,17 +245,18 @@ func (g *Game) startAlarmPlayer() {
 			g.debug("no enabled alarms in backup check")
 			return
 		}
-		if !g.radio.IsPlaying() && a.triggered && !a.snooze {
-			g.debug("PLAYING BACKUP ALARM!!!")
+		if !g.audioPlayer.IsPlaying() && a.triggered && !a.snooze {
 			g.stopAlarmPlayer()
 
 			backup, ok := sounds.Sounds["BackupAlarm"]
 			if !ok {
+				// I guess we are sleeping in today...
 				g.debug("no backup alarm found")
 				return
 			}
 			backupAlarm, err := mp3.DecodeWithoutResampling(bytes.NewReader(backup))
 			if err != nil {
+				// I guess we are sleeping in today...
 				g.debug(err.Error())
 				return
 			}

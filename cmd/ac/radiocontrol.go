@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -35,7 +36,7 @@ func (g *Game) setupRadioControls() {
 }
 
 func (g *Game) drawRadioControls(screen *ebiten.Image) {
-	if g.radio == nil {
+	if g.audioPlayer == nil {
 		return
 	}
 
@@ -56,14 +57,14 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	y = y + ypadding
 	x = x + 2*xpadding
 
-	if !g.radio.IsPlaying() {
+	if !g.audioPlayer.IsPlaying() {
 		play := g.radiocontrols["Play"]
 		play.setLocation(x, y)
 		play.drawWithLabel(screen)
 		x = x + 100
 	}
 
-	if g.radio.IsPlaying() {
+	if g.audioPlayer.IsPlaying() {
 		up := g.radiocontrols["VolUp"]
 		up.scale = 1.0
 		bounds := up.sprite.image.Bounds()
@@ -73,7 +74,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		dn := g.radiocontrols["VolDn"]
 		dn.scale = 1.0
 		dn.setLocation(x, y+bounds.Max.Y+ypadding)
-		dn.setLabel(fmt.Sprintf("%d", int(g.radio.Volume()*100.0)))
+		dn.setLabel(fmt.Sprintf("%d", int(g.audioPlayer.Volume()*100.0)))
 		dn.drawWithLabel(screen)
 
 		x = x + 100
@@ -99,23 +100,17 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 }
 
 func volumeUp(g *Game) {
-	vol := g.radio.Volume()
-	if vol > 0.89 {
-		return
-	}
-	vol = (vol + 0.10)
-	g.radio.SetVolume(vol)
+	vol := g.audioPlayer.Volume()
+	vol = math.Min(vol+0.10, 1.0)
+	g.audioPlayer.SetVolume(vol)
 	dn := g.radiocontrols["VolDn"]
 	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
 }
 
 func volumeDn(g *Game) {
-	vol := g.radio.Volume()
-	if vol < 0.11 {
-		return
-	}
-	vol = (vol - 0.10)
-	g.radio.SetVolume(vol)
+	vol := g.audioPlayer.Volume()
+	vol = math.Max(vol-0.10, 0.05)
+	g.audioPlayer.SetVolume(vol)
 	dn := g.radiocontrols["VolDn"]
 	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
 }

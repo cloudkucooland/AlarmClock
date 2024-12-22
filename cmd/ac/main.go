@@ -42,7 +42,7 @@ type Game struct {
 	weather          *owm.CurrentWeatherData
 	weathercache     *ebiten.Image
 	audioContext     *audio.Context
-	radio            *audio.Player
+	audioPlayer      *audio.Player
 	radiobuttons     map[string]*radiobutton
 	selectedStation  *radiobutton
 	inSleepCountdown bool

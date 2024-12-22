@@ -39,7 +39,7 @@ func (g *Game) Update() error {
 					c.startanimation()
 				}
 			}
-			if g.radio != nil {
+			if g.audioPlayer != nil {
 				for _, r := range g.radiocontrols {
 					if r.in(x, y) && !r.ani.in {
 						r.startanimation()
@@ -75,7 +75,7 @@ func (g *Game) Update() error {
 				}
 			}
 
-			if g.radio != nil {
+			if g.audioPlayer != nil {
 				for _, r := range g.radiocontrols {
 					if r.in(x, y) {
 						if r.ani.in {

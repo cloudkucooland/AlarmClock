@@ -120,8 +120,10 @@ func (g *Game) Update() error {
 				// check if we are in the body of the button, to enable/disable it
 				if !processed && a.in(x, y) {
 					if g.config.EnabledAlarmID == key {
+						chirp(g)
 						g.config.EnabledAlarmID = disabledAlarmID
 					} else {
+						chirp(g)
 						g.config.EnabledAlarmID = key
 					}
 					processed = true

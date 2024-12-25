@@ -7,8 +7,10 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 
+	"github.com/cloudkucooland/AlarmClock/resources/sounds"
 	spriteres "github.com/cloudkucooland/AlarmClock/resources/sprites"
 )
 
@@ -132,7 +134,26 @@ func (s *sprite) drawWithLabel(screen *ebiten.Image) {
 }
 
 func chirp(g *Game) {
-	g.debug("play sprite chirp")
+	chirpraw, ok := sounds.Sounds["Khew"]
+	if !ok {
+		return
+	}
+	chirp, err := mp3.DecodeWithoutResampling(bytes.NewReader(chirpraw))
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
+
+	p, err := g.audioContext.NewPlayer(chirp)
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
+	p.SetVolume(0.10)
+	p.Play()
+	if err := p.Close(); err != nil {
+		g.debug(err.Error())
+	}
 }
 
 type spriteanimation struct {

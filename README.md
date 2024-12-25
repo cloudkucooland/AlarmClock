@@ -32,7 +32,7 @@ Once, after disassembling to test fit, the touch on the display quit working. Af
 
 # Setup
 
-use raspi-config to switch to Wayland / lwc
+use raspi-config to switch to Wayland / labwc
 
 [install go](https://go.dev/doc/install)
 
@@ -47,15 +47,23 @@ edit /etc/xdg/labwc/autostart (should use $HOME/.config/labwc/autostart but I di
 /usr/bin/lxsession-xdg-autostart
 ```
 
-
 [set up for mono](https://askubuntu.com/questions/1439652/how-can-i-downmix-stereo-audio-output-to-mono-in-pipewire-on-22-10)
 
 ```pactl set-default-sink 37```
-
-
 
 # Code notes
 
 This is my first project using [ebiten](https://ebitengine.org) or using a game engine at all. It has been fun. I'm learning a lot and now have the urge to write and 8-bit-looking RPG...
 
+# GPIO Pins
 
+## HIFIBERRY AMP2, AMP4, AMP4 PRO
+
+- GPIO2-3 (pins 3 and 5) are used by our products for configuration. If you are experienced with I2C, you might add other slave devices. If you a a novice, we don’t recommend this at all.
+- GPIOs 18-21 (pins 12, 35, 38 and 40) are used for the sound interface. You can’t use these for any other purpose.
+- GPIO4 is used to control the MUTE function of the power stage. Pulling it to low will mute the output.
+
+## Adafruit NeoPixel
+
+- NeoPixels must be connected to GPIO10, GPIO12, GPIO18 or GPIO21 to work! GPIO18 is the standard pin.
+- Looks like GPIO10 (pin 19) are GPIO12 (pin 32) are my options

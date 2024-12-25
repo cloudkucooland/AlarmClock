@@ -14,7 +14,9 @@ import (
 	owm "github.com/briandowns/openweathermap"
 )
 
-const hz = 60
+const screenSaverHz = 5
+const normalHz = 60
+var hz = normalHz
 
 var screensize = image.Point{
 	X: 800,
@@ -53,6 +55,8 @@ type Game struct {
 }
 
 func (g *Game) startScreenSaver() {
+	hz = screenSaverHz
+	ebiten.SetTPS(hz)
 	g.debugString = ""
 	g.state = inScreenSaver
 	g.clock.clearCache()
@@ -60,6 +64,8 @@ func (g *Game) startScreenSaver() {
 }
 
 func (g *Game) leaveScreenSaver() {
+	hz = normalHz
+	ebiten.SetTPS(hz)
 	g.debugString = ""
 	g.state = inNormal
 	g.clock.clearCache()
@@ -98,8 +104,8 @@ func main() {
 	now := time.Now()
 
 	// attempt to get the minute-change correct...
-	ms := now.Sub(now.Truncate(time.Second))
-	g.clock.cyclesSinceTick = 1000 - int(ms.Milliseconds()*hz/1000)
+	// ms := now.Sub(now.Truncate(time.Second))
+	// g.clock.cyclesSinceTick = 1000 - int(ms.Milliseconds()*hz/1000)
 	g.clock.timestring = now.Format(g.config.ClockFormat)
 
 	ebiten.SetWindowSize(screensize.X, screensize.Y)

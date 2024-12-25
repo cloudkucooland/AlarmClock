@@ -185,17 +185,18 @@ func stopPlayer(g *Game) {
 func sleepStopPlayer(g *Game) {
 	g.inSleepCountdown = true
 	go func(g *Game) {
-		c := time.Tick(10 * time.Minute)
+		c := time.Tick(5 * time.Minute)
 
 		i := 0
-		for i < 3 {
+		for i < 6 {
 			i = i + 1
 			vol := g.audioPlayer.Volume()
-			vol = math.Max(vol-0.10, 0.05)
+			vol = math.Max(vol-0.05, 0.05)
 			g.audioPlayer.SetVolume(vol)
 			<-c
 		}
 		stopPlayer(g)
+		g.inSleepCountdown = false
 	}(g)
 }
 

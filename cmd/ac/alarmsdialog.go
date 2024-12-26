@@ -21,6 +21,7 @@ type alarmDialogButton struct {
 }
 
 func alarmConfigDialog(g *Game) {
+	chirp(g)
 	g.state = inAlarmConfig
 }
 

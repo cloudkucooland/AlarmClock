@@ -16,6 +16,7 @@ import (
 
 const screenSaverHz = 5
 const normalHz = 60
+
 var hz = normalHz
 
 var screensize = image.Point{

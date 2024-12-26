@@ -29,5 +29,6 @@ func (g *Game) drawModal(screen *ebiten.Image) {
 }
 
 func modalclose(g *Game) {
+	chirp(g)
 	g.state = inNormal
 }

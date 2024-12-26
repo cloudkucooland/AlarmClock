@@ -1,4 +1,4 @@
-package backgrounds 
+package backgrounds
 
 import (
 	_ "embed"

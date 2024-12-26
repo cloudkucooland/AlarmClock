@@ -33,6 +33,7 @@ func (g *Game) setBackground() {
 	g.background = ebiten.NewImage(screensize.X, screensize.Y)
 
 	// random for now, later we can do by season/weather/time-of-date, etc
+	// #nosec G404 G115
 	key := uint8(rand.Intn(len(g.backgrounds)))
 	bg, ok := g.backgrounds[key]
 	if !ok {

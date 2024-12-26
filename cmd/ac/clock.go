@@ -20,7 +20,9 @@ const defaultClockLocationY = 0
 
 func (c *clock) screensaverClockLocation() {
 	// get clock size, determine max range...
+	// #nosec G404 - we don't need strong randomness
 	c.X = rand.Int() % 150
+	// #nosec G404 - we don't need strong randomness
 	c.Y = rand.Int() % 250
 }
 

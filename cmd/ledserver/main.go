@@ -15,7 +15,10 @@ import (
 
 func main() {
 	led := new(ledserver.LED)
-	rpc.Register(led)
+	if err := rpc.Register(led); err != nil {
+		panic(err)
+	}
+	// nosec G114
 	rpc.HandleHTTP()
 
 	l, err := net.Listen("unix", ledserver.Pipefile)
@@ -24,6 +27,7 @@ func main() {
 		panic(err)
 	}
 
+	// #nosec G114 -- this is a socket, no need for timeouts
 	go http.Serve(l, nil)
 
 	// ctx, cancel := context.WithCancel(context.Background())
@@ -32,7 +36,9 @@ func main() {
 	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
 	sig := <-sigch
 
-	l.Close()
+	if err := l.Close(); err != nil {
+		panic(err)
+	}
 
 	fmt.Printf("shutdown requested by signal: %s", sig)
 	// cancel()

@@ -48,6 +48,7 @@ func (g *Game) loadconfig() {
 				4: {AlarmTime: AlarmTime{4, 30}},
 			},
 		}
+		// #nosec G304
 		f, err := os.Create(configFile)
 		if err != nil {
 			panic(err)
@@ -60,6 +61,7 @@ func (g *Game) loadconfig() {
 		}
 	} else {
 		// Load the existing file.
+		// #nosec G304
 		f, err := os.Open(configFile)
 		if err != nil {
 			panic(err)
@@ -75,6 +77,7 @@ func (g *Game) loadconfig() {
 }
 
 func (g *Game) storeconfig() error {
+	// #nosec G302 G304
 	f, err := os.OpenFile(configFile, os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
 		g.debug("unable to open file " + err.Error())

@@ -1,4 +1,4 @@
-package sounds 
+package sounds
 
 import (
 	_ "embed"
@@ -13,6 +13,6 @@ var (
 )
 
 var Sounds = map[string][]byte{
-	"BackupAlarm":     BackupAlarm,
-	"Khew":     Khew,
+	"BackupAlarm": BackupAlarm,
+	"Khew":        Khew,
 }

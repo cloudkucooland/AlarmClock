@@ -151,9 +151,9 @@ func chirp(g *Game) {
 	}
 	p.SetVolume(0.20)
 	p.Play()
-	if err := p.Close(); err != nil {
+	/* if err := p.Close(); err != nil {
 		g.debug(err.Error())
-	}
+	} */
 }
 
 type spriteanimation struct {

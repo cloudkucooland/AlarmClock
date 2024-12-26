@@ -4,6 +4,7 @@ import (
 	"context"
 	"image"
 	"log"
+	"net/rpc"
 	"os"
 	"strings"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 
 	owm "github.com/briandowns/openweathermap"
+
+	"github.com/cloudkucooland/AlarmClock/ledserver"
 )
 
 const screenSaverHz = 5
@@ -53,6 +56,7 @@ type Game struct {
 	controls         []*control
 	radiocontrols    map[string]*radiocontrol
 	alarmbuttons     map[string]*alarmbutton
+	ledclient        *rpc.Client
 }
 
 func (g *Game) startScreenSaver() {
@@ -62,6 +66,7 @@ func (g *Game) startScreenSaver() {
 	g.state = inScreenSaver
 	g.clock.clearCache()
 	g.setBackground()
+	g.ledAllOff()
 }
 
 func (g *Game) leaveScreenSaver() {
@@ -73,6 +78,7 @@ func (g *Game) leaveScreenSaver() {
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.setBackground()
+	g.ledFrontOn()
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -100,6 +106,13 @@ func main() {
 	g.selectedStation = g.defaultStation()
 	g.setupAlarmButtons()
 	g.setupRadioControls()
+
+	if client, err := rpc.DialHTTP("unix", ledserver.Pipefile); err != nil {
+		log.Printf("led server not connected: %s", err.Error())
+	} else {
+		g.ledclient = client
+	}
+	g.ledAllOn()
 
 	// setup clock
 	now := time.Now()

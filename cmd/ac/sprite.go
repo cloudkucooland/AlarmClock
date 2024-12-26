@@ -149,7 +149,7 @@ func chirp(g *Game) {
 		g.debug(err.Error())
 		return
 	}
-	p.SetVolume(0.10)
+	p.SetVolume(0.20)
 	p.Play()
 	if err := p.Close(); err != nil {
 		g.debug(err.Error())

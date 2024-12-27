@@ -7,7 +7,12 @@ require (
 	github.com/briandowns/openweathermap v0.21.0
 	github.com/hajimehoshi/ebiten/v2 v2.8.5
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
+	periph.io/x/conn/v3 v3.7.1
+	periph.io/x/devices/v3 v3.7.2
+	periph.io/x/host/v3 v3.8.2
 )
+
+replace periph.io/x/host/v3 => /home/scot/periph.io/host
 
 require (
 	github.com/abema/go-mp4 v1.2.0 // indirect

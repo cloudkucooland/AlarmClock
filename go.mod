@@ -4,8 +4,8 @@ go 1.23.0
 
 require (
 	github.com/bluenviron/gohlslib/v2 v2.1.0
-	github.com/briandowns/openweathermap v0.21.0
-	github.com/hajimehoshi/ebiten/v2 v2.8.5
+	github.com/briandowns/openweathermap v0.21.1
+	github.com/hajimehoshi/ebiten/v2 v2.8.6
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	periph.io/x/conn/v3 v3.7.1
 	periph.io/x/devices/v3 v3.7.2
@@ -15,15 +15,15 @@ require (
 replace periph.io/x/host/v3 => /home/scot/periph.io/host
 
 require (
-	github.com/abema/go-mp4 v1.2.0 // indirect
+	github.com/abema/go-mp4 v1.3.0 // indirect
 	github.com/asticode/go-astikit v0.51.1 // indirect
 	github.com/asticode/go-astits v1.13.0 // indirect
 	github.com/bluenviron/mediacommon v1.13.2 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20241016134836-cc2e38a7c0ee // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
-	github.com/ebitengine/oto/v3 v3.3.1 // indirect
+	github.com/ebitengine/oto/v3 v3.3.2 // indirect
 	github.com/ebitengine/purego v0.8.1 // indirect
-	github.com/go-text/typesetting v0.2.0 // indirect
+	github.com/go-text/typesetting v0.2.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect

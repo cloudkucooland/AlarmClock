@@ -156,6 +156,27 @@ func chirp(g *Game) {
 	} */
 }
 
+
+func tick(g *Game) {
+	raw, ok := sounds.Sounds["Tick"]
+	if !ok {
+		return
+	}
+	tick, err := mp3.DecodeWithoutResampling(bytes.NewReader(raw))
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
+
+	p, err := g.audioContext.NewPlayer(tick)
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
+	p.SetVolume(0.60)
+	p.Play()
+}
+
 type spriteanimation struct {
 	in   bool
 	step int

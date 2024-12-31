@@ -105,6 +105,7 @@ func volumeUp(g *Game) {
 	g.audioPlayer.SetVolume(vol)
 	dn := g.radiocontrols["VolDn"]
 	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
+	tick(g)
 }
 
 func volumeDn(g *Game) {
@@ -113,4 +114,5 @@ func volumeDn(g *Game) {
 	g.audioPlayer.SetVolume(vol)
 	dn := g.radiocontrols["VolDn"]
 	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
+	tick(g)
 }

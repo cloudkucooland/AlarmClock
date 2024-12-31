@@ -16,9 +16,10 @@ import (
 	"periph.io/x/host/v3"
 )
 
-const Pipefile = "/var/run/ledserver/command.sock"
-const pin = "28"
+const Pipefile = "/tmp/ledserver.sock"
+const pin = "GPIO12"
 const channels = 4
+const numpixels = 5
 
 type LED struct {
 	stream    *nrzled.Dev
@@ -79,7 +80,7 @@ func (l *LED) Init() error {
 	}
 
 	opts := nrzled.DefaultOpts
-	opts.NumPixels = 24
+	opts.NumPixels = numpixels
 	opts.Freq = 2500 * physic.KiloHertz
 	opts.Channels = channels
 

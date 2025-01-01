@@ -1,87 +1,95 @@
 package main
 
-/*
-#cgo CFLAGS: -I/usr/include/fdk-aac
-#cgo LDFLAGS: -L/usr/lib/aarch64-linux-gnu/ -lfdk-aac
-*/
-
 import (
-	"fmt"
-	"io"
+	"context"
+	// "fmt"
+	//"os"
+	"os/exec"
 
-	"github.com/bluenviron/gohlslib/v2"
-	"github.com/bluenviron/gohlslib/v2/pkg/codecs"
-	// "github.com/bluenviron/mediacommon/pkg/formats/mpegts"
-
-	"github.com/winlinvip/go-fdkaac/fdkaac"
-	// "github.com/hajimehoshi/ebiten/v2/audio/wav"
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+// ffplay -ac 1 -loglevel error -vn URL
+
 func (g *Game) playhls(url string) {
-	c := &gohlslib.Client{
-		URI: "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8",
-		// URI: url,
-	}
+	ctx, cancel := context.WithCancel(context.Background())
 
-	r, w := io.Pipe()
+	args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
+	cmd := exec.CommandContext(ctx, "ffplay", args...)
 
-	decoder := fdkaac.NewAacDecoder()
-	asc := []byte{0x12, 0x10}
-	if err := decoder.InitRaw(asc); err != nil {
+	if err := cmd.Start(); err != nil {
 		g.debug(err.Error())
-		return
-	}
-	defer decoder.Close()
-
-	c.OnTracks = func(tracks []*gohlslib.Track) error {
-		track := findMPEG4AudioTrack(tracks)
-		if track == nil {
-			err := fmt.Errorf("no MPEG-4 audio track found")
-			g.debug(err.Error())
-			return err
-		}
-
-		c.OnDataMPEG4Audio(track, func(pts int64, aus [][]byte) {
-			fmt.Printf("%+v\n", aus[0])
-			for i := range aus {
-				pcm, err := decoder.Decode(aus[i])
-				if err != nil {
-					g.debug(err.Error())
-					continue
-				}
-				w.Write(pcm)
-			}
-		})
-
-		return nil
 	}
 
-	if err := c.Start(); err != nil {
-		g.debug(err.Error())
-		return
-	}
-	defer c.Close()
-
-	var err error
-	g.audioPlayer, err = g.audioContext.NewPlayer(r)
-	if err != nil {
-		g.debug(err.Error())
-		return
-	}
-	g.audioPlayer.Play()
-	defer stopPlayer(g)
-
-	err = <-c.Wait()
-	w.Close()
-	// r.Close()
-	g.debug(err.Error())
+	g.externalAudioCancel = cancel
+	cmd.Wait()
+	g.externalAudioCancel = nil
 }
 
-func findMPEG4AudioTrack(tracks []*gohlslib.Track) *gohlslib.Track {
-	for _, track := range tracks {
-		if _, ok := track.Codec.(*codecs.MPEG4Audio); ok {
-			return track
+func (g *Game) stophls() {
+	if g.externalAudioCancel == nil {
+		return
+	}
+
+	g.externalAudioCancel()
+	g.externalAudioCancel = nil
+}
+
+func (g *Game) hlsSetupRadioControls(screen *ebiten.Image) {
+	if g.externalAudioCancel == nil {
+		return
+	}
+
+	boxwidth := 340
+	boxheight := 150
+	borderwidth := 20
+	x := (screensize.X / 2) - (boxwidth / 2)
+	y := 230
+	ypadding := 16
+	xpadding := 10
+
+	// TODO: base this on sprite size not hardcoded values
+	vector.DrawFilledRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), modalgrey, false)
+	vector.StrokeRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
+	vector.StrokeRect(screen, float32(x+xpadding), float32(y+10), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
+
+	// move from box corner to initial location fo icons
+	y = y + ypadding
+	x = x + 2*xpadding
+
+	if g.audioPlayer.IsPlaying() {
+		/*
+			up := g.radiocontrols["VolUp"]
+			up.scale = 1.0
+			bounds := up.sprite.image.Bounds()
+			up.setLocation(x, y)
+			up.draw(screen)
+
+			dn := g.radiocontrols["VolDn"]
+			dn.scale = 1.0
+			dn.setLocation(x, y+bounds.Max.Y+ypadding)
+			dn.setLabel(fmt.Sprintf("%d", int(g.audioPlayer.Volume()*100.0)))
+			dn.drawWithLabel(screen)
+
+			x = x + 100
+		*/
+		stop := g.radiocontrols["Stop"]
+		stop.setLocation(x, y)
+		stop.drawWithLabel(screen)
+
+		x = x + 100
+
+		if !g.inSleepCountdown {
+			stop := g.radiocontrols["SleepCountdown"]
+			stop.setLocation(x, y)
+			stop.drawWithLabel(screen)
 		}
 	}
-	return nil
 }
+
+func (g *Game) hlsDrawRadioControls(screen *ebiten.Image) {}
+
+func hlsVolumeUp(g *Game) {}
+
+func hlsVolumeDn(g *Game) {}

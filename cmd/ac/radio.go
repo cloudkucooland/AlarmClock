@@ -80,8 +80,9 @@ func (g *Game) setupRadioButtons() {
 		},
 		"BBC 6 Music": {
 			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
-			// url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
-			url: "http://lstn.lv/bbc.m3u8?station=bbc_6music&bitrate=320000",
+			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+			// url: "http://lstn.lv/bbc.m3u8?station=bbc_6music&bitrate=320000",
+			works: true,
 		},
 		"BBC 4": {
 			sprite: getSprite("Pinwheel", "BBC 4", chirp),
@@ -138,27 +139,29 @@ func (r *radiobutton) startPlayer(g *Game) {
 
 	// if a playlist is requested, do that in a new goprocess
 	if strings.Contains(r.url, "m3u") {
-		g.debug("starting HLS player logic")
 		go g.playhls(r.url)
 		return
 	}
 
-	g.debug(r.url)
+	// g.debug(r.url)
 	stream, err := http.Get(r.url)
 	if err != nil {
 		g.debug(err.Error())
+		chirp(g)
 		return
 	}
 
 	decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
 	if err != nil {
 		g.debug(err.Error())
+		chirp(g)
 		return
 	}
 
 	g.audioPlayer, err = g.audioContext.NewPlayer(decoded)
 	if err != nil {
 		g.debug(err.Error())
+		chirp(g)
 		return
 	}
 	g.audioPlayer.Play()

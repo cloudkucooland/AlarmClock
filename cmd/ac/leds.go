@@ -14,8 +14,8 @@ func (g *Game) ledAllOn() {
 	var res ledserver.Result
 
 	cmd := &ledserver.Command{
-		Command:    ledserver.AllOn,
-		Color: color.RGBA{R: 0x00, G:0x00, B:0x00, A: 0xff,},
+		Command: ledserver.AllOn,
+		Color:   color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff},
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {
@@ -31,7 +31,7 @@ func (g *Game) ledRainbow() {
 	var res ledserver.Result
 
 	cmd := &ledserver.Command{
-		Command:    ledserver.Rainbow,
+		Command: ledserver.Rainbow,
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {
@@ -47,8 +47,8 @@ func (g *Game) ledFrontOn() {
 	var res ledserver.Result
 
 	cmd := &ledserver.Command{
-		Command:    ledserver.FrontOn,
-		Color: color.RGBA{R: 0x00, G:0x00, B:0x00, A: 0xff,},
+		Command: ledserver.FrontOn,
+		Color:   color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0xff},
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {
@@ -64,8 +64,8 @@ func (g *Game) ledAllOff() {
 	var res ledserver.Result
 
 	cmd := &ledserver.Command{
-		Command:    ledserver.AllOn,
-		Color: color.RGBA{R: 0x00, G:0x00, B:0x00, A: 0x00,},
+		Command: ledserver.AllOn,
+		Color:   color.RGBA{R: 0x00, G: 0x00, B: 0x00, A: 0x00},
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {

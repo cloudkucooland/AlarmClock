@@ -156,7 +156,6 @@ func chirp(g *Game) {
 	} */
 }
 
-
 func tick(g *Game) {
 	raw, ok := sounds.Sounds["Tick"]
 	if !ok {

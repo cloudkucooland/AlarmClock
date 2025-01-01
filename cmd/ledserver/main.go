@@ -15,6 +15,10 @@ import (
 
 func main() {
 	led := new(ledserver.LED)
+	if err := led.Init(); err != nil {
+		panic(err)
+	}
+
 	if err := rpc.Register(led); err != nil {
 		panic(err)
 	}
@@ -29,6 +33,7 @@ func main() {
 
 	// #nosec G114 -- this is a socket, no need for timeouts
 	go http.Serve(l, nil)
+	fmt.Println("ledserver running")
 
 	// ctx, cancel := context.WithCancel(context.Background())
 

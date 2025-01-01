@@ -1,6 +1,8 @@
 package main
 
 import (
+	"image/color"
+
 	"github.com/cloudkucooland/AlarmClock/ledserver"
 )
 
@@ -13,7 +15,7 @@ func (g *Game) ledAllOn() {
 
 	cmd := &ledserver.Command{
 		Command:    ledserver.AllOn,
-		Brightness: 255,
+		Color: color.RGBA{R: 0x00, G:0x00, B:0x00, A: 0xff,},
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {
@@ -30,7 +32,6 @@ func (g *Game) ledRainbow() {
 
 	cmd := &ledserver.Command{
 		Command:    ledserver.Rainbow,
-		Brightness: 255,
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {
@@ -47,7 +48,7 @@ func (g *Game) ledFrontOn() {
 
 	cmd := &ledserver.Command{
 		Command:    ledserver.FrontOn,
-		Brightness: 255,
+		Color: color.RGBA{R: 0x00, G:0x00, B:0x00, A: 0xff,},
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {
@@ -64,7 +65,7 @@ func (g *Game) ledAllOff() {
 
 	cmd := &ledserver.Command{
 		Command:    ledserver.AllOn,
-		Brightness: 0,
+		Color: color.RGBA{R: 0x00, G:0x00, B:0x00, A: 0x00,},
 	}
 
 	if err := g.ledclient.Call("LED.Set", cmd, &res); err != nil {

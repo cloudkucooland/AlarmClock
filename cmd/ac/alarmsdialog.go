@@ -47,6 +47,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 
 			a.dialogButton.hourUp = getSprite("Up", "Hour Up", func(g *Game) {
 				a.AlarmTime.Hour = (a.AlarmTime.Hour + 1) % 24
+				tick(g)
 			})
 			a.dialogButton.hourUp.scale = 1
 			updownbounds := a.dialogButton.hourUp.image.Bounds()
@@ -59,6 +60,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 				} else {
 					a.AlarmTime.Hour = a.AlarmTime.Hour - 1
 				}
+				tick(g)
 			})
 			a.dialogButton.hourDn.scale = 1
 			a.dialogButton.hourDn.setLocation(inx, y+(int(rowheight/2)))
@@ -66,6 +68,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 			a.dialogButton.minUp = getSprite("Up", "Minute Up", func(g *Game) {
 				a.AlarmTime.Minute = (a.AlarmTime.Minute + 15) % 60
 				// tick hour up if goes to 00?
+				tick(g)
 			})
 			a.dialogButton.minUp.scale = 1
 			inx = inx + updownbounds.Max.X + xpadding + int(textwidth) + xpadding
@@ -78,6 +81,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 				} else {
 					a.AlarmTime.Minute = (a.AlarmTime.Minute - 15) % 60
 				}
+				tick(g)
 			})
 			a.dialogButton.minDn.scale = 1
 			a.dialogButton.minDn.setLocation(inx, y+(int(rowheight/2)))

@@ -18,16 +18,18 @@ func (g *Game) playhls(url string) {
 	args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
 	cmd := exec.CommandContext(ctx, "ffplay", args...)
 
+	g.debug("starting ffplay")
 	if err := cmd.Start(); err != nil {
 		g.debug(err.Error())
 	}
 
 	g.externalAudioCancel = cancel
 	cmd.Wait()
+	g.debug("ffplay exited")
 	g.externalAudioCancel = nil
 }
 
-func (g *Game) stophls() {
+func (g *Game) stopPlayerHLS() {
 	if g.externalAudioCancel == nil {
 		return
 	}
@@ -36,7 +38,7 @@ func (g *Game) stophls() {
 	g.externalAudioCancel = nil
 }
 
-func (g *Game) hlsSetupRadioControls(screen *ebiten.Image) {
+func (g *Game) hlsDrawRadioControls(screen *ebiten.Image) {
 	if g.externalAudioCancel == nil {
 		return
 	}
@@ -87,8 +89,6 @@ func (g *Game) hlsSetupRadioControls(screen *ebiten.Image) {
 		}
 	}
 }
-
-func (g *Game) hlsDrawRadioControls(screen *ebiten.Image) {}
 
 func hlsVolumeUp(g *Game) {}
 

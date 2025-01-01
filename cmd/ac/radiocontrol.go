@@ -36,6 +36,13 @@ func (g *Game) setupRadioControls() {
 }
 
 func (g *Game) drawRadioControls(screen *ebiten.Image) {
+	// if an external audio program is running (ffplay) draw controls for that
+	if g.externalAudioCancel != nil {
+		g.hlsDrawRadioControls(screen)
+		return
+	}
+
+	// if no internal player is running, don't draw anything
 	if g.audioPlayer == nil {
 		return
 	}
@@ -100,6 +107,12 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 }
 
 func volumeUp(g *Game) {
+	if g.externalAudioCancel != nil {
+		hlsVolumeUp(g)
+		return
+	}
+
+	// internal audio player
 	vol := g.audioPlayer.Volume()
 	vol = math.Min(vol+0.10, 1.0)
 	g.audioPlayer.SetVolume(vol)
@@ -109,6 +122,12 @@ func volumeUp(g *Game) {
 }
 
 func volumeDn(g *Game) {
+	if g.externalAudioCancel != nil {
+		hlsVolumeDn(g)
+		return
+	}
+
+	// internal audio player
 	vol := g.audioPlayer.Volume()
 	vol = math.Max(vol-0.10, 0.05)
 	g.audioPlayer.SetVolume(vol)

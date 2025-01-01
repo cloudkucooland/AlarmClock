@@ -1,16 +1,20 @@
 package main
 
+/*
+#cgo CFLAGS: -I/usr/include/fdk-aac
+#cgo LDFLAGS: -L/usr/lib/aarch64-linux-gnu/ -lfdk-aac
+*/
+
 import (
-	"io"
 	"fmt"
+	"io"
 
 	"github.com/bluenviron/gohlslib/v2"
 	"github.com/bluenviron/gohlslib/v2/pkg/codecs"
 	// "github.com/bluenviron/mediacommon/pkg/formats/mpegts"
 
 	"github.com/winlinvip/go-fdkaac/fdkaac"
-
-	"github.com/hajimehoshi/ebiten/v2/audio/wav"	
+	// "github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
 func (g *Game) playhls(url string) {
@@ -28,7 +32,7 @@ func (g *Game) playhls(url string) {
 		return
 	}
 	defer decoder.Close()
-	
+
 	c.OnTracks = func(tracks []*gohlslib.Track) error {
 		track := findMPEG4AudioTrack(tracks)
 		if track == nil {
@@ -39,9 +43,9 @@ func (g *Game) playhls(url string) {
 
 		c.OnDataMPEG4Audio(track, func(pts int64, aus [][]byte) {
 			fmt.Printf("%+v\n", aus[0])
-			var pcm []byte
 			for i := range aus {
-				if pcm, err = decoder.Decode(aus[i]); err != nil  {
+				pcm, err := decoder.Decode(aus[i])
+				if err != nil {
 					g.debug(err.Error())
 					continue
 				}
@@ -58,9 +62,8 @@ func (g *Game) playhls(url string) {
 	}
 	defer c.Close()
 
-
-	// var err error
-	g.audioPlayer, err = g.audioContext.NewPlayerFrom(r)
+	var err error
+	g.audioPlayer, err = g.audioContext.NewPlayer(r)
 	if err != nil {
 		g.debug(err.Error())
 		return

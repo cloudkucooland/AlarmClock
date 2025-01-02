@@ -37,8 +37,8 @@ func (g *Game) setupRadioControls() {
 
 func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	// if an external audio program is running (ffplay) draw controls for that
-	if g.externalAudioCancel != nil {
-		g.hlsDrawRadioControls(screen)
+	if g.externalAudio != nil {
+		g.drawExternalControls(screen)
 		return
 	}
 
@@ -107,8 +107,9 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 }
 
 func volumeUp(g *Game) {
-	if g.externalAudioCancel != nil {
-		hlsVolumeUp(g)
+	if g.externalAudio != nil {
+		volumeUpExternal(g)
+		tick(g)
 		return
 	}
 
@@ -122,8 +123,9 @@ func volumeUp(g *Game) {
 }
 
 func volumeDn(g *Game) {
-	if g.externalAudioCancel != nil {
-		hlsVolumeDn(g)
+	if g.externalAudio != nil {
+		volumeDnExternal(g)
+		tick(g)
 		return
 	}
 

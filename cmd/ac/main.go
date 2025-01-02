@@ -40,25 +40,25 @@ const (
 )
 
 type Game struct {
-	state               gameState
-	debugString         string
-	lastAct             time.Time
-	clock               *clock
-	background          *ebiten.Image
-	backgrounds         map[uint8]*background
-	weather             *owm.CurrentWeatherData
-	weathercache        *ebiten.Image
-	audioContext        *audio.Context
-	audioPlayer         *audio.Player
-	externalAudioCancel context.CancelFunc
-	radiobuttons        map[string]*radiobutton
-	selectedStation     *radiobutton
-	inSleepCountdown    bool
-	config              *Config
-	controls            []*control
-	radiocontrols       map[string]*radiocontrol
-	alarmbuttons        map[string]*alarmbutton
-	ledclient           *rpc.Client
+	state            gameState
+	debugString      string
+	lastAct          time.Time
+	clock            *clock
+	background       *ebiten.Image
+	backgrounds      map[uint8]*background
+	weather          *owm.CurrentWeatherData
+	weathercache     *ebiten.Image
+	audioContext     *audio.Context
+	audioPlayer      *audio.Player
+	externalAudio    context.CancelFunc
+	radiobuttons     map[string]*radiobutton
+	selectedStation  *radiobutton
+	inSleepCountdown bool
+	config           *Config
+	controls         []*control
+	radiocontrols    map[string]*radiocontrol
+	alarmbuttons     map[string]*alarmbutton
+	ledclient        *rpc.Client
 }
 
 func (g *Game) startScreenSaver() {

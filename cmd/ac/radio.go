@@ -139,7 +139,7 @@ func (r *radiobutton) startPlayer(g *Game) {
 
 	// if a playlist is requested, do that in a new goprocess
 	if strings.Contains(r.url, "m3u") {
-		go g.playhls(r.url)
+		go g.playExternal(r.url)
 		return
 	}
 
@@ -172,6 +172,11 @@ func (r *radiobutton) stopPlayer(g *Game) {
 }
 
 func stopPlayer(g *Game) {
+	if g.externalAudio != nil {
+		g.stopExternalPlayer()
+		return
+	}
+
 	if g.audioPlayer == nil {
 		return
 	}

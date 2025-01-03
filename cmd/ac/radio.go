@@ -66,17 +66,17 @@ func (g *Game) setupRadioButtons() {
 		"BBC 6 Music": {
 			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
-			works: true,
+			works:  true,
 		},
 		"BBC 4": {
 			sprite: getSprite("Pinwheel", "BBC 4", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
-			works: true,
+			works:  true,
 		},
 		"BBC World Service": {
 			sprite: getSprite("Spring", "BBC World Service", chirp),
-			url: "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
-			works: true,
+			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
+			works:  true,
 		},
 	}
 }

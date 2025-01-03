@@ -30,7 +30,6 @@ func (g *Game) playExternal(url string) {
 
 	g.externalAudio = cancel
 
-	g.debug("starting ffplay")
 	if err := cmd.Start(); err != nil {
 		g.debug(err.Error())
 		g.externalAudio = nil
@@ -46,13 +45,11 @@ func (g *Game) playExternal(url string) {
 		g.debug(err.Error())
 		g.externalAudio = nil
 	}
-	g.debug("ffplay completed")
 
 	g.externalAudio = nil
 }
 
 func (g *Game) stopExternalPlayer() {
-	g.debug("stopping external audio")
 	if g.externalAudio == nil {
 		return
 	}

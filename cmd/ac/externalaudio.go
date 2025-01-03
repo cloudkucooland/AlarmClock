@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	//"os"
 	"os/exec"
 
@@ -10,13 +11,22 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-// ffplay -ac 1 -loglevel error -vn URL
-
 func (g *Game) playExternal(url string) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
 	cmd := exec.CommandContext(ctx, "ffplay", args...)
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
 
 	g.externalAudio = cancel
 
@@ -25,6 +35,12 @@ func (g *Game) playExternal(url string) {
 		g.debug(err.Error())
 		g.externalAudio = nil
 	}
+
+	slurp, _ := io.ReadAll(stderr)
+	g.debug(string(slurp))
+
+	slurp, _ = io.ReadAll(stdout)
+	g.debug(string(slurp))
 
 	if err := cmd.Wait(); err != nil {
 		g.debug(err.Error())
@@ -86,7 +102,6 @@ func (g *Game) drawExternalControls(screen *ebiten.Image) {
 
 	/* not yet
 	x = x + 100
-
 	if !g.inSleepCountdown {
 		stop := g.radiocontrols["SleepCountdown"]
 		stop.setLocation(x, y)

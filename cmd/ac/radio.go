@@ -23,7 +23,7 @@ type radiobutton struct {
 
 func (g *Game) setupRadioButtons() {
 	g.radiobuttons = map[string]*radiobutton{
-		" WRR": {
+		"WRR": {
 			sprite: getSprite("Tea Time", "WRR", chirp),
 			url:    "https://kera.streamguys1.com/wrrlive",
 			works:  true,
@@ -33,21 +33,10 @@ func (g *Game) setupRadioButtons() {
 			url:    "https://kera.streamguys1.com/keralive",
 			works:  true,
 		},
-		"90s90s Dance": {
-			sprite: getSprite("Confused", "90s90s Dance", chirp),
-			url:    "https://streams.90s90s.de/danceradio/mp3-192/",
-			works:  true,
-		},
 		"90s90s Techno": {
 			sprite: getSprite("Mad", "90s90s Techno", chirp),
 			url:    "http://streams.90s90s.de/techno/mp3-192/",
 			works:  true,
-		},
-		"Sunshine Live": {
-			sprite: getSprite("Happy", "Sunshine Live", chirp),
-			// url:    "http://stream.sunshine-live.de/techno/mp3-192/play.m3u",
-			url:   "http://stream.sunshine-live.de/techno/mp3-192/",
-			works: true,
 		},
 		"Dub Techno": {
 			sprite: getSprite("Bathtime", "Dub Techno", chirp),
@@ -74,28 +63,20 @@ func (g *Game) setupRadioButtons() {
 			url:    "http://radio.stereoscenic.com/mod-s",
 			works:  true,
 		},
-		"Radio Frisky": {
-			sprite: getSprite("Swan Mommy", "Radio Frisky", chirp),
-			url:    "https://stream.friskyradio.com",
-		},
 		"BBC 6 Music": {
 			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
-			// url: "http://lstn.lv/bbc.m3u8?station=bbc_6music&bitrate=320000",
 			works: true,
 		},
 		"BBC 4": {
 			sprite: getSprite("Pinwheel", "BBC 4", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
-		},
-		"Radio 1 Dance": {
-			sprite: getSprite("Spring", "Radio 1 Dance", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_one_dance/bbc_radio_one_dance.isml/bbc_radio_one_dance-audio%3d96000.norewind.m3u8",
+			works: true,
 		},
 		"BBC World Service": {
 			sprite: getSprite("Spring", "BBC World Service", chirp),
-			// url:    "http://stream.live.vc.bbcmedia.co.uk/bbc_world_service",
 			url: "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
+			works: true,
 		},
 	}
 }

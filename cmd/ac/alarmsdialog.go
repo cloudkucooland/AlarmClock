@@ -107,7 +107,12 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 			op := &text.DrawOptions{}
 			op.GeoM.Translate(float64(inx), float64(y)+float64(rowheight/2.0)-float64(textheight/2))
 			op.ColorScale.ScaleWithColor(pink)
-			text.Draw(screen, "Enabled", weatherfont, op)
+			label := "Enabled"
+			if a.station != nil {
+				label = a.station.spritelabel.label
+			}
+
+			text.Draw(screen, label, weatherfont, op)
 		}
 
 		y = y + int(rowheight) // + 1

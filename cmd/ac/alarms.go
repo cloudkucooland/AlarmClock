@@ -24,6 +24,7 @@ type Alarm struct {
 	triggered    bool
 	snooze       bool
 	snoozeCount  int
+	station      *radiobutton
 	dialogButton alarmDialogButton
 }
 
@@ -61,15 +62,16 @@ func (g *Game) startAlarm(id alarmid) {
 	if g.state == inScreenSaver {
 		g.leaveScreenSaver()
 	}
-	g.state = inAlarm
 
 	a, ok := g.config.Alarms[id]
 	if !ok {
 		g.debug("cannot start unknown alarm?")
 		return
 	}
+
+	g.state = inAlarm
 	a.triggered = true
-	g.startAlarmPlayer()
+	g.startAlarmPlayer(a)
 	g.audioPlayer.SetVolume(0.25)
 }
 
@@ -133,7 +135,7 @@ func (g *Game) wakeFromSnooze(id alarmid) {
 		return
 	}
 	a.triggered = true
-	g.startAlarmPlayer()
+	g.startAlarmPlayer(a)
 	// vol := float64((60 + (aa.snoozeCount * 10)) / 100)
 	g.audioPlayer.SetVolume(0.50)
 }
@@ -226,12 +228,19 @@ func (g *Game) drawSnooze(screen *ebiten.Image) {
 	screen.DrawImage(g.clock.cache, &ebiten.DrawImageOptions{})
 }
 
-func (g *Game) startAlarmPlayer() {
-	r := g.selectedStation
+func (g *Game) startAlarmPlayer(a *Alarm) {
+	// use the station playing when the alarm was set
+	r := a.station
+	// if the alarm doesn't have a station set, use the last played station
 	if r == nil {
-		r = g.defaultStation()
-		g.selectedStation = r
+		g.debug("alarm enabled w/o station set?")
+		r = g.selectedStation
 	}
+	if r == nil {
+		g.debug("alarm enabled, no station set, using default")
+		r = g.defaultStation()
+	}
+	g.selectedStation = r
 	r.startPlayer(g)
 
 	// backup alarm if internet is down

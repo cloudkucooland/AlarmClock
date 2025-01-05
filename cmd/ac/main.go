@@ -51,7 +51,7 @@ type Game struct {
 	audioContext     *audio.Context
 	audioPlayer      *audio.Player
 	externalAudio    context.CancelFunc
-	radiobuttons     map[string]*radiobutton
+	radiobuttons     map[stationName]*radiobutton
 	selectedStation  *radiobutton
 	inSleepCountdown bool
 	config           *Config

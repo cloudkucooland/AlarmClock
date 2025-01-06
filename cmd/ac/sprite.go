@@ -101,9 +101,7 @@ func (s *sprite) drawlabel(screen *ebiten.Image) {
 		s.genlabelimage(spritelabelgrey, controlfont)
 	}
 
-	if s.labelloc.X == 0 {
-		s.setlabelloc()
-	}
+	s.setlabelloc()
 
 	// center label below sprite
 	op := &ebiten.DrawImageOptions{}
@@ -112,11 +110,7 @@ func (s *sprite) drawlabel(screen *ebiten.Image) {
 }
 
 func (s *sprite) setlabelloc() {
-	if s.label == "" {
-		return
-	}
-
-	if s.image == nil {
+	if s.image == nil || s.labelimg == nil {
 		return
 	}
 

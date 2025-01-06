@@ -76,7 +76,7 @@ func (g *Game) drawExternalControls(screen *ebiten.Image) {
 	vector.StrokeRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
 	vector.StrokeRect(screen, float32(x+xpadding), float32(y+10), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
 
-	// move from box corner to initial location fo icons
+	// move from box corner to initial location of icons
 	y = y + ypadding
 	x = x + 2*xpadding
 

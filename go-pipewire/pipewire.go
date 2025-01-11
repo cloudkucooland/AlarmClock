@@ -125,7 +125,7 @@ func main() {
 	// missing from older verrsions?
 	// wp_settings := wp_settings_new(wp_core, "go-pipewire")
 	// nasty kludge for testing
-	wp_settings := g_object_new(83, "core", wp_core, "metadata-name", "go-pipewire", nil) // guessing on the 82...
+	wp_settings := g_object_new(80, "core", wp_core, "metadata-name", "go-pipewire", nil) // guessing on the 82...
 	fmt.Printf("wp_settings: %+v\n", wp_settings)
 
 	wp_core_load_component(wp_core, "libwireplumber-module-default-nodes-api", "module", nil, nil, nil, nil, nil)

@@ -64,6 +64,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	y = y + ypadding
 	x = x + 2*xpadding
 
+	// do not use g.isAudioPlaying since external audio is covered above
 	if !g.audioPlayer.IsPlaying() {
 		play := g.radiocontrols["Play"]
 		play.setLocation(x, y)

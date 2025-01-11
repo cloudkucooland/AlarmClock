@@ -163,6 +163,8 @@ func stopPlayer(g *Game) {
 	if g.audioPlayer == nil {
 		return
 	}
+
+	// do not use g.isAudioPlaying since external audio is covered above
 	if g.audioPlayer.IsPlaying() {
 		g.audioPlayer.Pause()
 	}
@@ -192,6 +194,7 @@ func sleepStopPlayer(g *Game) {
 }
 
 func pausePlayer(g *Game) {
+	// no external audio pause support
 	if g.audioPlayer == nil {
 		return
 	}
@@ -201,6 +204,7 @@ func pausePlayer(g *Game) {
 }
 
 func resumePlayer(g *Game) {
+	// no external audio pause support
 	if g.audioPlayer == nil {
 		return
 	}
@@ -220,4 +224,12 @@ func (g *Game) defaultStation() *radiobutton {
 		}
 	}
 	return s
+}
+
+func (g *Game) isAudioPlaying() bool {
+	if g.externalAudio != nil {
+		return true
+	}
+
+	return g.audioPlayer.IsPlaying()
 }

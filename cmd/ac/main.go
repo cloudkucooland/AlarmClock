@@ -80,7 +80,7 @@ func (g *Game) leaveScreenSaver() {
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY
 	g.setBackground()
-	g.ledFrontOn()
+	g.ledAllOn()
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

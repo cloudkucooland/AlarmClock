@@ -43,10 +43,9 @@ func (g *Game) playExternal(url string) {
 
 	if err := cmd.Wait(); err != nil {
 		g.debug(err.Error())
-		g.externalAudio = nil
+		// g.externalAudio = nil
 	}
-
-	g.externalAudio = nil
+	// g.externalAudio = nil
 }
 
 func (g *Game) stopExternalPlayer() {

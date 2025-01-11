@@ -9,12 +9,13 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	// "image/color"
 
 	"github.com/cloudkucooland/AlarmClock/ledserver"
 )
 
 func main() {
-	led := new(ledserver.LED)
+	led := &ledserver.LED{}
 	if err := led.Init(); err != nil {
 		panic(err)
 	}
@@ -30,6 +31,11 @@ func main() {
 		fmt.Println("listen error:", err)
 		panic(err)
 	}
+	defer func () {
+		if err := l.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
 	// #nosec G114 -- this is a socket, no need for timeouts
 	go http.Serve(l, nil)
@@ -40,10 +46,6 @@ func main() {
 	sigch := make(chan os.Signal, 3)
 	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
 	sig := <-sigch
-
-	if err := l.Close(); err != nil {
-		panic(err)
-	}
 
 	fmt.Printf("shutdown requested by signal: %s", sig)
 	// cancel()

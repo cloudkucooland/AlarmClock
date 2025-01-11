@@ -1,38 +1,30 @@
 package ledserver
 
 import (
-	"errors"
 	"fmt"
 	"image/color"
+	"time"
 
-	// "periph.io/x/conn/v3/display"
-	"periph.io/x/conn/v3/gpio"
-	"periph.io/x/conn/v3/gpio/gpioreg"
-	"periph.io/x/conn/v3/gpio/gpiostream"
 	"periph.io/x/conn/v3/physic"
-	// "periph.io/x/conn/v3/spi"
-	// "periph.io/x/conn/v3/spi/spireg"
+	"periph.io/x/conn/v3/spi"
+	"periph.io/x/conn/v3/spi/spireg"
 	"periph.io/x/devices/v3/nrzled"
 	"periph.io/x/host/v3"
 )
 
 const Pipefile = "/tmp/ledserver.sock"
-const pin = "GPIO12"
-const channels = 4
-const numpixels = 5
+const pin = "SPI0.0"
+const channels = 3
+const numpixels = 16
+var bufsize = channels * numpixels
+var buf []byte
+var leds *nrzled.Dev
 
-type LED struct {
-	stream    *nrzled.Dev
-	numpixels int
-	buf       []byte
-}
+type LED struct {}
 
 type CommandCode int
-
 const (
 	AllOn CommandCode = iota
-	BackOn
-	FrontOn
 	Rainbow
 )
 
@@ -44,19 +36,14 @@ type Command struct {
 type Result bool
 
 func (l *LED) Set(cmd *Command, res *Result) error {
-	fmt.Printf("%+v", cmd)
-
 	switch cmd.Command {
 	case AllOn:
-		l.White(255)
-	case BackOn:
-		fmt.Println("back on")
-		// just the back
-	case FrontOn:
-		fmt.Println("front on")
-		// just the front
+		// fmt.Printf("All on color: %+v\n", cmd.Color)
+		staticColor(cmd.Color)
+		*res = true
 	case Rainbow:
 		fmt.Println("rainbow")
+		*res = true
 		// do a rainbow
 	}
 	return nil
@@ -67,63 +54,70 @@ func (l *LED) Init() error {
 		return err
 	}
 
-	p := gpioreg.ByName(pin)
-	if p == nil {
-		return errors.New("specify a valid pin")
-	}
-	if rp, ok := p.(gpio.RealPin); ok {
-		p = rp.Real()
-	}
-	s, ok := p.(gpiostream.PinOut)
-	if !ok {
-		return fmt.Errorf("pin %s doesn't support arbitrary bit stream", p)
-	}
+	fmt.Printf("Using: %s\n", pin)
 
-	opts := nrzled.DefaultOpts
-	opts.NumPixels = numpixels
-	opts.Freq = 2500 * physic.KiloHertz
-	opts.Channels = channels
-
-	l.numpixels = opts.NumPixels
-	l.buf = make([]byte, l.numpixels*(channels))
-
-	var err error
-	if l.stream, err = nrzled.NewStream(s, &opts); err != nil {
+	s, err := spireg.Open(pin)
+	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
-	l.StaticColor(color.RGBA{
-		R: 0x20,
-		G: 0x00,
-		B: 0x22,
-		A: 0x00,
+	if p, ok := s.(spi.Pins); ok {
+		fmt.Printf("Using pins CLK: %s  MOSI: %s  MISO: %s\n", p.CLK(), p.MOSI(), p.MISO())
+	} else {
+		err := fmt.Errorf("unable to open SPI")
+		fmt.Println(err.Error())
+		return err
+	}
+
+	leds, err = nrzled.NewSPI(s, &nrzled.Opts{
+		NumPixels: numpixels,
+		Freq:      2500 * physic.KiloHertz,
+		Channels:  channels,
 	})
+	if err != nil {
+		fmt.Println(err.Error())
+		return err
+	}
+	buf = make([]byte, bufsize)
+
+	go startup()
 	return nil
 }
 
-func (l *LED) StaticColor(c color.RGBA) error {
-	for i := 0; i < len(l.buf); i += channels {
-		l.buf[i] = c.R
-		l.buf[i+1] = c.G
-		l.buf[i+2] = c.B
-		l.buf[i+3] = c.A
+func startup() {
+	for i := 0; i < bufsize; i += channels {
+		for j := 0; j < 3; j++ {
+			buf[i + j] = 0xff
+			leds.Write(buf)
+			time.Sleep(100 * time.Millisecond)
+			buf[i + j] = 0x00
+			leds.Write(buf)
+		}
 	}
 
-	if _, err := l.stream.Write(l.buf); err != nil {
-		return err
-	}
-	return nil
+	white(0x88)
+	time.Sleep(100 * time.Millisecond)
+	white(0xff)
+	time.Sleep(100 * time.Millisecond)
+	white(0x22)
+	time.Sleep(100 * time.Millisecond)
+	white(0x00)
+	leds.Halt()
 }
 
-func (l *LED) White(brightness byte) error {
-	for i := 0; i < len(l.buf); i += channels {
-		l.buf[i] = 0x00   // r
-		l.buf[i+1] = 0x00 // g
-		l.buf[i+2] = 0x00 // b
-		l.buf[i+3] = brightness
+func staticColor(c color.RGBA) {
+	for i := 0; i < bufsize; i += channels {
+		buf[i] = c.R
+		buf[i+1] = c.G
+		buf[i+2] = c.B
 	}
-	if _, err := l.stream.Write(l.buf); err != nil {
-		return err
+	leds.Write(buf)
+}
+
+func white(brightness byte) {
+	for i := 0; i < bufsize; i++ {
+		buf[i] = brightness
 	}
-	return nil
+	leds.Write(buf)
 }

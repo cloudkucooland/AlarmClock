@@ -16,16 +16,21 @@ const Pipefile = "/tmp/ledserver.sock"
 const pin = "SPI0.0"
 const channels = 3
 const numpixels = 16
-var bufsize = channels * numpixels
-var buf []byte
-var leds *nrzled.Dev
 
-type LED struct {}
+type LED struct {
+	buf     []byte
+	leds    *nrzled.Dev
+	bufsize int
+	reg     spi.PortCloser
+}
 
 type CommandCode int
+
 const (
 	AllOn CommandCode = iota
+	Startup
 	Rainbow
+	Off
 )
 
 type Command struct {
@@ -38,13 +43,20 @@ type Result bool
 func (l *LED) Set(cmd *Command, res *Result) error {
 	switch cmd.Command {
 	case AllOn:
-		// fmt.Printf("All on color: %+v\n", cmd.Color)
-		staticColor(cmd.Color)
+		l.stopRunning()
+		l.staticColor(cmd.Color)
+		*res = true
+	case Startup:
+		l.stopRunning()
+		l.startup_test()
 		*res = true
 	case Rainbow:
-		fmt.Println("rainbow")
+		l.stopRunning()
+		l.rainbow()
 		*res = true
-		// do a rainbow
+	case Off:
+		l.stopRunning()
+		l.off()
 	}
 	return nil
 }
@@ -56,21 +68,22 @@ func (l *LED) Init() error {
 
 	fmt.Printf("Using: %s\n", pin)
 
-	s, err := spireg.Open(pin)
+	var err error
+	l.reg, err = spireg.Open(pin)
 	if err != nil {
 		fmt.Println(err.Error())
 		return err
 	}
 
-	if p, ok := s.(spi.Pins); ok {
-		fmt.Printf("Using pins CLK: %s  MOSI: %s  MISO: %s\n", p.CLK(), p.MOSI(), p.MISO())
-	} else {
+	pins, ok := l.reg.(spi.Pins)
+	if !ok {
 		err := fmt.Errorf("unable to open SPI")
 		fmt.Println(err.Error())
 		return err
 	}
+	fmt.Printf("Using pins CLK: %s  MOSI: %s  MISO: %s\n", pins.CLK(), pins.MOSI(), pins.MISO())
 
-	leds, err = nrzled.NewSPI(s, &nrzled.Opts{
+	l.leds, err = nrzled.NewSPI(l.reg, &nrzled.Opts{
 		NumPixels: numpixels,
 		Freq:      2500 * physic.KiloHertz,
 		Channels:  channels,
@@ -79,45 +92,64 @@ func (l *LED) Init() error {
 		fmt.Println(err.Error())
 		return err
 	}
-	buf = make([]byte, bufsize)
+	l.bufsize = numpixels * channels
+	l.buf = make([]byte, l.bufsize)
 
-	go startup()
+	// go l.startup_test()
 	return nil
 }
 
-func startup() {
-	for i := 0; i < bufsize; i += channels {
+func (l *LED) Shutdown() {
+	l.leds.Halt()
+	l.reg.Close()
+}
+
+func (l *LED) startup_test() {
+	l.white(0x00)
+
+	// test each individual pixel, all three channels
+	for i := 0; i < l.bufsize; i += channels {
 		for j := 0; j < 3; j++ {
-			buf[i + j] = 0xff
-			leds.Write(buf)
+			l.buf[i+j] = 0x0f
+			l.leds.Write(l.buf)
 			time.Sleep(100 * time.Millisecond)
-			buf[i + j] = 0x00
-			leds.Write(buf)
+			l.buf[i+j] = 0x00
+			l.leds.Write(l.buf)
 		}
 	}
 
-	white(0x88)
-	time.Sleep(100 * time.Millisecond)
-	white(0xff)
-	time.Sleep(100 * time.Millisecond)
-	white(0x22)
-	time.Sleep(100 * time.Millisecond)
-	white(0x00)
-	leds.Halt()
+	// step down from full to dim
+	steps := []byte{0xff, 0xdd, 0xbb, 0x99, 0x77, 0x55, 0x33, 0x11, 0x00}
+	for _, v := range steps {
+		l.white(v)
+		time.Sleep(100 * time.Millisecond)
+	}
+	l.leds.Halt()
 }
 
-func staticColor(c color.RGBA) {
-	for i := 0; i < bufsize; i += channels {
-		buf[i] = c.R
-		buf[i+1] = c.G
-		buf[i+2] = c.B
+func (l *LED) staticColor(c color.RGBA) {
+	l.white(0x00)
+	for i := 0; i < l.bufsize; i += channels {
+		l.buf[i] = c.R
+		l.buf[i+1] = c.G
+		l.buf[i+2] = c.B
 	}
-	leds.Write(buf)
+	l.leds.Write(l.buf)
 }
 
-func white(brightness byte) {
-	for i := 0; i < bufsize; i++ {
-		buf[i] = brightness
+func (l *LED) white(brightness byte) {
+	// Google's AI hallucinated a slices.Fill function to do this... but alas it does not exist
+	for i := 0; i < l.bufsize; i++ {
+		l.buf[i] = brightness
 	}
-	leds.Write(buf)
+	l.leds.Write(l.buf)
+}
+
+func (l *LED) off() {
+	l.white(0x00)
+	l.leds.Halt()
+}
+
+func (l *LED) stopRunning() {
+	// stop any running sequence
 }

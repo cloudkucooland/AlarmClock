@@ -13,26 +13,28 @@ import (
 
 func (g *Game) playExternal(url string) {
 	ctx, cancel := context.WithCancel(context.Background())
+	g.externalAudio = cancel
 
 	args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
 	cmd := exec.CommandContext(ctx, "ffplay", args...)
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		g.debug(err.Error())
+		g.externalAudio = nil
 		return
 	}
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		g.debug(err.Error())
+		g.externalAudio = nil
 		return
 	}
-
-	g.externalAudio = cancel
 
 	if err := cmd.Start(); err != nil {
 		g.debug(err.Error())
 		g.externalAudio = nil
+		return
 	}
 
 	slurp, _ := io.ReadAll(stderr)
@@ -43,9 +45,8 @@ func (g *Game) playExternal(url string) {
 
 	if err := cmd.Wait(); err != nil {
 		g.debug(err.Error())
-		// g.externalAudio = nil
 	}
-	// g.externalAudio = nil
+	g.externalAudio = nil
 }
 
 func (g *Game) stopExternalPlayer() {

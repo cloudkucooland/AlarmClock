@@ -8,7 +8,7 @@ ExecStart=/home/scot/go/bin/ledserver
 KillMode=process
 Restart=on-failure
 RestartPreventExitStatus=255
-Type=notify
+Type=simple
 
 [Install]
 WantedBy=multi-user.target

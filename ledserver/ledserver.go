@@ -95,7 +95,7 @@ func (l *LED) Init() error {
 	l.bufsize = numpixels * channels
 	l.buf = make([]byte, l.bufsize)
 
-	// go l.startup_test()
+	l.startup_test()
 	return nil
 }
 

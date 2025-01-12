@@ -30,6 +30,11 @@ func main() {
 		fmt.Println("listen error:", err)
 		panic(err)
 	}
+
+	if err := os.Chmod(ledserver.Pipefile, 0666); err != nil {
+		panic(err)
+	}
+
 	defer func() {
 		if err := listener.Close(); err != nil {
 			panic(err)
@@ -38,7 +43,6 @@ func main() {
 
 	// #nosec G114 -- this is a socket, no need for timeouts
 	go http.Serve(listener, nil)
-	fmt.Println("ledserver running")
 
 	// ctx, cancel := context.WithCancel(context.Background())
 

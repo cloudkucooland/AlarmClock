@@ -29,7 +29,6 @@ func main() {
 				Aliases: []string{"r"},
 				Usage:   "run the rainbow pattern",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					fmt.Println("rainbow! ", cmd.Args().First())
 					rpccmd := &ledserver.Command{
 						Command: ledserver.Rainbow,
 					}
@@ -45,7 +44,6 @@ func main() {
 				Aliases: []string{"o"},
 				Usage:   "turn all off",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					fmt.Println("turning all off ", cmd.Args().First())
 					rpccmd := &ledserver.Command{
 						Command: ledserver.Off,
 					}
@@ -61,7 +59,6 @@ func main() {
 				Aliases: []string{"s"},
 				Usage:   "run the startup test",
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					fmt.Println("startup! ", cmd.Args().First())
 					rpccmd := &ledserver.Command{
 						Command: ledserver.Startup,
 					}

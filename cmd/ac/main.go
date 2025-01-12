@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/rpc"
 	"os"
-	// "os/exec"
 	"strings"
 	"time"
 
@@ -14,12 +13,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 
 	owm "github.com/briandowns/openweathermap"
-
-	"github.com/cloudkucooland/AlarmClock/ledserver"
 )
-
-const screenSaverHz = 5
-const normalHz = 60
 
 var hz = normalHz
 
@@ -61,28 +55,6 @@ type Game struct {
 	ledclient        *rpc.Client
 }
 
-func (g *Game) startScreenSaver() {
-	hz = screenSaverHz
-	ebiten.SetTPS(hz)
-	g.debugString = ""
-	g.state = inScreenSaver
-	g.clock.clearCache()
-	g.setBackground()
-	g.ledAllOff()
-}
-
-func (g *Game) leaveScreenSaver() {
-	hz = normalHz
-	ebiten.SetTPS(hz)
-	g.debugString = ""
-	g.state = inNormal
-	g.clock.clearCache()
-	g.clock.X = defaultClockLocationX
-	g.clock.Y = defaultClockLocationY
-	g.setBackground()
-	g.ledAllOn()
-}
-
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return screensize.X, screensize.Y
 }
@@ -109,12 +81,8 @@ func main() {
 	g.setupAlarmButtons()
 	g.setupRadioControls()
 
-	if client, err := rpc.DialHTTP("unix", ledserver.Pipefile); err != nil {
-		log.Printf("led server not connected: %s", err.Error())
-	} else {
-		g.ledclient = client
-	}
-	g.ledAllOn()
+	// set up leds
+	g.ledRainbow()
 
 	// setup clock
 	now := time.Now()

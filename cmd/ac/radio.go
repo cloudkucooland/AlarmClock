@@ -19,8 +19,7 @@ const defaultRadioStation = stationName(" KERA")
 
 type radiobutton struct {
 	*sprite
-	url   string
-	works bool
+	url string
 }
 
 func (g *Game) setupRadioButtons() {
@@ -28,57 +27,46 @@ func (g *Game) setupRadioButtons() {
 		"WRR": {
 			sprite: getSprite("Tea Time", "WRR", chirp),
 			url:    "https://kera.streamguys1.com/wrrlive",
-			works:  true,
 		},
 		defaultRadioStation: {
 			sprite: getSprite("Swan Mommy", "KERA", chirp),
 			url:    "https://kera.streamguys1.com/keralive",
-			works:  true,
 		},
 		"90s90s Techno": {
 			sprite: getSprite("Mad", "90s90s Techno", chirp),
 			url:    "http://streams.90s90s.de/techno/mp3-192/",
-			works:  true,
 		},
 		"Dub Techno": {
 			sprite: getSprite("Bathtime", "Dub Techno", chirp),
 			url:    "http://94.130.113.214:8000/dubtechno",
-			works:  true,
 		},
 		"Chillout": {
 			sprite: getSprite("Baby", "Chillout", chirp),
 			url:    "http://144.76.106.52:7000/chillout.mp3",
-			works:  true,
 		},
 		"Sleeping Pill": {
 			sprite: getSprite("Artist", "Sleeping Pill", chirp),
 			url:    "http://radio.stereoscenic.com/asp-s",
-			works:  true,
 		},
 		"a.m. ambient": {
 			sprite: getSprite("Pinwheel", "a.m. ambient", chirp),
 			url:    "http://radio.stereoscenic.com/ama-s",
-			works:  true,
 		},
 		"modern ambient": {
 			sprite: getSprite("Indignent", "modern ambient", chirp),
 			url:    "http://radio.stereoscenic.com/mod-s",
-			works:  true,
 		},
 		"BBC 6 Music": {
 			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
-			works:  true,
 		},
 		"BBC 4": {
 			sprite: getSprite("Pinwheel", "BBC 4", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
-			works:  true,
 		},
 		"BBC World Service": {
 			sprite: getSprite("Spring", "BBC World Service", chirp),
 			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
-			works:  true,
 		},
 	}
 }
@@ -98,7 +86,7 @@ func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 
 	for _, k := range slices.Sorted(maps.Keys(g.radiobuttons)) {
 		rb, ok := g.radiobuttons[k]
-		if !ok || !rb.works {
+		if !ok {
 			continue
 		}
 		rb.setLocation(x, y)
@@ -177,6 +165,10 @@ func stopPlayer(g *Game) {
 
 func sleepStopPlayer(g *Game) {
 	g.inSleepCountdown = true
+
+	// kick the screensaver on in 5
+	g.lastAct = time.Now().Add(-(screensaverTimeout - (5 * time.Second)))
+
 	go func(g *Game) {
 		c := time.Tick(5 * time.Minute)
 

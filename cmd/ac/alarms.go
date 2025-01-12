@@ -254,8 +254,8 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			g.debug("no enabled alarms in backup check")
 			return
 		}
-		if !g.audioPlayer.IsPlaying() && a.triggered && !a.snooze {
-			g.stopAlarmPlayer()
+		if !g.isAudioPlaying() && a.triggered && !a.snooze {
+			// g.stopAlarmPlayer() // why stop if already not playing?
 
 			backup, ok := sounds.Sounds["BackupAlarm"]
 			if !ok {

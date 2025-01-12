@@ -14,17 +14,11 @@ type radiocontrol struct {
 
 func (g *Game) setupRadioControls() {
 	g.radiocontrols = map[string]*radiocontrol{
-		"Pause": {
-			sprite: getSprite("Tea Time", "Pause", pausePlayer),
-		},
-		"Play": {
-			sprite: getSprite("Swan Mommy", "Play", resumePlayer),
-		},
 		"Stop": {
 			sprite: getSprite("Spring", "Stop", stopPlayer),
 		},
 		"SleepCountdown": {
-			sprite: getSprite("Spring", "Sleeptimer", sleepStopPlayer),
+			sprite: getSprite("Tea Time", "Sleeptimer", sleepStopPlayer),
 		},
 		"VolUp": {
 			sprite: getSprite("Up", "", volumeUp),
@@ -47,7 +41,11 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		return
 	}
 
-	boxwidth := 440
+	boxwidth := 240
+	if !g.inSleepCountdown {
+		boxwidth += 100
+	}
+
 	boxheight := 150
 	borderwidth := 20
 	x := (screensize.X / 2) - (boxwidth / 2)
@@ -64,13 +62,6 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	y = y + ypadding
 	x = x + 2*xpadding
 
-	if !g.audioPlayer.IsPlaying() {
-		play := g.radiocontrols["Play"]
-		play.setLocation(x, y)
-		play.drawWithLabel(screen)
-		x = x + 100
-	}
-
 	if g.audioPlayer.IsPlaying() {
 		up := g.radiocontrols["VolUp"]
 		up.scale = 1.0
@@ -83,12 +74,6 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		dn.setLocation(x, y+bounds.Max.Y+ypadding)
 		dn.setLabel(fmt.Sprintf("%d", int(g.audioPlayer.Volume()*100.0)))
 		dn.drawWithLabel(screen)
-
-		x = x + 100
-
-		pause := g.radiocontrols["Pause"]
-		pause.setLocation(x, y)
-		pause.drawWithLabel(screen)
 
 		x = x + 100
 

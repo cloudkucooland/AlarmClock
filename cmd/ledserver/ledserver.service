@@ -1,0 +1,15 @@
+[Unit]
+Description=Alarm Clock LED server
+Documentation=github.com/cloudkucooland/AlarmClock
+After=network.target 
+
+[Service]
+ExecStart=/home/scot/go/bin/ledserver
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
+Alias=ledserver.service

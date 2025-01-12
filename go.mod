@@ -7,6 +7,7 @@ require (
 	github.com/ebitengine/purego v0.8.2
 	github.com/hajimehoshi/ebiten/v2 v2.8.6
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
+	github.com/urfave/cli/v3 v3.0.0-beta1
 	periph.io/x/conn/v3 v3.7.1
 	periph.io/x/devices/v3 v3.7.3
 	periph.io/x/host/v3 v3.8.3

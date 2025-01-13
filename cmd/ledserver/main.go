@@ -12,7 +12,6 @@ import (
 
 	"github.com/brutella/hap"
 	"github.com/brutella/hap/accessory"
-	"github.com/brutella/hap/log"
 	"github.com/cloudkucooland/AlarmClock/ledserver"
 )
 
@@ -51,7 +50,7 @@ func main() {
 	// #nosec G114 -- this is a socket, no need for timeouts
 	go http.Serve(listener, nil)
 
-	hk := NewLedServer(accessory.Info{
+	hk := ledserver.NewLedServer(accessory.Info{
 		Name:         "Birdhouse",
 		SerialNumber: "1997-07-16",
 		Manufacturer: "I❤️Jen",
@@ -62,7 +61,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	s, err := hap.NewServer(hap.NewFsStore(fulldir), hk.A)
 	if err != nil {
-		log.Info.Panic(err)
+		panic(err)
 	}
 	s.Pin = pin
 

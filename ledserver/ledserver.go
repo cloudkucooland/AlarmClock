@@ -24,6 +24,7 @@ type LED struct {
 	bufsize int
 	reg     spi.PortCloser
 	mu      sync.Mutex
+	hk      *LedServer
 }
 
 type CommandCode int
@@ -133,6 +134,7 @@ func (l *LED) staticColor(c color.RGBA) {
 	}
 	l.leds.Write(l.buf)
 	l.mu.Unlock()
+	l.updateHomeKit(c)
 }
 
 func (l *LED) white(brightness byte) {
@@ -143,11 +145,13 @@ func (l *LED) white(brightness byte) {
 	}
 	l.leds.Write(l.buf)
 	l.mu.Unlock()
+	l.updateHomeKit(color.RGBA{brightness, brightness, brightness, 0x00})
 }
 
 func (l *LED) Off() {
 	l.white(0x00)
 	l.leds.Halt()
+	l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
 }
 
 func (l *LED) stopRunning() {

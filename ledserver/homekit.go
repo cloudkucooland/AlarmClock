@@ -1,6 +1,7 @@
 package ledserver
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/brutella/hap/accessory"
@@ -22,6 +23,8 @@ func NewLedServer(info accessory.Info, l *LED) *LedServer {
 	a.A = accessory.New(info, accessory.TypeLightbulb)
 	a.Lightbulb = NewLedServerSvc(l)
 	a.AddS(a.Lightbulb.S)
+
+	l.hk = &a
 
 	return &a
 }
@@ -104,6 +107,19 @@ type HSB struct {
 func (hsb HSB) ToRGB() color.RGBA {
 	rgb := color.RGBA{}
 	c := colorful.Hsl(hsb.H, hsb.S/100, float64(hsb.B)/100)
-	rgb.R, rgb.G, rgb.B= c.RGB255()
+	rgb.R, rgb.G, rgb.B = c.RGB255()
 	return rgb
+}
+
+func (l *LED) updateHomeKit(c color.RGBA) {
+	if l.hk == nil {
+		return
+	}
+
+	cf := colorful.LinearRgb(float64(c.R)/255, float64(c.G)/255, float64(c.B)/255)
+	h, s, b := cf.Hsl()
+	fmt.Printf("H: %f S: %f B: %f\n", h, s*100, b*100)
+	// l.hk.Lightbulb.Hue.SetValue(h * 360)
+	// l.hk.Lightbulb.Saturation.SetValue(s * 100)
+	// l.hk.Lightbulb.Brightness.SetValue(int(b * 100))
 }

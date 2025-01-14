@@ -21,7 +21,7 @@ func (l *LED) rainbow() {
 	inorder := []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet", "indigo", "blue", "green", "yellow", "orange"}
 
 	l.mu.Lock()
-	for i := 0; i < 4; i++ {
+	for j := 0; j < 4; j++ {
 		for _, color := range inorder {
 			for i := 0; i < l.bufsize; i += channels {
 				l.buf[i] = colors[color].R

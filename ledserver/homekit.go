@@ -2,12 +2,12 @@ package ledserver
 
 import (
 	"image/color"
-	"math"
 
 	"github.com/brutella/hap/accessory"
 	"github.com/brutella/hap/characteristic"
 	"github.com/brutella/hap/service"
-	// "https://github.com/gerow/go-color"
+
+	"github.com/lucasb-eyer/go-colorful"
 )
 
 type LedServer struct {
@@ -103,27 +103,7 @@ type HSB struct {
 
 func (hsb HSB) ToRGB() color.RGBA {
 	rgb := color.RGBA{}
-
-	// Normalize values to [0, 1]
-	h := hsb.H / 360
-	s := hsb.S / 100
-	b := float64(hsb.B) / 100
-
-	if s == 0 {
-		rgb.R = uint8(b * 255)
-		rgb.G = uint8(b * 255)
-		rgb.B = uint8(b * 255)
-		return rgb
-	}
-
-	// var f func(n float64) float64
-	f := func(n float64) float64 {
-		k := math.Mod(n+h/60, 6)
-		return b - b*s*math.Max(0, math.Min(math.Min(k, 4-k), 1))
-	}
-
-	rgb.R = uint8(f(5) * 255)
-	rgb.G = uint8(f(3) * 255)
-	rgb.B = uint8(f(1) * 255)
+	c := colorful.Hsl(hsb.H, hsb.S/100, float64(hsb.B)/100)
+	rgb.R, rgb.G, rgb.B= c.RGB255()
 	return rgb
 }

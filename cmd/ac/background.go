@@ -52,7 +52,7 @@ func (g *Game) setBackground() {
 		op := &colorm.DrawImageOptions{}
 		op.Blend = ebiten.BlendCopy
 		var cm colorm.ColorM
-		cm.Scale(1.0, 1.0, 1.0, 0.10)
+		cm.Scale(1.0, 1.0, 1.0, 0.05)
 		colorm.DrawImage(g.background, img, cm, op)
 		return
 	}

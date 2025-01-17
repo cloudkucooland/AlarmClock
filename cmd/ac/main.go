@@ -53,6 +53,7 @@ type Game struct {
 	radiocontrols    map[string]*radiocontrol
 	alarmbuttons     map[string]*alarmbutton
 	ledclient        *rpc.Client
+	alarmStateIcon   *alarmstateicon
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

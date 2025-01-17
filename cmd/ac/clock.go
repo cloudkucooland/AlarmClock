@@ -48,7 +48,7 @@ func (g *Game) drawClock(screen *ebiten.Image) {
 		}
 		op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
 		if g.state == inScreenSaver {
-			op.ColorScale.ScaleAlpha(0.25)
+			op.ColorScale.ScaleAlpha(0.50)
 		}
 		text.Draw(g.clock.cache, g.clock.timestring, clockfont, op)
 	}

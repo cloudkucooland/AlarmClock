@@ -81,8 +81,8 @@ func main() {
 	g.setupAlarmButtons()
 	g.setupRadioControls()
 
-	// set up leds
-	g.ledRainbow()
+	// set up leds -- spin up in background
+	go g.ledRainbow()
 
 	// setup clock
 	now := time.Now()

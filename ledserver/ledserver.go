@@ -3,6 +3,7 @@ package ledserver
 import (
 	"fmt"
 	"image/color"
+	"sync"
 	"time"
 
 	"periph.io/x/conn/v3/physic"
@@ -22,6 +23,8 @@ type LED struct {
 	leds    *nrzled.Dev
 	bufsize int
 	reg     spi.PortCloser
+	mu      sync.Mutex
+	hk      *LedServer
 }
 
 type CommandCode int
@@ -56,7 +59,7 @@ func (l *LED) Set(cmd *Command, res *Result) error {
 		*res = true
 	case Off:
 		l.stopRunning()
-		l.off()
+		l.Off()
 	}
 	return nil
 }
@@ -107,6 +110,7 @@ func (l *LED) Shutdown() {
 func (l *LED) startup_test() {
 	l.white(0x00)
 
+	l.mu.Lock()
 	// test each individual pixel, all three channels
 	for i := 0; i < l.bufsize; i += channels {
 		for j := 0; j < 3; j++ {
@@ -117,37 +121,37 @@ func (l *LED) startup_test() {
 			l.leds.Write(l.buf)
 		}
 	}
-
-	// step down from full to dim
-	steps := []byte{0xff, 0xdd, 0xbb, 0x99, 0x77, 0x55, 0x33, 0x11, 0x00}
-	for _, v := range steps {
-		l.white(v)
-		time.Sleep(100 * time.Millisecond)
-	}
 	l.leds.Halt()
+	l.mu.Unlock()
 }
 
 func (l *LED) staticColor(c color.RGBA) {
-	l.white(0x00)
+	l.mu.Lock()
 	for i := 0; i < l.bufsize; i += channels {
 		l.buf[i] = c.R
 		l.buf[i+1] = c.G
 		l.buf[i+2] = c.B
 	}
 	l.leds.Write(l.buf)
+	l.mu.Unlock()
+	l.updateHomeKit(c)
 }
 
 func (l *LED) white(brightness byte) {
+	l.mu.Lock()
 	// Google's AI hallucinated a slices.Fill function to do this... but alas it does not exist
 	for i := 0; i < l.bufsize; i++ {
 		l.buf[i] = brightness
 	}
 	l.leds.Write(l.buf)
+	l.mu.Unlock()
+	l.updateHomeKit(color.RGBA{brightness, brightness, brightness, 0x00})
 }
 
-func (l *LED) off() {
+func (l *LED) Off() {
 	l.white(0x00)
 	l.leds.Halt()
+	l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
 }
 
 func (l *LED) stopRunning() {

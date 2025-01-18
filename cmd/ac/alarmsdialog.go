@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"maps"
@@ -38,7 +37,7 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 	// range over map doesn't always happen in the same order, causing chaos, this gives us a sorted list of alarmIDs to use
 	for _, key := range slices.Sorted(maps.Keys(g.config.Alarms)) {
 		a := g.config.Alarms[key]
-		alarmtime := fmt.Sprintf("%0.2d:%0.2d", a.AlarmTime.Hour, a.AlarmTime.Minute)
+		alarmtime := a.AlarmTime.String()
 		textwidth, textheight := text.Measure(alarmtime, weatherfont, 0)
 
 		if a.dialogButton.bounds.Min.X == 0 { // the button is uninitialized

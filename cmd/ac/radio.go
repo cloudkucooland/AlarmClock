@@ -114,7 +114,6 @@ func (r *radiobutton) startPlayer(g *Game) {
 		return
 	}
 
-	// g.debug(r.url)
 	stream, err := http.Get(r.url)
 	if err != nil {
 		g.debug(err.Error())
@@ -183,26 +182,6 @@ func sleepStopPlayer(g *Game) {
 		stopPlayer(g)
 		g.inSleepCountdown = false
 	}(g)
-}
-
-func pausePlayer(g *Game) {
-	// no external audio pause support
-	if g.audioPlayer == nil {
-		return
-	}
-	if g.audioPlayer.IsPlaying() {
-		g.audioPlayer.Pause()
-	}
-}
-
-func resumePlayer(g *Game) {
-	// no external audio pause support
-	if g.audioPlayer == nil {
-		return
-	}
-	if !g.audioPlayer.IsPlaying() {
-		g.audioPlayer.Play()
-	}
 }
 
 func (g *Game) defaultStation() *radiobutton {

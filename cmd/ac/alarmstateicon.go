@@ -4,8 +4,10 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/colorm"
 )
 
+// alarmstateicon is just a sprite with a few extra methods
 type alarmstateicon struct {
 	*sprite
 }
@@ -53,9 +55,7 @@ func (g *Game) setAlarmStateIcon() {
 	g.alarmStateIcon.sprite = getSprite("Swan Mommy", alarm.AlarmTime.String(), chirp)
 
 	if alarm.station != nil && alarm.station.sprite != nil {
-		g.alarmStateIcon.sprite.name = alarm.station.name
 		g.alarmStateIcon.sprite.image = alarm.station.image
-		g.alarmStateIcon.sprite.spritelabel = alarm.station.spritelabel
 	}
 
 	// random location
@@ -64,4 +64,22 @@ func (g *Game) setAlarmStateIcon() {
 
 func (g *Game) clearAlarmStateIcon() {
 	g.alarmStateIcon = nil
+}
+
+func (a *alarmstateicon) draw(screen *ebiten.Image) {
+	op := &colorm.DrawImageOptions{}
+	op.Blend = ebiten.BlendCopy
+
+	var cm colorm.ColorM
+	cm.Scale(1.0, 1.0, 1.0, 0.25)
+
+	op.GeoM.Scale(a.scale, a.scale)
+	op.GeoM.Translate(float64(a.X), float64(a.Y))
+
+	colorm.DrawImage(screen, a.image, cm, op)
+}
+
+func (a *alarmstateicon) drawWithLabel(screen *ebiten.Image) {
+	a.draw(screen)
+	a.drawlabel(screen) // from sprite
 }

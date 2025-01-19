@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"math"
 	"time"
@@ -10,7 +11,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
-	// "github.com/hajimehoshi/ebiten/v2/vector"
 
 	"github.com/cloudkucooland/AlarmClock/resources/sounds"
 )
@@ -285,4 +285,8 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 
 func (g *Game) stopAlarmPlayer() {
 	stopPlayer(g)
+}
+
+func (a AlarmTime) String() string {
+	return fmt.Sprintf("%d:%02d", a.Hour, a.Minute)
 }

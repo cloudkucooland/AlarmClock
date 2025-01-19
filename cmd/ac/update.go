@@ -100,7 +100,6 @@ func (g *Game) Update() error {
 		case inAlarmConfig:
 			processed := false
 			for key, a := range g.config.Alarms {
-				// a := g.config.Alarms[key]
 				if a.dialogButton.hourUp.in(x, y) {
 					a.dialogButton.hourUp.do(g)
 					processed = true
@@ -118,15 +117,17 @@ func (g *Game) Update() error {
 					processed = true
 				}
 
-				// check if we are in the body of the button, to enable/disable it
+				// check if we are in the body of the list-item, to enable/disable it
 				if !processed && a.in(x, y) {
 					if g.config.EnabledAlarmID == key {
 						chirp(g)
 						g.config.EnabledAlarmID = disabledAlarmID
+						g.clearAlarmStateIcon()
 					} else {
 						chirp(g)
 						g.config.EnabledAlarmID = key
 						a.station = g.selectedStation
+						g.setAlarmStateIcon()
 					}
 					processed = true
 				}

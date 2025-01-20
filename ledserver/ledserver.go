@@ -47,7 +47,7 @@ func (l *LED) Set(cmd *Command, res *Result) error {
 	switch cmd.Command {
 	case AllOn:
 		l.stopRunning()
-		l.staticColor(cmd.Color)
+		l.staticColor(cmd.Color, true)
 		*res = true
 	case Startup:
 		l.stopRunning()
@@ -59,7 +59,7 @@ func (l *LED) Set(cmd *Command, res *Result) error {
 		*res = true
 	case Off:
 		l.stopRunning()
-		l.Off()
+		l.Off(false)
 	}
 	return nil
 }
@@ -108,7 +108,7 @@ func (l *LED) Shutdown() {
 }
 
 func (l *LED) startup_test() {
-	l.white(0x00)
+	l.white(0x00, false)
 
 	l.mu.Lock()
 	// test each individual pixel, all three channels
@@ -125,7 +125,7 @@ func (l *LED) startup_test() {
 	l.mu.Unlock()
 }
 
-func (l *LED) staticColor(c color.RGBA) {
+func (l *LED) staticColor(c color.RGBA, updateHomekit bool) {
 	l.mu.Lock()
 	for i := 0; i < l.bufsize; i += channels {
 		l.buf[i] = c.R
@@ -134,10 +134,12 @@ func (l *LED) staticColor(c color.RGBA) {
 	}
 	l.leds.Write(l.buf)
 	l.mu.Unlock()
-	l.updateHomeKit(c)
+	if updateHomekit {
+		l.updateHomeKit(c)
+	}
 }
 
-func (l *LED) white(brightness byte) {
+func (l *LED) white(brightness byte, updateHomekit bool) {
 	l.mu.Lock()
 	// Google's AI hallucinated a slices.Fill function to do this... but alas it does not exist
 	for i := 0; i < l.bufsize; i++ {
@@ -145,13 +147,17 @@ func (l *LED) white(brightness byte) {
 	}
 	l.leds.Write(l.buf)
 	l.mu.Unlock()
-	l.updateHomeKit(color.RGBA{brightness, brightness, brightness, 0x00})
+	if updateHomekit {
+		l.updateHomeKit(color.RGBA{brightness, brightness, brightness, 0x00})
+	}
 }
 
-func (l *LED) Off() {
-	l.white(0x00)
+func (l *LED) Off(updateHomekit bool) {
+	l.white(0x00, updateHomekit)
 	l.leds.Halt()
-	l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
+	if updateHomekit {
+		l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
+	}
 }
 
 func (l *LED) stopRunning() {

@@ -16,7 +16,7 @@ var colors = map[string]color.RGBA{
 }
 
 func (l *LED) rainbow() {
-	l.white(0x00)
+	l.white(0x00, false)
 
 	inorder := []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet", "indigo", "blue", "green", "yellow", "orange"}
 

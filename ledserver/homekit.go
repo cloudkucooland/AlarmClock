@@ -119,7 +119,7 @@ func (l *LED) updateHomeKit(c color.RGBA) {
 	cf := colorful.LinearRgb(float64(c.R)/255, float64(c.G)/255, float64(c.B)/255)
 	h, s, b := cf.Hsl()
 	fmt.Printf("H: %f S: %f B: %f\n", h, s*100, b*100)
-	// l.hk.Lightbulb.Hue.SetValue(h * 360)
-	// l.hk.Lightbulb.Saturation.SetValue(s * 100)
-	// l.hk.Lightbulb.Brightness.SetValue(int(b * 100))
+	l.hk.Lightbulb.Hue.SetValue(h * 360)
+	l.hk.Lightbulb.Saturation.SetValue(s * 100)
+	l.hk.Lightbulb.Brightness.SetValue(int(b * 100))
 }

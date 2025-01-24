@@ -145,6 +145,6 @@ func (l *LED) stopRunning() {
 		l.cancel = nil
 		// there is a race here, this is a naïve way of ensuring the context cancel finished before we return
 		time.Sleep(200 * time.Millisecond)
+		l.leds.Halt()
 	}
-	l.leds.Halt()
 }

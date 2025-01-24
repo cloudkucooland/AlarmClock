@@ -49,8 +49,9 @@ func NewLedServerSvc(l *LED) *LedServerSvc {
 	s.On = characteristic.NewOn()
 	s.AddC(s.On.C)
 	s.On.OnValueRemoteUpdate(func(newstate bool) {
+		s.led.stopRunning()
 		if !newstate {
-			s.led.white(0x00, false)
+			s.led.off(false)
 			return
 		}
 
@@ -65,6 +66,7 @@ func NewLedServerSvc(l *LED) *LedServerSvc {
 	s.Brightness = characteristic.NewBrightness()
 	s.AddC(s.Brightness.C)
 	s.Brightness.OnValueRemoteUpdate(func(newstate int) {
+		s.led.stopRunning()
 		hsb := HSB{
 			H: s.Hue.Value(),
 			S: s.Saturation.Value(),
@@ -76,6 +78,7 @@ func NewLedServerSvc(l *LED) *LedServerSvc {
 	s.Saturation = characteristic.NewSaturation()
 	s.AddC(s.Saturation.C)
 	s.Saturation.OnValueRemoteUpdate(func(newstate float64) {
+		s.led.stopRunning()
 		hsb := HSB{
 			H: s.Hue.Value(),
 			S: newstate,
@@ -87,6 +90,7 @@ func NewLedServerSvc(l *LED) *LedServerSvc {
 	s.Hue = characteristic.NewHue()
 	s.AddC(s.Hue.C)
 	s.Hue.OnValueRemoteUpdate(func(newstate float64) {
+		s.led.stopRunning()
 		hsb := HSB{
 			H: newstate,
 			S: s.Saturation.Value(),

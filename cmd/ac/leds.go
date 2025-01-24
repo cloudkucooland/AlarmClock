@@ -68,10 +68,11 @@ func (g *Game) ledConnect() bool {
 		return false
 	} else {
 		g.ledclient = client
-		return true
 	}
+	return true
 }
 
 func (g *Game) ledDisconnect() {
+	g.ledclient.Close()
 	g.ledclient = nil
 }

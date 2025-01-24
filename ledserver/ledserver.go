@@ -1,9 +1,9 @@
 package ledserver
 
 import (
+	"context"
 	"fmt"
 	"image/color"
-	"sync"
 	"time"
 
 	"periph.io/x/conn/v3/physic"
@@ -23,8 +23,8 @@ type LED struct {
 	leds    *nrzled.Dev
 	bufsize int
 	reg     spi.PortCloser
-	mu      sync.Mutex
 	hk      *LedServer
+	cancel  func()
 }
 
 type CommandCode int
@@ -44,22 +44,22 @@ type Command struct {
 type Result bool
 
 func (l *LED) Set(cmd *Command, res *Result) error {
+	*res = true
+	l.stopRunning()
+
 	switch cmd.Command {
 	case AllOn:
-		l.stopRunning()
 		l.staticColor(cmd.Color, true)
-		*res = true
 	case Startup:
-		l.stopRunning()
-		l.startup_test()
-		*res = true
+		var ctx context.Context
+		ctx, l.cancel = context.WithCancel(context.Background())
+		l.startup_test(ctx)
 	case Rainbow:
-		l.stopRunning()
-		l.rainbow()
-		*res = true
+		var ctx context.Context
+		ctx, l.cancel = context.WithCancel(context.Background())
+		l.rainbow(ctx)
 	case Off:
-		l.stopRunning()
-		l.Off(false)
+		l.off(false)
 	}
 	return nil
 }
@@ -98,7 +98,9 @@ func (l *LED) Init() error {
 	l.bufsize = numpixels * channels
 	l.buf = make([]byte, l.bufsize)
 
-	l.startup_test()
+	var ctx context.Context
+	ctx, l.cancel = context.WithCancel(context.Background())
+	l.startup_test(ctx)
 	return nil
 }
 
@@ -107,59 +109,42 @@ func (l *LED) Shutdown() {
 	l.reg.Close()
 }
 
-func (l *LED) startup_test() {
-	l.white(0x00, false)
-
-	l.mu.Lock()
-	// test each individual pixel, all three channels
-	for i := 0; i < l.bufsize; i += channels {
-		for j := 0; j < 3; j++ {
-			l.buf[i+j] = 0x0f
-			l.leds.Write(l.buf)
-			time.Sleep(100 * time.Millisecond)
-			l.buf[i+j] = 0x00
-			l.leds.Write(l.buf)
-		}
-	}
-	l.leds.Halt()
-	l.mu.Unlock()
-}
-
 func (l *LED) staticColor(c color.RGBA, updateHomekit bool) {
-	l.mu.Lock()
 	for i := 0; i < l.bufsize; i += channels {
 		l.buf[i] = c.R
 		l.buf[i+1] = c.G
 		l.buf[i+2] = c.B
 	}
 	l.leds.Write(l.buf)
-	l.mu.Unlock()
 	if updateHomekit {
 		l.updateHomeKit(c)
 	}
 }
 
 func (l *LED) white(brightness byte, updateHomekit bool) {
-	l.mu.Lock()
 	// Google's AI hallucinated a slices.Fill function to do this... but alas it does not exist
 	for i := 0; i < l.bufsize; i++ {
 		l.buf[i] = brightness
 	}
 	l.leds.Write(l.buf)
-	l.mu.Unlock()
 	if updateHomekit {
 		l.updateHomeKit(color.RGBA{brightness, brightness, brightness, 0x00})
 	}
 }
 
-func (l *LED) Off(updateHomekit bool) {
+func (l *LED) off(updateHomekit bool) {
 	l.white(0x00, updateHomekit)
-	l.leds.Halt()
 	if updateHomekit {
 		l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
 	}
 }
 
 func (l *LED) stopRunning() {
-	// stop any running sequence
+	if l.cancel != nil {
+		l.cancel()
+		l.cancel = nil
+		// there is a race here, this is a naïve way of ensuring the context cancel finished before we return
+		time.Sleep(200 * time.Millisecond)
+	}
+	l.leds.Halt()
 }

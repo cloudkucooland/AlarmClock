@@ -1,6 +1,7 @@
 package ledserver
 
 import (
+	"context"
 	"image/color"
 	"time"
 )
@@ -15,24 +16,52 @@ var colors = map[string]color.RGBA{
 	"violet": {0x7f, 0x00, 0xff, 0x00},
 }
 
-func (l *LED) rainbow() {
-	l.white(0x00, false)
-
+func (l *LED) rainbow(ctx context.Context) {
+	l.off(true)
 	inorder := []string{"red", "orange", "yellow", "green", "blue", "indigo", "violet", "indigo", "blue", "green", "yellow", "orange"}
 
-	l.mu.Lock()
-	for j := 0; j < 4; j++ {
-		for _, color := range inorder {
-			for i := 0; i < l.bufsize; i += channels {
-				l.buf[i] = colors[color].R
-				l.buf[i+1] = colors[color].G
-				l.buf[i+2] = colors[color].B
-				l.leds.Write(l.buf)
-				time.Sleep(25 * time.Millisecond)
+	// spin in go task until ctx.Done()
+	go func(ctx context.Context) {
+		for {
+			for _, color := range inorder {
+				for i := 0; i < l.bufsize; i += channels {
+					cc := colors[color]
+					l.buf[i] = cc.R
+					l.buf[i+1] = cc.G
+					l.buf[i+2] = cc.B
+					select {
+					case <-ctx.Done():
+						l.off(true)
+						return
+					default:
+						l.leds.Write(l.buf)
+						time.Sleep(25 * time.Millisecond)
+					}
+				}
 			}
 		}
-	}
-	l.mu.Unlock()
+	}(ctx)
+}
 
-	l.leds.Halt()
+func (l *LED) startup_test(ctx context.Context) {
+	l.off(false)
+
+	go func(ctx context.Context) {
+		// test each individual pixel, all three channels
+		for i := 0; i < l.bufsize; i += channels {
+			for j := 0; j < channels; j++ {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					l.buf[i+j] = 0x1f
+					l.leds.Write(l.buf)
+					time.Sleep(25 * time.Millisecond)
+					l.buf[i+j] = 0x00
+					l.leds.Write(l.buf)
+					time.Sleep(25 * time.Millisecond)
+				}
+			}
+		}
+	}(ctx)
 }

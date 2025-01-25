@@ -71,6 +71,7 @@ func (g *Game) startAlarm(id alarmid) {
 
 	g.state = inAlarm
 	a.triggered = true
+	g.ledAllOn()
 	g.startAlarmPlayer(a)
 	g.audioPlayer.SetVolume(0.25)
 }
@@ -95,6 +96,7 @@ func snoozeAlarm(g *Game) {
 	g.state = inSnooze
 	// a.triggered = false
 	a.snooze = true
+	g.ledAllOff()
 	a.snoozeCount = a.snoozeCount + 1
 	g.stopAlarmPlayer()
 }
@@ -115,6 +117,7 @@ func stopAlarm(g *Game) {
 		// do it anyways?
 		// return
 	}
+	g.ledAllOff()
 	g.stopAlarmPlayer()
 	a.triggered = false
 	a.snooze = false
@@ -136,6 +139,7 @@ func (g *Game) wakeFromSnooze(id alarmid) {
 	}
 	a.triggered = true
 	g.startAlarmPlayer(a)
+	g.ledRainbow()
 	// vol := float64((60 + (aa.snoozeCount * 10)) / 100)
 	g.audioPlayer.SetVolume(0.50)
 }
@@ -261,12 +265,14 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			if !ok {
 				// I guess we are sleeping in today...
 				g.debug("no backup alarm found")
+				g.ledRainbow()
 				return
 			}
 			backupAlarm, err := mp3.DecodeWithoutResampling(bytes.NewReader(backup))
 			if err != nil {
 				// I guess we are sleeping in today...
 				g.debug(err.Error())
+				g.ledRainbow()
 				return
 			}
 
@@ -275,10 +281,12 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			if err != nil {
 				// I guess we are sleeping in today...
 				g.debug(err.Error())
+				g.ledRainbow()
 				return
 			}
 			loopplayer.SetVolume(0.33)
 			loopplayer.Play()
+			g.ledRainbow()
 		}
 	}(g)
 }

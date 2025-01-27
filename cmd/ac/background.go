@@ -4,43 +4,45 @@ import (
 	"bytes"
 	"image"
 	"math/rand"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/colorm"
-
-	bgres "github.com/cloudkucooland/AlarmClock/resources/backgrounds"
 )
 
-type background struct {
-	raw  []byte
-	tags []string
-}
-
-func (g *Game) setupBackgrounds() {
-	g.backgrounds = map[uint8]*background{
-		0: {raw: bgres.Default, tags: []string{"Day", "Sunny"}},
-		1: {raw: bgres.Owlmoon, tags: []string{"Night"}},
-		2: {raw: bgres.Owleyes, tags: []string{"Night"}},
-		3: {raw: bgres.Hummingbird, tags: []string{"Day"}},
-	}
-}
+const bgpath = "/home/birdhouse/backgrounds"
 
 func (g *Game) setBackground() {
 	if g.background != nil {
 		g.background.Deallocate()
 		g.background = nil
 	}
+
+	// start with empty image
 	g.background = ebiten.NewImage(screensize.X, screensize.Y)
 
-	// random for now, later we can do by season/weather/time-of-date, etc
-	// #nosec G404 G115
-	key := uint8(rand.Intn(len(g.backgrounds)))
-	bg, ok := g.backgrounds[key]
-	if !ok {
-		g.debug("backgrounds maps not keyed correctly")
+	bgs, err := os.ReadDir(bgpath)
+	if err != nil {
+		g.debug(err.Error())
 		return
 	}
-	decoded, _, err := image.Decode(bytes.NewReader(bg.raw))
+
+	// #nosec G404 G115
+	key := uint8(rand.Intn(len(bgs)))
+
+	bg := bgs[key]
+	if !strings.HasSuffix(bg.Name(), ".png") {
+		g.debug("file not PNG")
+		return
+	}
+	raw, err := os.ReadFile(filepath.Join(bgpath, bg.Name()))
+	if err != nil {
+		g.debug(err.Error())
+		return
+	}
+	decoded, _, err := image.Decode(bytes.NewReader(raw))
 	if err != nil {
 		g.debug(err.Error())
 		return

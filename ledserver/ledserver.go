@@ -16,7 +16,7 @@ import (
 const Pipefile = "/tmp/ledserver.sock"
 const pin = "SPI0.0"
 const channels = 3
-const numpixels = 16
+const numpixels = 32
 
 type LED struct {
 	buf     []byte
@@ -59,7 +59,7 @@ func (l *LED) Set(cmd *Command, res *Result) error {
 		ctx, l.cancel = context.WithCancel(context.Background())
 		l.rainbow(ctx)
 	case Off:
-		l.off(false)
+		l.off(true)
 	}
 	return nil
 }
@@ -137,6 +137,7 @@ func (l *LED) off(updateHomekit bool) {
 	if updateHomekit {
 		l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
 	}
+	l.leds.Halt()
 }
 
 func (l *LED) stopRunning() {

@@ -44,7 +44,7 @@ func (l *LED) rainbow(ctx context.Context) {
 }
 
 func (l *LED) startup_test(ctx context.Context) {
-	l.off(false)
+	l.off(true)
 
 	go func(ctx context.Context) {
 		// test each individual pixel, all three channels

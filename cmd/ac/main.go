@@ -39,7 +39,6 @@ type Game struct {
 	lastAct          time.Time
 	clock            *clock
 	background       *ebiten.Image
-	backgrounds      map[uint8]*background
 	weather          *owm.CurrentWeatherData
 	weathercache     *ebiten.Image
 	audioContext     *audio.Context
@@ -74,16 +73,12 @@ func main() {
 	g.clock.Y = defaultClockLocationY
 	g.audioContext = audio.NewContext(44100)
 	g.loadconfig()
-	g.setupBackgrounds()
 	g.setBackground()
 	g.setupControls()
 	g.setupRadioButtons()
 	g.selectedStation = g.defaultStation()
 	g.setupAlarmButtons()
 	g.setupRadioControls()
-
-	// set up leds -- spin up in background
-	go g.ledRainbow()
 
 	// setup clock
 	now := time.Now()
@@ -97,9 +92,9 @@ func main() {
 	if hostname, _ := os.Hostname(); strings.EqualFold(hostname, "birdhouse") {
 		ebiten.SetFullscreen(true)
 		ebiten.SetCursorMode(ebiten.CursorModeHidden)
+		ebiten.SetVsyncEnabled(false)
 	}
 
-	// ctx, cancel := context.WithCancel(context.Background())
 	go g.runWeather(context.Background())
 
 	ebiten.SetWindowTitle("Alarm Clock")

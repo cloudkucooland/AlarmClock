@@ -16,7 +16,9 @@ import (
 const Pipefile = "/tmp/ledserver.sock"
 const pin = "SPI0.0"
 const channels = 3
-const numpixels = 16
+const numpixels = 32
+
+var runningHot bool
 
 type LED struct {
 	buf     []byte
@@ -59,7 +61,7 @@ func (l *LED) Set(cmd *Command, res *Result) error {
 		ctx, l.cancel = context.WithCancel(context.Background())
 		l.rainbow(ctx)
 	case Off:
-		l.off(false)
+		l.off(true)
 	}
 	return nil
 }
@@ -111,6 +113,10 @@ func (l *LED) Shutdown() {
 
 func (l *LED) staticColor(c color.RGBA, updateHomekit bool) {
 	for i := 0; i < l.bufsize; i += channels {
+		// if we are running hot only light up every 4th led
+		if runningHot && i%(4*channels) != 0 {
+			continue
+		}
 		l.buf[i] = c.R
 		l.buf[i+1] = c.G
 		l.buf[i+2] = c.B
@@ -137,6 +143,7 @@ func (l *LED) off(updateHomekit bool) {
 	if updateHomekit {
 		l.updateHomeKit(color.RGBA{0x00, 0x00, 0x00, 0x00})
 	}
+	l.leds.Halt()
 }
 
 func (l *LED) stopRunning() {
@@ -146,5 +153,19 @@ func (l *LED) stopRunning() {
 		// there is a race here, this is a naïve way of ensuring the context cancel finished before we return
 		time.Sleep(200 * time.Millisecond)
 		l.leds.Halt()
+	}
+}
+
+func ThermalHigh() {
+	if !runningHot {
+		fmt.Println("running hot")
+		runningHot = true
+	}
+}
+
+func ThermalNormal() {
+	if runningHot {
+		fmt.Println("cooled off")
+		runningHot = false
 	}
 }

@@ -8,7 +8,9 @@ import (
 	"net/rpc"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/brutella/hap"
 	"github.com/brutella/hap/accessory"
@@ -65,15 +67,44 @@ func main() {
 	}
 	s.Pin = pin
 
-	// await context cancel
-	go s.ListenAndServe(ctx)
+	var wg sync.WaitGroup
 
-	sigch := make(chan os.Signal, 3)
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+		s.ListenAndServe(ctx)
+	}()
+
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+
+		t := time.Tick(time.Minute)
+
+		for {
+			select {
+			case <-t:
+				max, err := thermal()
+				if err != nil {
+					return
+				}
+				if max > threshold {
+					ledserver.ThermalHigh()
+				} else {
+					ledserver.ThermalNormal()
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
+	sigch := make(chan os.Signal)
 	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
 	sig := <-sigch
 
-	fmt.Printf("shutdown requested by signal: %s", sig)
+	fmt.Printf("shutdown requested by signal: %s\n", sig)
 	cancel()
-
-	// wait for cancel...
+	fmt.Printf("waiting for goroutines\n")
+	wg.Wait()
 }

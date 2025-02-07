@@ -106,7 +106,7 @@ func (r *radiobutton) startPlayer(g *Game) {
 	}
 
 	g.selectedStation = r
-	r.stopPlayer(g)
+	g.stopPlayer()
 
 	// if a playlist is requested, do that in a new goprocess
 	if strings.Contains(r.url, "m3u") {
@@ -137,11 +137,11 @@ func (r *radiobutton) startPlayer(g *Game) {
 	g.audioPlayer.Play()
 }
 
-func (r *radiobutton) stopPlayer(g *Game) {
-	stopPlayer(g)
+func stopPlayer(g *Game) {
+	g.stopPlayer()
 }
 
-func stopPlayer(g *Game) {
+func (g *Game) stopPlayer() {
 	if g.externalAudio != nil {
 		g.stopExternalPlayer()
 		return
@@ -179,7 +179,7 @@ func sleepStopPlayer(g *Game) {
 			g.audioPlayer.SetVolume(vol)
 			<-c
 		}
-		stopPlayer(g)
+		g.stopPlayer()
 		g.inSleepCountdown = false
 	}(g)
 }

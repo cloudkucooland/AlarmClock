@@ -99,7 +99,7 @@ func main() {
 		}
 	}()
 
-	sigch := make(chan os.Signal)
+	sigch := make(chan os.Signal, 2)
 	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)
 	sig := <-sigch
 

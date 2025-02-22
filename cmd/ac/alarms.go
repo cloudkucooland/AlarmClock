@@ -98,14 +98,14 @@ func snoozeAlarm(g *Game) {
 	a.snooze = true
 	g.ledAllOff()
 	a.snoozeCount = a.snoozeCount + 1
-	g.stopAlarmPlayer()
+	g.stopPlayer()
 }
 
 func stopAlarm(g *Game) {
 	a, ok := g.config.Alarms[g.config.EnabledAlarmID]
 	if !ok {
 		g.debug("no alarm enabled, nothing to stop")
-		g.stopAlarmPlayer()
+		g.stopPlayer()
 		return
 	}
 
@@ -118,7 +118,7 @@ func stopAlarm(g *Game) {
 		// return
 	}
 	g.ledAllOff()
-	g.stopAlarmPlayer()
+	g.stopPlayer()
 	a.triggered = false
 	a.snooze = false
 	a.snoozeCount = 0
@@ -259,7 +259,7 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			return
 		}
 		if !g.isAudioPlaying() && a.triggered && !a.snooze {
-			// g.stopAlarmPlayer() // why stop if already not playing?
+			// g.stopPlayer() // why stop if already not playing?
 
 			backup, ok := sounds.Sounds["BackupAlarm"]
 			if !ok {
@@ -289,10 +289,6 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			g.ledRainbow()
 		}
 	}(g)
-}
-
-func (g *Game) stopAlarmPlayer() {
-	stopPlayer(g)
 }
 
 func (a AlarmTime) String() string {

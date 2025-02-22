@@ -92,7 +92,7 @@ func main() {
 	if hostname, _ := os.Hostname(); strings.EqualFold(hostname, "birdhouse") {
 		ebiten.SetFullscreen(true)
 		ebiten.SetCursorMode(ebiten.CursorModeHidden)
-		ebiten.SetVsyncEnabled(false)
+		// ebiten.SetVsyncEnabled(false)
 	}
 
 	go g.runWeather(context.Background())

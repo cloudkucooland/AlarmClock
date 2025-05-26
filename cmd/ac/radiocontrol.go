@@ -15,16 +15,24 @@ type radiocontrol struct {
 func (g *Game) setupRadioControls() {
 	g.radiocontrols = map[string]*radiocontrol{
 		"Stop": {
-			sprite: getSprite("Spring", "Stop", stopPlayer),
+			sprite: getSprite("Spring", "Stop", func(g *Game) {
+				g.stopPlayer()
+			}),
 		},
 		"SleepCountdown": {
-			sprite: getSprite("Tea Time", "Sleeptimer", sleepStopPlayer),
+			sprite: getSprite("Tea Time", "Sleeptimer", func(g *Game) {
+				g.sleepStopPlayer()
+			}),
 		},
 		"VolUp": {
-			sprite: getSprite("Up", "", volumeUp),
+			sprite: getSprite("Up", "", func(g *Game) {
+				g.volumeUp()
+			}),
 		},
 		"VolDn": {
-			sprite: getSprite("Dn", "", volumeDn),
+			sprite: getSprite("Dn", "", func(g *Game) {
+				g.volumeDn()
+			}),
 		},
 	}
 }
@@ -91,7 +99,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	}
 }
 
-func volumeUp(g *Game) {
+func (g *Game) volumeUp() {
 	if g.externalAudio != nil {
 		volumeUpExternal(g)
 		tick(g)
@@ -107,7 +115,7 @@ func volumeUp(g *Game) {
 	tick(g)
 }
 
-func volumeDn(g *Game) {
+func (g *Game) volumeDn() {
 	if g.externalAudio != nil {
 		volumeDnExternal(g)
 		tick(g)

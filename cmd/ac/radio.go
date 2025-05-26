@@ -137,11 +137,9 @@ func (r *radiobutton) startPlayer(g *Game) {
 	g.audioPlayer.Play()
 }
 
-func stopPlayer(g *Game) {
-	g.stopPlayer()
-}
-
 func (g *Game) stopPlayer() {
+	g.inSleepCountdown = false
+
 	if g.externalAudio != nil {
 		g.stopExternalPlayer()
 		return
@@ -162,7 +160,7 @@ func (g *Game) stopPlayer() {
 	g.audioPlayer = nil
 }
 
-func sleepStopPlayer(g *Game) {
+func (g *Game) sleepStopPlayer() {
 	g.inSleepCountdown = true
 
 	// kick the screensaver on in 5
@@ -180,7 +178,6 @@ func sleepStopPlayer(g *Game) {
 			<-c
 		}
 		g.stopPlayer()
-		g.inSleepCountdown = false
 	}(g)
 }
 

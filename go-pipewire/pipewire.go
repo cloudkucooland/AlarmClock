@@ -95,7 +95,7 @@ func setup_libwp() {
 	purego.RegisterLibFunc(&wp_get_library_version, wp, "wp_get_library_version")
 	purego.RegisterLibFunc(&g_option_context_new, wp, "g_option_context_new")
 	purego.RegisterLibFunc(&wp_core_new, wp, "wp_core_new")
-	// purego.RegisterLibFunc(&wp_settings_new, wp, "wp_settings_new")
+	purego.RegisterLibFunc(&wp_settings_new, wp, "wp_settings_new")
 	purego.RegisterLibFunc(&wp_core_connect, wp, "wp_core_connect")
 	purego.RegisterLibFunc(&wp_core_get_remote_name, wp, "wp_core_get_remote_name")
 	purego.RegisterLibFunc(&wp_core_get_remote_version, wp, "wp_core_get_remote_version")
@@ -117,15 +117,15 @@ func main() {
 
 	fmt.Printf("WirePlumber library version: %s\n", wp_get_library_version())
 
-	// g_context := g_option_context_new("go-wireplumber")
-	g_context := g_context_t(nil)
+	g_context := g_option_context_new("go-wireplumber")
+	// g_context := g_context_t(nil)
 	wp_core = wp_core_new(g_context, nil, nil)
 	om = wp_object_manager_new()
 
 	// missing from older verrsions?
-	// wp_settings := wp_settings_new(wp_core, "go-pipewire")
+	wp_settings := wp_settings_new(wp_core, "go-pipewire")
 	// nasty kludge for testing
-	wp_settings := g_object_new(80, "core", wp_core, "metadata-name", "go-pipewire", nil) // guessing on the 82...
+	// wp_settings := g_object_new(80, "core", wp_core, "metadata-name", "go-pipewire", nil) // guessing on the 82...
 	fmt.Printf("wp_settings: %+v\n", wp_settings)
 
 	wp_core_load_component(wp_core, "libwireplumber-module-default-nodes-api", "module", nil, nil, nil, nil, nil)

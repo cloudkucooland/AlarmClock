@@ -69,11 +69,12 @@ func (g *Game) startAlarm(id alarmid) {
 		return
 	}
 
-	g.state = inAlarm
 	a.triggered = true
 	g.ledAllOn()
 	g.startAlarmPlayer(a)
 	g.audioPlayer.SetVolume(0.25)
+
+	g.state = inAlarm
 }
 
 func snoozeAlarm(g *Game) {
@@ -93,12 +94,13 @@ func snoozeAlarm(g *Game) {
 		return
 	}
 
-	g.state = inSnooze
 	// a.triggered = false
 	a.snooze = true
 	g.ledAllOff()
 	a.snoozeCount = a.snoozeCount + 1
 	g.stopPlayer()
+
+	g.state = inSnooze
 }
 
 func stopAlarm(g *Game) {
@@ -110,7 +112,6 @@ func stopAlarm(g *Game) {
 	}
 
 	g.lastAct = time.Now()
-	g.state = inNormal
 
 	if !a.triggered {
 		g.debug("enabled alarm not triggered, nothing to stop")
@@ -123,6 +124,8 @@ func stopAlarm(g *Game) {
 	a.snooze = false
 	a.snoozeCount = 0
 	g.config.EnabledAlarmID = disabledAlarmID
+
+	g.state = inNormal
 }
 
 func (g *Game) wakeFromSnooze(id alarmid) {
@@ -238,13 +241,15 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 	// if the alarm doesn't have a station set, use the last played station
 	if r == nil {
 		g.debug("alarm enabled w/o station set?")
+		a.station = g.selectedStation // so we don't come back here if snoozed
 		r = g.selectedStation
 	}
 	if r == nil {
 		g.debug("alarm enabled, no station set, using default")
+		a.station = g.selectedStation // so we don't come back here if snoozed
 		r = g.defaultStation()
 	}
-	g.selectedStation = r
+	// g.selectedStation = r // covered in r.startPlayer(g)
 	r.startPlayer(g)
 
 	// backup alarm if internet is down
@@ -277,15 +282,15 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			}
 
 			loop := audio.NewInfiniteLoop(backupAlarm, backupAlarm.Length())
-			loopplayer, err := g.audioContext.NewPlayer(loop)
+			g.audioPlayer, err = g.audioContext.NewPlayer(loop)
 			if err != nil {
 				// I guess we are sleeping in today...
 				g.debug(err.Error())
 				g.ledRainbow()
 				return
 			}
-			loopplayer.SetVolume(0.33)
-			loopplayer.Play()
+			g.audioPlayer.SetVolume(0.33)
+			g.audioPlayer.Play()
 			g.ledRainbow()
 		}
 	}(g)

@@ -32,8 +32,8 @@ func (g *Game) Update() error {
 
 		switch g.state {
 		case inScreenSaver:
-			g.lastAct = time.Now()
-			g.leaveScreenSaver()
+			// g.lastAct = time.Now()
+			// g.leaveScreenSaver() // let release handle it so the release doesn't pass to the normal UI
 		case inNormal, inSnooze:
 			for _, c := range g.controls {
 				if c.in(x, y) && !c.ani.in {

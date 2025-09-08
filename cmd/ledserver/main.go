@@ -69,16 +69,9 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	go func() {
-		wg.Add(1)
-		defer wg.Done()
-		s.ListenAndServe(ctx)
-	}()
+	wg.Go(func() { s.ListenAndServe(ctx) })
 
-	go func() {
-		wg.Add(1)
-		defer wg.Done()
-
+	wg.Go(func() {
 		t := time.Tick(time.Minute)
 
 		for {
@@ -97,7 +90,7 @@ func main() {
 				return
 			}
 		}
-	}()
+	})
 
 	sigch := make(chan os.Signal, 2)
 	signal.Notify(sigch, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)

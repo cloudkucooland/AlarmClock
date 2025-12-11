@@ -62,7 +62,7 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	xpadding := 10
 
 	// TODO: base this on sprite size not hardcoded values
-	vector.DrawFilledRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), modalgrey, false)
+	vector.FillRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), modalgrey, false)
 	vector.StrokeRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
 	vector.StrokeRect(screen, float32(x+xpadding), float32(y+10), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
 

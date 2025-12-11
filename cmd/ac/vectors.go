@@ -32,8 +32,8 @@ func buttonbase(textwidth float32, textheight float32, bgcolor color.RGBA, paddi
 	totalwidth := radius + padding + textwidth + padding + radius
 
 	img := ebiten.NewImage(int(math.Ceil(float64(totalwidth))), int(math.Ceil(float64(totalheight))))
-	vector.DrawFilledCircle(img, radius, radius, radius, bgcolor, true)
-	vector.DrawFilledCircle(img, totalwidth-radius, radius, radius, bgcolor, true)
-	vector.DrawFilledRect(img, radius, 0, totalwidth-diameter, totalheight, bgcolor, true)
+	vector.FillCircle(img, radius, radius, radius, bgcolor, true)
+	vector.FillCircle(img, totalwidth-radius, radius, radius, bgcolor, true)
+	vector.FillRect(img, radius, 0, totalwidth-diameter, totalheight, bgcolor, true)
 	return img
 }

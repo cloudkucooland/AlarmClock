@@ -73,6 +73,6 @@ func (g *Game) ledConnect() bool {
 }
 
 func (g *Game) ledDisconnect() {
-	g.ledclient.Close()
+	_ = g.ledclient.Close()
 	g.ledclient = nil
 }

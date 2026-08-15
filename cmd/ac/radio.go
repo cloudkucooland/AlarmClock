@@ -108,33 +108,8 @@ func (r *radiobutton) startPlayer(g *Game) {
 	g.selectedStation = r
 	g.stopPlayer()
 
-	// if a playlist is requested, do that in a new goprocess
-	if strings.Contains(r.url, "m3u") {
-		go g.playExternal(r.url)
-		return
-	}
-
-	stream, err := http.Get(r.url)
-	if err != nil {
-		g.debug(err.Error())
-		chirp(g)
-		return
-	}
-
-	decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
-	if err != nil {
-		g.debug(err.Error())
-		chirp(g)
-		return
-	}
-
-	g.audioPlayer, err = g.audioContext.NewPlayer(decoded)
-	if err != nil {
-		g.debug(err.Error())
-		chirp(g)
-		return
-	}
-	g.audioPlayer.Play()
+	// All streams now routed through external player
+	go g.playExternal(r.url)
 }
 
 func (g *Game) stopPlayer() {
@@ -172,9 +147,8 @@ func (g *Game) sleepStopPlayer() {
 		i := 0
 		for i < 6 {
 			i = i + 1
-			vol := g.audioPlayer.Volume()
-			vol = math.Max(vol-0.05, 0.05)
-			g.audioPlayer.SetVolume(vol)
+			// Reduce volume
+			volumeDnExternal(g)
 			<-c
 		}
 		g.stopPlayer()

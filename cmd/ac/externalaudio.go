@@ -16,41 +16,41 @@ func (g *Game) playExternal(url string) {
 
 	args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
 	cmd := exec.CommandContext(ctx, "ffplay", args...)
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		g.debug(err.Error())
-		g.externalAudio = nil
-		return
-	}
 
-	stdout, err := cmd.StdoutPipe()
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		g.debug(err.Error())
+		g.debug(fmt.Sprintf("Failed to get stdin pipe: %v", err))
 		g.externalAudio = nil
+		cancel()
 		return
 	}
+	g.externalAudioStdin = stdin
 
 	if err := cmd.Start(); err != nil {
-		g.debug(err.Error())
+		g.debug(fmt.Sprintf("Failed to start ffplay: %v", err))
 		g.externalAudio = nil
+		cancel()
 		return
 	}
 
-	slurp, _ := io.ReadAll(stderr)
-	g.debug(string(slurp))
-
-	slurp, _ = io.ReadAll(stdout)
-	g.debug(string(slurp))
-
-	if err := cmd.Wait(); err != nil {
-		g.debug(err.Error())
-	}
-	g.externalAudio = nil
+	// Goroutine to monitor the process and clean up state
+	go func() {
+		if err := cmd.Wait(); err != nil {
+			g.debug(fmt.Sprintf("ffplay exited: %v", err))
+		}
+		g.externalAudio = nil
+		g.externalAudioStdin = nil
+	}()
 }
 
 func (g *Game) stopExternalPlayer() {
 	if g.externalAudio == nil {
 		return
+	}
+
+	if g.externalAudioStdin != nil {
+		g.externalAudioStdin.Close()
+		g.externalAudioStdin = nil
 	}
 
 	g.externalAudio()
@@ -106,13 +106,19 @@ func (g *Game) drawExternalControls(screen *ebiten.Image) {
 }
 
 func volumeUpExternal(g *Game) {
-	g.debug("external volume up")
+	if g.externalAudioStdin != nil {
+		g.externalAudioStdin.Write([]byte("9"))
+	}
 }
 
 func volumeDnExternal(g *Game) {
-	g.debug("external volume down")
+	if g.externalAudioStdin != nil {
+		g.externalAudioStdin.Write([]byte("0"))
+	}
 }
 
 func getExternalVolume() uint8 {
+	// ffplay doesn't provide easy volume feedback.
+	// Returning a dummy value for the UI label.
 	return 50
 }

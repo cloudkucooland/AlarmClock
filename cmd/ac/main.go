@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"image"
+	"io"
 	"log"
 	"net/rpc"
 	"os"
@@ -34,25 +35,26 @@ const (
 )
 
 type Game struct {
-	state            gameState
-	debugString      string
-	lastAct          time.Time
-	clock            *clock
-	background       *ebiten.Image
-	weather          *owm.CurrentWeatherData
-	weathercache     *ebiten.Image
-	audioContext     *audio.Context
-	audioPlayer      *audio.Player
-	externalAudio    context.CancelFunc
-	radiobuttons     map[stationName]*radiobutton
-	selectedStation  *radiobutton
-	inSleepCountdown bool
-	config           *Config
-	controls         []*control
-	radiocontrols    map[string]*radiocontrol
-	alarmbuttons     map[string]*alarmbutton
-	ledclient        *rpc.Client
-	alarmStateIcon   *alarmstateicon
+	state              gameState
+	debugString        string
+	lastAct            time.Time
+	clock              *clock
+	background         *ebiten.Image
+	weather            *owm.CurrentWeatherData
+	weathercache       *ebiten.Image
+	audioContext       *audio.Context
+	audioPlayer        *audio.Player
+	externalAudio      context.CancelFunc
+	externalAudioStdin io.WriteCloser
+	radiobuttons       map[stationName]*radiobutton
+	selectedStation    *radiobutton
+	inSleepCountdown   bool
+	config             *Config
+	controls           []*control
+	radiocontrols      map[string]*radiocontrol
+	alarmbuttons       map[string]*alarmbutton
+	ledclient          *rpc.Client
+	alarmStateIcon     *alarmstateicon
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
+	// "io"
 	"os/exec"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,7 +14,7 @@ func (g *Game) playExternal(url string) {
 	ctx, cancel := context.WithCancel(context.Background())
 	g.externalAudio = cancel
 
-	args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
+	args := []string{"-ac", "1", "-loglevel", "error", "-nodisp", "-volume", "50", "-vn", url}
 	cmd := exec.CommandContext(ctx, "ffplay", args...)
 
 	stdin, err := cmd.StdinPipe()

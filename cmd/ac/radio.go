@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"maps"
-	"math"
-	"net/http"
+	// "math"
+	// "net/http"
 	"slices"
-	"strings"
+	// "strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	// "github.com/hajimehoshi/ebiten/v2/audio/mp3"
 )
 
 type stationName string
@@ -58,15 +58,15 @@ func (g *Game) setupRadioButtons() {
 		},
 		"BBC 6 Music": {
 			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+			url:    "http://as-hls-ww-live.akamaized.net/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
 		},
 		"BBC 4": {
 			sprite: getSprite("Pinwheel", "BBC 4", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
+			url:    "http://as-hls-ww-live.akamaized.net/pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
 		},
 		"BBC World Service": {
 			sprite: getSprite("Spring", "BBC World Service", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
+			url:    "http://as-hls-ww-live.akamaized.net/pool_87948813/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8",
 		},
 	}
 }

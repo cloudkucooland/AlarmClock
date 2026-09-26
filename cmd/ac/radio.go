@@ -117,7 +117,6 @@ func (g *Game) stopPlayer() {
 
 	if g.externalAudio != nil {
 		g.stopExternalPlayer()
-		return
 	}
 
 	if g.audioPlayer == nil {

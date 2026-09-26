@@ -12,7 +12,8 @@ import (
 
 func (g *Game) playExternal(url string) {
 	ctx, cancel := context.WithCancel(context.Background())
-	g.externalAudio = cancel
+	session := &audioSession{cancel: cancel}
+	g.externalAudio = session
 
 	args := []string{"-ac", "1", "-loglevel", "error", "-nodisp", "-volume", "50", "-vn", url}
 	cmd := exec.CommandContext(ctx, "ffplay", args...)
@@ -34,13 +35,15 @@ func (g *Game) playExternal(url string) {
 	}
 
 	// Goroutine to monitor the process and clean up state
-	go func() {
+	go func(s *audioSession) {
 		if err := cmd.Wait(); err != nil {
 			g.debug(fmt.Sprintf("ffplay exited: %v", err))
 		}
-		g.externalAudio = nil
-		g.externalAudioStdin = nil
-	}()
+		if g.externalAudio == s {
+			g.externalAudio = nil
+			g.externalAudioStdin = nil
+		}
+	}(session)
 }
 
 func (g *Game) stopExternalPlayer() {
@@ -53,7 +56,7 @@ func (g *Game) stopExternalPlayer() {
 		g.externalAudioStdin = nil
 	}
 
-	g.externalAudio()
+	g.externalAudio.cancel()
 	g.externalAudio = nil
 }
 

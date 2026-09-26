@@ -34,6 +34,10 @@ const (
 	inRadio
 )
 
+type audioSession struct {
+	cancel context.CancelFunc
+}
+
 type Game struct {
 	state              gameState
 	debugString        string
@@ -44,7 +48,7 @@ type Game struct {
 	weathercache       *ebiten.Image
 	audioContext       *audio.Context
 	audioPlayer        *audio.Player
-	externalAudio      context.CancelFunc
+	externalAudio      *audioSession
 	externalAudioStdin io.WriteCloser
 	radiobuttons       map[stationName]*radiobutton
 	selectedStation    *radiobutton

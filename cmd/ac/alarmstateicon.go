@@ -13,14 +13,21 @@ type alarmstateicon struct {
 }
 
 func (a *alarmstateicon) location() {
-	if a == nil || a.sprite == nil {
+	if a == nil || a.sprite == nil || a.image == nil {
 		return
 	}
 
+	b := a.image.Bounds()
+	w := int(float64(b.Max.X) * a.scale)
+	h := int(float64(b.Max.Y)*a.scale) + 28 // include space for the label below
+
+	maxX := max(screensize.X-w, 1)
+	maxY := max(screensize.Y-h, 1)
+
 	// #nosec G404 - we don't need strong randomness
-	a.X = rand.Int()%screensize.X - 32
+	a.X = rand.Intn(maxX)
 	// #nosec G404 - we don't need strong randomness
-	a.Y = rand.Int()%screensize.Y - 32
+	a.Y = rand.Intn(maxY)
 }
 
 func (g *Game) drawAlarmStateIcon(screen *ebiten.Image) {
@@ -68,7 +75,7 @@ func (g *Game) clearAlarmStateIcon() {
 
 func (a *alarmstateicon) draw(screen *ebiten.Image) {
 	op := &colorm.DrawImageOptions{}
-	op.Blend = ebiten.BlendCopy
+	// op.Blend = ebiten.BlendCopy
 
 	var cm colorm.ColorM
 	cm.Scale(1.0, 1.0, 1.0, 0.25)

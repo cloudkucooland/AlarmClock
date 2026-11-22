@@ -22,11 +22,14 @@ func (s *spritelabel) genlabelimage(bgcolor color.RGBA, font *text.GoTextFace) {
 	bsize := s.labelimg.Bounds()
 
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(float64(bsize.Max.X/2)-float64(textwidth/2), float64(bsize.Max.Y/2)-float64(textheight/2))
+	op.GeoM.Translate(float64(bsize.Max.X/2.0)-float64(textwidth/2.0), float64(bsize.Max.Y/2.0)-float64(textheight/2.0))
 	text.Draw(s.labelimg, s.label, font, op)
 }
 
 func (s *sprite) setLabel(l string) {
+	if s.spritelabel.label == l && s.spritelabel.labelimg != nil {
+		return
+	}
 	s.spritelabel.label = l
 	if s.spritelabel.labelimg != nil {
 		s.spritelabel.labelimg.Deallocate()

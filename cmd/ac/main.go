@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"image"
+	"io"
 	"log"
 	"net/rpc"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -43,7 +45,13 @@ type Game struct {
 	weathercache     *ebiten.Image
 	audioContext     *audio.Context
 	audioPlayer      *audio.Player
-	externalAudio    context.CancelFunc
+	streamBody       io.Closer
+	streamCancel     context.CancelFunc
+	targetVol        float64
+	externalMu       sync.Mutex
+	externalAudio    *externalProc
+	externalVol      uint8
+	sleepCancel      context.CancelFunc
 	radiobuttons     map[stationName]*radiobutton
 	selectedStation  *radiobutton
 	inSleepCountdown bool
@@ -52,6 +60,7 @@ type Game struct {
 	radiocontrols    map[string]*radiocontrol
 	alarmbuttons     map[string]*alarmbutton
 	ledclient        *rpc.Client
+	ledMu            sync.Mutex
 	alarmStateIcon   *alarmstateicon
 }
 
@@ -65,9 +74,10 @@ func main() {
 	}
 
 	g := &Game{
-		state:   inNormal,
-		clock:   &clock{},
-		weather: nil,
+		state:     inNormal,
+		clock:     &clock{},
+		weather:   nil,
+		targetVol: 0.50,
 	}
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY

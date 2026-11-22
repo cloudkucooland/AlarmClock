@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"maps"
 	"math"
 	"net/http"
+	"os/exec"
 	"slices"
 	"strings"
 	"time"
@@ -20,6 +23,10 @@ const defaultRadioStation = stationName(" KERA")
 type radiobutton struct {
 	*sprite
 	url string
+}
+
+type readerOnly struct {
+	io.Reader
 }
 
 func (g *Game) setupRadioButtons() {
@@ -38,7 +45,7 @@ func (g *Game) setupRadioButtons() {
 		},
 		"Dub Techno": {
 			sprite: getSprite("Bathtime", "Dub Techno", chirp),
-			url:    "http://94.130.113.214:8000/dubtechno",
+			url:    "http://ice1.somafm.com/groovesalad-128-mp3",
 		},
 		"Chillout": {
 			sprite: getSprite("Baby", "Chillout", chirp),
@@ -56,17 +63,17 @@ func (g *Game) setupRadioButtons() {
 			sprite: getSprite("Indignent", "modern ambient", chirp),
 			url:    "http://radio.stereoscenic.com/mod-s",
 		},
-		"BBC 6 Music": {
-			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+		"SomaFM Drone Zone": {
+			sprite: getSprite("Indignent", "Drone Zone", chirp),
+			url:    "http://ice1.somafm.com/dronezone-128-mp3",
 		},
-		"BBC 4": {
-			sprite: getSprite("Pinwheel", "BBC 4", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
+		"Sleepbot Environmental": {
+			sprite: getSprite("Pinwheel", "Sleepbot Environmental", chirp),
+			url:    "http://ice1.somafm.com/sleepbot-128-mp3",
 		},
-		"BBC World Service": {
-			sprite: getSprite("Spring", "BBC World Service", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/audio_pop_up_01/audio_pop_up_01.isml/audio_pop_up_01-audio=96000.norewind.m3u8",
+		"Suburbs of Goa": {
+			sprite: getSprite("Spring", "Suburbs of Goa", chirp),
+			url:    "http://ice1.somafm.com/sf1033-128-mp3",
 		},
 	}
 }
@@ -108,77 +115,143 @@ func (r *radiobutton) startPlayer(g *Game) {
 	g.selectedStation = r
 	g.stopPlayer()
 
-	// if a playlist is requested, do that in a new goprocess
 	if strings.Contains(r.url, "m3u") {
-		go g.playExternal(r.url)
+		g.playExternal(r.url)
 		return
 	}
 
-	stream, err := http.Get(r.url)
-	if err != nil {
-		g.debug(err.Error())
-		chirp(g)
-		return
-	}
+	ctx, cancel := context.WithCancel(context.Background())
+	g.streamCancel = cancel
 
-	decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
-	if err != nil {
-		g.debug(err.Error())
-		chirp(g)
-		return
-	}
+	go func(url string) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			g.debug(err.Error())
+			chirp(g)
+			return
+		}
 
-	g.audioPlayer, err = g.audioContext.NewPlayer(decoded)
-	if err != nil {
-		g.debug(err.Error())
-		chirp(g)
-		return
-	}
-	g.audioPlayer.Play()
+		client := &http.Client{
+			Transport: &http.Transport{
+				ResponseHeaderTimeout: 8 * time.Second,
+			},
+		}
+		req.Header.Set("User-Agent", "Birdhouse-Alarmclock/1.0")
+
+		stream, err := client.Do(req)
+		if err != nil {
+			if ctx.Err() == nil {
+				g.debug(err.Error())
+				chirp(g)
+			}
+			return
+		}
+
+		if stream.StatusCode != http.StatusOK {
+			stream.Body.Close()
+			g.debug(fmt.Sprintf("stream HTTP %d: %s", stream.StatusCode, url))
+			chirp(g)
+			return
+		}
+
+		decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
+		if err != nil {
+			stream.Body.Close()
+			if ctx.Err() == nil {
+				g.debug(err.Error())
+				chirp(g)
+			}
+			return
+		}
+
+		if ctx.Err() != nil {
+			stream.Body.Close()
+			return
+		}
+
+		// player, err := g.audioContext.NewPlayer(decoded)
+		player, err := g.audioContext.NewPlayer(readerOnly{decoded})
+		if err != nil {
+			stream.Body.Close()
+			g.debug(err.Error())
+			chirp(g)
+			return
+		}
+
+		player.SetVolume(g.targetVol)
+		g.audioPlayer = player
+		g.streamBody = stream.Body
+		g.audioPlayer.Play()
+	}(r.url)
 }
 
 func (g *Game) stopPlayer() {
 	g.inSleepCountdown = false
+	if g.sleepCancel != nil {
+		g.sleepCancel()
+		g.sleepCancel = nil
+	}
 
-	if g.externalAudio != nil {
+	if g.streamCancel != nil {
+		g.streamCancel()
+		g.streamCancel = nil
+	}
+
+	if g.hasExternalAudio() {
 		g.stopExternalPlayer()
-		return
 	}
 
-	if g.audioPlayer == nil {
-		return
+	if g.audioPlayer != nil {
+		if g.audioPlayer.IsPlaying() {
+			g.audioPlayer.Pause()
+		}
+		if err := g.audioPlayer.Close(); err != nil {
+			g.debug(err.Error())
+		}
+		g.audioPlayer = nil
 	}
 
-	// do not use g.isAudioPlaying since external audio is covered above
-	if g.audioPlayer.IsPlaying() {
-		g.audioPlayer.Pause()
+	if g.streamBody != nil {
+		if err := g.streamBody.Close(); err != nil {
+			g.debug(err.Error())
+		}
+		g.streamBody = nil
 	}
-	if err := g.audioPlayer.Close(); err != nil {
-		g.debug(err.Error())
-		return
-	}
-	g.audioPlayer = nil
 }
 
 func (g *Game) sleepStopPlayer() {
+	if g.sleepCancel != nil {
+		g.sleepCancel()
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	g.sleepCancel = cancel
 	g.inSleepCountdown = true
 
 	// kick the screensaver on in 5
 	g.lastAct = time.Now().Add(-(screensaverTimeout - (5 * time.Second)))
 
-	go func(g *Game) {
-		c := time.Tick(5 * time.Minute)
+	go func(ctx context.Context) {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
 
-		i := 0
-		for i < 6 {
-			i = i + 1
-			vol := g.audioPlayer.Volume()
-			vol = math.Max(vol-0.05, 0.05)
-			g.audioPlayer.SetVolume(vol)
-			<-c
+		for i := 0; i < 6; i++ {
+			if g.hasExternalAudio() {
+				_ = exec.Command("wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%-").Run()
+				g.refreshExternalVolume()
+			} else if g.audioPlayer != nil {
+				vol := math.Max(g.audioPlayer.Volume()-0.05, 0.05)
+				g.audioPlayer.SetVolume(vol)
+			}
+
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
 		}
 		g.stopPlayer()
-	}(g)
+	}(ctx)
 }
 
 func (g *Game) defaultStation() *radiobutton {
@@ -195,9 +268,33 @@ func (g *Game) defaultStation() *radiobutton {
 }
 
 func (g *Game) isAudioPlaying() bool {
-	if g.externalAudio != nil {
+	if g.hasExternalAudio() {
 		return true
+	}
+	if g.audioPlayer == nil {
+		return false
 	}
 
 	return g.audioPlayer.IsPlaying()
+}
+
+func (g *Game) setStreamVolume(vol float64) {
+	vol = math.Max(0.05, math.Min(1.0, vol))
+	g.targetVol = vol
+
+	if g.hasExternalAudio() {
+		pct := fmt.Sprintf("%d%%", int(math.Round(vol*100)))
+		if err := exec.Command("wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", pct).Run(); err != nil {
+			g.debug(err.Error())
+		}
+		g.refreshExternalVolume()
+		return
+	}
+
+	if g.audioPlayer != nil {
+		g.audioPlayer.SetVolume(vol)
+	}
+	if dn, ok := g.radiocontrols["VolDn"]; ok {
+		dn.setLabel(fmt.Sprintf("%d", int(math.Round(vol*100))))
+	}
 }

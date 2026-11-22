@@ -77,18 +77,27 @@ func (g *Game) loadconfig() {
 }
 
 func (g *Game) storeconfig() error {
-	// #nosec G302 G304
-	f, err := os.OpenFile(configFile, os.O_RDWR|os.O_TRUNC, 0644)
+	tmpFile := configFile + ".tmp"
+	// #nosec G304
+	f, err := os.OpenFile(tmpFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		g.debug("unable to open file " + err.Error())
+		g.debug("unable to open temp config: " + err.Error())
 		return err
 	}
-	defer f.Close()
-	// f.Seek(0, io.SeekStart)
 
 	encoder := json.NewEncoder(f)
+	encoder.SetIndent("", "  ")
 	if err := encoder.Encode(g.config); err != nil {
-		g.debug("unable to write file: " + err.Error())
+		_ = f.Close()
+		g.debug("unable to write temp config: " + err.Error())
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+
+	if err := os.Rename(tmpFile, configFile); err != nil {
+		g.debug("unable to rename config: " + err.Error())
 		return err
 	}
 	return nil

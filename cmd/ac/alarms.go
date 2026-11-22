@@ -39,18 +39,18 @@ func (g *Game) checkAlarms(hour int, minute int) {
 		return
 	}
 
-	if !a.snooze && a.AlarmTime.Hour == hour && a.AlarmTime.Minute == minute {
+	// Only trigger once: !a.triggered prevents re-firing every 15s during the same minute
+	if !a.triggered && !a.snooze && a.AlarmTime.Hour == hour && a.AlarmTime.Minute == minute {
 		g.startAlarm(g.config.EnabledAlarmID)
 		return
 	}
 
-	if a.snooze {
-		snoozehour := a.AlarmTime.Hour
-		snoozemin := a.AlarmTime.Minute + (g.config.SnoozeDuration * a.snoozeCount)
-		if snoozemin >= 60 {
-			snoozemin = snoozemin - 60
-			snoozehour = snoozehour + 1
-		}
+	// Only wake from snooze once, and handle multi-hour / midnight rollovers
+	if a.snooze && !a.triggered {
+		totalMin := a.AlarmTime.Minute + (g.config.SnoozeDuration * a.snoozeCount)
+		snoozehour := (a.AlarmTime.Hour + (totalMin / 60)) % 24
+		snoozemin := totalMin % 60
+
 		if snoozehour == hour && snoozemin == minute {
 			g.wakeFromSnooze(g.config.EnabledAlarmID)
 		}
@@ -71,6 +71,7 @@ func (g *Game) startAlarm(id alarmid) {
 
 	a.triggered = true
 	g.ledAllOn()
+	g.targetVol = 0.25
 	g.startAlarmPlayer(a)
 	g.audioPlayer.SetVolume(0.25)
 
@@ -140,11 +141,12 @@ func (g *Game) wakeFromSnooze(id alarmid) {
 		g.debug("unable to wake from snooze for unknown alarm")
 		return
 	}
+	a.snooze = false
 	a.triggered = true
+	g.targetVol = 0.50
 	g.startAlarmPlayer(a)
 	g.ledRainbow()
-	// vol := float64((60 + (aa.snoozeCount * 10)) / 100)
-	g.audioPlayer.SetVolume(0.50)
+	g.setStreamVolume(0.50)
 }
 
 func (g *Game) drawAlarm(screen *ebiten.Image) {
@@ -264,7 +266,13 @@ func (g *Game) startAlarmPlayer(a *Alarm) {
 			return
 		}
 		if !g.isAudioPlaying() && a.triggered && !a.snooze {
-			// g.stopPlayer() // why stop if already not playing?
+			if g.streamCancel != nil {
+				g.streamCancel()
+				g.streamCancel = nil
+			}
+			if g.hasExternalAudio() {
+				g.stopExternalPlayer()
+			}
 
 			backup, ok := sounds.Sounds["BackupAlarm"]
 			if !ok {

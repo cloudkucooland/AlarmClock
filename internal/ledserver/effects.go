@@ -140,7 +140,7 @@ func (l *LED) candle(ctx context.Context, done chan struct{}, brightness uint8) 
 
 		for {
 			l.mu.Lock()
-			hot := runningHot.Load()
+			hot := runningHot.Load() || voltageOutOfSpec.Load()
 			var lastRnd uint32
 			for i := 0; i < l.bufsize; i += channels {
 				if hot && i%(4*channels) != 0 {
@@ -195,7 +195,7 @@ func (l *LED) fireflies(ctx context.Context, done chan struct{}) {
 		{R: 140, G: 210, B: 45}, // soft chartreuse
 	}
 
-	numFlies := numpixels/8
+	numFlies := numpixels / 8
 	flies := make([]firefly, numFlies)
 	for f := range flies {
 		flies[f] = firefly{
@@ -217,7 +217,7 @@ func (l *LED) fireflies(ctx context.Context, done chan struct{}) {
 				return
 			case <-ticker.C:
 				l.mu.Lock()
-				hot := runningHot.Load()
+				hot := runningHot.Load() || voltageOutOfSpec.Load()
 
 				// Faint sparse moonlight base (or pure black when running hot)
 				for i := 0; i < l.bufsize; i += channels {
@@ -305,7 +305,7 @@ func (l *LED) alertPulse(ctx context.Context, done chan struct{}, col color.RGBA
 				b := uint8(float64(col.B) * scale)
 
 				l.mu.Lock()
-				hot := runningHot.Load()
+				hot := runningHot.Load() || voltageOutOfSpec.Load()
 				for i := 0; i < l.bufsize; i += channels {
 					if hot && i%(4*channels) != 0 {
 						l.buf[i], l.buf[i+1], l.buf[i+2] = 0, 0, 0

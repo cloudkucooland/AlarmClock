@@ -23,16 +23,19 @@ const (
 )
 
 var runningHot atomic.Bool
+var voltageOutOfSpec atomic.Bool
 
 type LED struct {
-	mu      sync.Mutex
-	buf     []byte
-	leds    *nrzled.Dev
-	bufsize int
-	reg     spi.PortCloser
-	hk      *LedServer
-	cancel  func()
-	done    chan struct{}
+	mu            sync.Mutex
+	buf           []byte
+	leds          *nrzled.Dev
+	bufsize       int
+	reg           spi.PortCloser
+	hk            *LedServer
+	cancel        func()
+	done          chan struct{}
+	monitorCancel func()
+	monitorDone   chan struct{}
 }
 
 type CommandCode int
@@ -132,12 +135,15 @@ func (l *LED) Init() error {
 	l.bufsize = numpixels * channels
 	l.buf = make([]byte, l.bufsize)
 
+	l.startMonitor(2 * time.Second)
+
 	ctx := l.startAnim()
 	l.startup_test(ctx, l.done)
 	return nil
 }
 
 func (l *LED) Shutdown() {
+	l.stopMonitor()
 	l.stopRunning()
 	l.mu.Lock()
 	defer l.mu.Unlock()
@@ -147,7 +153,7 @@ func (l *LED) Shutdown() {
 
 func (l *LED) staticColor(c color.RGBA, updateHomekit bool) {
 	l.mu.Lock()
-	hot := runningHot.Load()
+	hot := runningHot.Load() || voltageOutOfSpec.Load()
 	for i := 0; i < l.bufsize; i += channels {
 		// if we are running hot only light up every 4th led
 		if hot && i%(4*channels) != 0 {
@@ -202,6 +208,60 @@ func (l *LED) stopRunning() {
 	}
 }
 
+func (l *LED) startMonitor(interval time.Duration) {
+	ctx, cancel := context.WithCancel(context.Background())
+	l.monitorCancel = cancel
+	l.monitorDone = make(chan struct{})
+
+	go func() {
+		defer close(l.monitorDone)
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		check := func() {
+			if temp, err := Thermal(); err == nil {
+				if temp >= ThermalThreshold {
+					ThermalHigh()
+				} else if temp <= ThermalThreshold-2.0 { // 2°C hysteresis to prevent flap
+					ThermalNormal()
+				}
+			}
+
+			if volts, err := Voltage(); err == nil {
+				switch {
+				case volts < VoltageMinThreshold:
+					VoltageLow()
+				case volts > VoltageMaxThreshold:
+					VoltageHigh()
+				case volts >= VoltageMinThreshold+0.05 && volts <= VoltageMaxThreshold-0.05:
+					VoltageNormal()
+				}
+			}
+		}
+
+		check()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				check()
+			}
+		}
+	}()
+}
+
+func (l *LED) stopMonitor() {
+	if l.monitorCancel != nil {
+		l.monitorCancel()
+		l.monitorCancel = nil
+		if l.monitorDone != nil {
+			<-l.monitorDone
+			l.monitorDone = nil
+		}
+	}
+}
+
 func ThermalHigh() {
 	if !runningHot.Swap(true) {
 		fmt.Println("running hot")
@@ -211,5 +271,23 @@ func ThermalHigh() {
 func ThermalNormal() {
 	if runningHot.Swap(false) {
 		fmt.Println("cooled off")
+	}
+}
+
+func VoltageLow() {
+	if !voltageOutOfSpec.Swap(true) {
+		fmt.Println("voltage low")
+	}
+}
+
+func VoltageNormal() {
+	if voltageOutOfSpec.Swap(false) {
+		fmt.Println("voltage normal")
+	}
+}
+
+func VoltageHigh() {
+	if !voltageOutOfSpec.Swap(true) {
+		fmt.Println("voltage high")
 	}
 }

@@ -150,19 +150,22 @@ func (l *LED) candle(ctx context.Context, done chan struct{}, brightness uint8) 
 				rnd := rand.Uint32()
 				lastRnd = rnd
 
-				rRaw := rnd >> 8 & 0x3F
-				gRaw := min(rnd&0x0F, rRaw)
-				bRaw := min(rnd>>16&0x0F, rRaw/2) // slightly warmer amber tint on RGB strips
+				rRaw := (rnd >> 8) & 0x3F
+				rLow := rRaw & 0x0F
+				gRaw := min(rnd&0x0F, rLow)
+				// Keep blue very low on 3-channel RGB so low-level flicker stays amber/orange instead of lavender/white
+				bRaw := min((rnd>>16)&0x07, rLow/2)
 
-				// Optional occasional warm-white spark (replaces the W channel from RGBW)
-				var spark uint32
-				if (rnd>>24)&0x07 == 0 {
-					spark = 12
+				// Subtle warm ember/wick glint (matches the 1-bit W flicker without washing out to blue-white)
+				var sparkR, sparkG uint32
+				if (rnd>>24)&0x03 == 0 {
+					sparkR = 4
+					sparkG = 1
 				}
 
-				l.buf[i] = uint8(min(255, (rRaw+spark)*uint32(brightness)))
-				l.buf[i+1] = uint8(min(255, (gRaw+spark)*uint32(brightness)))
-				l.buf[i+2] = uint8(min(255, (bRaw+spark)*uint32(brightness)))
+				l.buf[i] = uint8(min(255, (rRaw+sparkR)*uint32(brightness)))
+				l.buf[i+1] = uint8(min(255, (gRaw+sparkG)*uint32(brightness)))
+				l.buf[i+2] = uint8(min(255, bRaw*uint32(brightness)))
 			}
 			_, _ = l.leds.Write(l.buf)
 			l.mu.Unlock()
@@ -187,9 +190,9 @@ type firefly struct {
 // fireflies renders a dim night-sky backdrop with a few drifting warm bioluminescent glows.
 func (l *LED) fireflies(ctx context.Context, done chan struct{}) {
 	palette := []color.RGBA{
-		{R: 180, G: 220, B: 20},  // classic warm yellow-green firefly
-		{R: 255, G: 190, B: 30},  // warm amber-gold
-		{R: 140, G: 210, B: 45},  // soft chartreuse
+		{R: 180, G: 220, B: 20}, // classic warm yellow-green firefly
+		{R: 255, G: 190, B: 30}, // warm amber-gold
+		{R: 140, G: 210, B: 45}, // soft chartreuse
 	}
 
 	const numFlies = 4
@@ -216,12 +219,12 @@ func (l *LED) fireflies(ctx context.Context, done chan struct{}) {
 				l.mu.Lock()
 				hot := runningHot.Load()
 
-				// Faint moonlight base (or pure black when running hot)
+				// Faint sparse moonlight base (or pure black when running hot)
 				for i := 0; i < l.bufsize; i += channels {
-					if hot {
+					if hot || (i/channels)%3 != 0 {
 						l.buf[i], l.buf[i+1], l.buf[i+2] = 0, 0, 0
 					} else {
-						l.buf[i], l.buf[i+1], l.buf[i+2] = 1, 2, 5
+						l.buf[i], l.buf[i+1], l.buf[i+2] = 0, 0, 1
 					}
 				}
 
@@ -318,4 +321,3 @@ func (l *LED) alertPulse(ctx context.Context, done chan struct{}, col color.RGBA
 		}
 	}()
 }
-

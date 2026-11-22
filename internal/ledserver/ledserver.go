@@ -19,7 +19,7 @@ const (
 	Pipefile  = "/tmp/ledserver.sock"
 	pin       = "SPI0.0"
 	channels  = 3
-	numpixels = 32
+	numpixels = 16
 )
 
 var runningHot atomic.Bool

@@ -195,7 +195,7 @@ func (l *LED) fireflies(ctx context.Context, done chan struct{}) {
 		{R: 140, G: 210, B: 45}, // soft chartreuse
 	}
 
-	const numFlies = 4
+	numFlies := numpixels/8
 	flies := make([]firefly, numFlies)
 	for f := range flies {
 		flies[f] = firefly{

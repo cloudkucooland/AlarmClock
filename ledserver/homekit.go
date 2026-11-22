@@ -110,7 +110,7 @@ type HSB struct {
 
 func (hsb HSB) ToRGB() color.RGBA {
 	rgb := color.RGBA{}
-	c := colorful.Hsl(hsb.H, hsb.S/100, float64(hsb.B)/100)
+	c := colorful.Hsv(hsb.H, hsb.S/100, float64(hsb.B)/100)
 	rgb.R, rgb.G, rgb.B = c.RGB255()
 	return rgb
 }
@@ -120,10 +120,20 @@ func (l *LED) updateHomeKit(c color.RGBA) {
 		return
 	}
 
-	cf := colorful.LinearRgb(float64(c.R)/255, float64(c.G)/255, float64(c.B)/255)
-	h, s, b := cf.Hsl()
-	fmt.Printf("H: %f S: %f B: %f\n", h, s*100, b*100)
-	l.hk.Lightbulb.Hue.SetValue(h * 360)
+	isOn := c.R > 0 || c.G > 0 || c.B > 0
+	l.hk.Lightbulb.On.SetValue(isOn)
+	if !isOn {
+		return
+	}
+
+	cf := colorful.Color{
+		R: float64(c.R) / 255.0,
+		G: float64(c.G) / 255.0,
+		B: float64(c.B) / 255.0,
+	}
+	h, s, v := cf.Hsv()
+	fmt.Printf("H: %f S: %f B: %f\n", h, s*100, v*100)
+	l.hk.Lightbulb.Hue.SetValue(h)
 	l.hk.Lightbulb.Saturation.SetValue(s * 100)
-	l.hk.Lightbulb.Brightness.SetValue(int(b * 100))
+	l.hk.Lightbulb.Brightness.SetValue(int(v * 100))
 }

@@ -8,6 +8,7 @@ import (
 	"net/rpc"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/urfave/cli/v3"
 
@@ -25,6 +26,70 @@ func main() {
 	cmd := &cli.Command{
 		Commands: []*cli.Command{
 			{
+				Name:  "sunrise",
+				Usage: "run the sunrise ramp (optional duration, e.g. 30s or 15m)",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					rpccmd := &ledserver.Command{
+						Command: ledserver.Sunrise,
+					}
+					if arg := cmd.Args().Get(0); arg != "" {
+						d, err := time.ParseDuration(arg)
+						if err != nil {
+							return err
+						}
+						rpccmd.Duration = d
+					}
+
+					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
+						return err
+					}
+					return nil
+				},
+			},
+
+			{
+				Name:  "fireflies",
+				Usage: "run the fireflies effect",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					rpccmd := &ledserver.Command{
+						Command: ledserver.Fireflies,
+					}
+
+					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
+						return err
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "alert",
+				Usage: "run the alert pulse effect",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					rpccmd := &ledserver.Command{
+						Command: ledserver.AlertPulse,
+					}
+
+					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
+						return err
+					}
+					return nil
+				},
+			},
+			{
+				Name:  "candle",
+				Usage: "run the candle effect",
+				Action: func(ctx context.Context, cmd *cli.Command) error {
+					rpccmd := &ledserver.Command{
+						Command: ledserver.Candle,
+					}
+
+					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
+						return err
+					}
+					return nil
+				},
+			},
+			{
 				Name:    "rainbow",
 				Aliases: []string{"r"},
 				Usage:   "run the rainbow pattern",
@@ -34,7 +99,7 @@ func main() {
 					}
 
 					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
-						panic(err.Error())
+						return err
 					}
 					return nil
 				},
@@ -49,7 +114,7 @@ func main() {
 					}
 
 					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
-						panic(err.Error())
+						return err
 					}
 					return nil
 				},
@@ -64,7 +129,7 @@ func main() {
 					}
 
 					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
-						panic(err.Error())
+						return err
 					}
 					return nil
 				},
@@ -90,7 +155,7 @@ func main() {
 					}
 
 					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
-						panic(err.Error())
+						return err
 					}
 					return nil
 				},
@@ -136,7 +201,7 @@ func main() {
 					}
 
 					if err := client.Call("LED.Set", rpccmd, &res); err != nil {
-						panic(err.Error())
+						return err
 					}
 					return nil
 				},

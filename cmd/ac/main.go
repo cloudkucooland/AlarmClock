@@ -35,33 +35,31 @@ const (
 	inRadio
 )
 
+type audioSession struct {
+	cancel context.CancelFunc
+}
+
 type Game struct {
-	state            gameState
-	debugString      string
-	lastAct          time.Time
-	clock            *clock
-	background       *ebiten.Image
-	weather          *owm.CurrentWeatherData
-	weathercache     *ebiten.Image
-	audioContext     *audio.Context
-	audioPlayer      *audio.Player
-	streamBody       io.Closer
-	streamCancel     context.CancelFunc
-	targetVol        float64
-	externalMu       sync.Mutex
-	externalAudio    *externalProc
-	externalVol      uint8
-	sleepCancel      context.CancelFunc
-	radiobuttons     map[stationName]*radiobutton
-	selectedStation  *radiobutton
-	inSleepCountdown bool
-	config           *Config
-	controls         []*control
-	radiocontrols    map[string]*radiocontrol
-	alarmbuttons     map[string]*alarmbutton
-	ledclient        *rpc.Client
-	ledMu            sync.Mutex
-	alarmStateIcon   *alarmstateicon
+	state              gameState
+	debugString        string
+	lastAct            time.Time
+	clock              *clock
+	background         *ebiten.Image
+	weather            *owm.CurrentWeatherData
+	weathercache       *ebiten.Image
+	audioContext       *audio.Context
+	audioPlayer        *audio.Player
+	externalAudio      *audioSession
+	externalAudioStdin io.WriteCloser
+	radiobuttons       map[stationName]*radiobutton
+	selectedStation    *radiobutton
+	inSleepCountdown   bool
+	config             *Config
+	controls           []*control
+	radiocontrols      map[string]*radiocontrol
+	alarmbuttons       map[string]*alarmbutton
+	ledclient          *rpc.Client
+	alarmStateIcon     *alarmstateicon
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

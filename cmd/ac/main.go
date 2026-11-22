@@ -33,6 +33,7 @@ const (
 	inScreenSaver
 	inAlarmConfig
 	inRadio
+	inMusic
 )
 
 type Game struct {
@@ -62,6 +63,7 @@ type Game struct {
 	ledclient        *rpc.Client
 	ledMu            sync.Mutex
 	alarmStateIcon   *alarmstateicon
+	music            *musicBrowser
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {

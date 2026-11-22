@@ -45,4 +45,3 @@ func (s *sprite) setLabel(l string) {
 		s.spritelabel.labelimg = nil
 	}
 }
-

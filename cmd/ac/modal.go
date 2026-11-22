@@ -44,4 +44,3 @@ func modalclose(g *Game) {
 	chirp(g)
 	g.state = inNormal
 }
-

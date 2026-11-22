@@ -53,7 +53,7 @@ func (g *Game) Update() error {
 					rb.startanimation()
 				}
 			}
-		case inAlarmConfig, inAlarm:
+		case inAlarmConfig, inAlarm, inMusic:
 		default:
 			g.debug("mousedown in unknown state")
 		}
@@ -163,6 +163,13 @@ func (g *Game) Update() error {
 			if b, ok := g.alarmbuttons["Stop"]; ok {
 				if b.in(x, y) {
 					b.do(g)
+				}
+			}
+		case inMusic:
+			g.handleMusicClick(x, y)
+			for _, m := range modalbuttons {
+				if m.in(x, y) {
+					m.do(g)
 				}
 			}
 		default:

@@ -132,4 +132,3 @@ func (g *Game) getExternalVolume() uint8 {
 	defer g.externalMu.Unlock()
 	return g.externalVol
 }
-

@@ -220,6 +220,12 @@ func (r *radiobutton) startPlayer(g *Game) {
 
 func (g *Game) stopPlayer() {
 	g.inSleepCountdown = false
+	if g.music != nil {
+		g.music.mu.Lock()
+		g.music.queue = nil
+		g.music.nowPlaying = ""
+		g.music.mu.Unlock()
+	}
 	if g.sleepCancel != nil {
 		g.sleepCancel()
 		g.sleepCancel = nil

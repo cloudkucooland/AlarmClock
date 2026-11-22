@@ -104,4 +104,3 @@ func drawCenteredWeatherLine(dst *ebiten.Image, str string, centerX, y float64, 
 	op.ColorScale.ScaleWithColor(col)
 	text.Draw(dst, str, weatherfont, op)
 }
-

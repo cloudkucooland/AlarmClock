@@ -16,13 +16,16 @@ func (g *Game) setupControls() {
 		{
 			sprite: getSprite("Happy", "Radio", radioDialog),
 		},
+		{
+			sprite: getSprite("Artist", "Music", musicDialog),
+		},
 	}
 }
 
 func (g *Game) drawControls(screen *ebiten.Image) {
 	x := screensize.X - 100
-	y := 30
-	spacing := 150
+	y := 22
+	spacing := 125
 
 	for _, c := range g.controls {
 		c.setLocation(x, y)

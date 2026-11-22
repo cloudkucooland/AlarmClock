@@ -1,4 +1,4 @@
-package ledserver 
+package ledserver
 
 import (
 	"periph.io/x/conn/v3/physic"

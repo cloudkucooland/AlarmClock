@@ -50,4 +50,3 @@ func loadfonts() error {
 	}
 	return nil
 }
-

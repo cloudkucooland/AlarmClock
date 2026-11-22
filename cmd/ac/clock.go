@@ -66,4 +66,3 @@ func (g *Game) drawClock(screen *ebiten.Image) {
 	}
 	screen.DrawImage(g.clock.cache, drawOp)
 }
-

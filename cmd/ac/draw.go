@@ -27,6 +27,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g.drawAlarmConfig(screen)
 	case inRadio:
 		g.drawRadioDialog(screen)
+	case inMusic:
+		g.drawMusicDialog(screen)
 	}
 
 	if g.debugString != "" {

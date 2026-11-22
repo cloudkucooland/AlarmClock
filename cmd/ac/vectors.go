@@ -88,4 +88,3 @@ func fillRoundedRect(dst *ebiten.Image, x, y, w, h, r float32, col color.RGBA) {
 	vector.FillRect(dst, x+r, y, w-r*2, h, col, true)
 	vector.FillRect(dst, x, y+r, w, h-r*2, col, true)
 }
-

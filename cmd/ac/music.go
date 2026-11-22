@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -15,6 +16,21 @@ import (
 )
 
 const musicRoot = "/Net/music/alac"
+
+type letterBucket struct {
+	label string
+	start string // "#" or first letter in bucket
+}
+
+var letterBuckets = []letterBucket{
+	{label: "#–C", start: "#"},
+	{label: "D–G", start: "D"},
+	{label: "H–K", start: "H"},
+	{label: "L–O", start: "L"},
+	{label: "P–S", start: "P"},
+	{label: "T–W", start: "T"},
+	{label: "X–Z", start: "X"},
+}
 
 type musicItem struct {
 	label  string
@@ -32,18 +48,18 @@ type musicBrowser struct {
 	page        int
 	pageUp      *sprite
 	pageDn      *sprite
-	letterRects map[string]image.Rectangle
+	bucketRects map[string]image.Rectangle
 
-	queue       []string
-	queueIdx    int
-	nowPlaying  string
+	queue      []string
+	queueIdx   int
+	nowPlaying string
 }
 
 func musicDialog(g *Game) {
 	chirp(g)
 	if g.music == nil {
 		g.music = &musicBrowser{
-			letterRects: make(map[string]image.Rectangle),
+			bucketRects: make(map[string]image.Rectangle),
 		}
 	}
 	g.music.ensureLoaded(g)
@@ -69,6 +85,19 @@ func (m *musicBrowser) ensureLoaded(g *Game) {
 			}
 		}
 		slices.SortFunc(m.artists, func(a, b string) int {
+			ca, cb := leadingBucketChar(a), leadingBucketChar(b)
+			if ca != cb {
+				if ca == '#' {
+					return -1
+				}
+				if cb == '#' {
+					return 1
+				}
+				if ca < cb {
+					return -1
+				}
+				return 1
+			}
 			return strings.Compare(strings.ToLower(a), strings.ToLower(b))
 		})
 	}
@@ -268,22 +297,22 @@ func (g *Game) drawMusicDialog(screen *ebiten.Image) {
 	}
 	drawShadowedText(screen, truncateLabel(header, 38), controlfont, float64(innerX), float64(innerY)+4, textPrimary)
 
-	// A-Z jump strip at root level
-	listTopY := innerY + 34
+	// Finger-friendly letter-range jump bar at root level (~85x44px buttons)
+	listTopY := innerY + 32
 	if g.music.currentPath == "" {
-		letters := []string{"#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 		stripW := rightLimit - innerX
-		cellW := stripW / len(letters)
-		cellH := 26
-		for i, l := range letters {
-			lx := innerX + i*cellW
-			rect := image.Rect(lx, listTopY, lx+cellW-2, listTopY+cellH)
-			g.music.letterRects[l] = rect
-			drawRoundedBox(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), 6, cardSlate, bordergrey, 1.0)
-			tw, th := text.Measure(l, controlfont, 0)
+		gap := 6
+		cellW := (stripW - gap*(len(letterBuckets)-1)) / len(letterBuckets)
+		cellH := 44
+		for i, b := range letterBuckets {
+			lx := innerX + i*(cellW+gap)
+			rect := image.Rect(lx, listTopY, lx+cellW, listTopY+cellH)
+			g.music.bucketRects[b.start] = rect
+			drawRoundedBox(screen, float32(rect.Min.X), float32(rect.Min.Y), float32(rect.Dx()), float32(rect.Dy()), 10, cardSlate, bordergrey, 1.0)
+			tw, th := text.Measure(b.label, controlfont, 0)
 			tx := float64(rect.Min.X) + (float64(rect.Dx())-tw)/2
 			ty := float64(rect.Min.Y) + (float64(rect.Dy())-th)/2
-			drawShadowedText(screen, l, controlfont, tx, ty, textMuted)
+			drawShadowedText(screen, b.label, controlfont, tx, ty, textPrimary)
 		}
 		listTopY += cellH + 10
 	}
@@ -352,14 +381,14 @@ func (g *Game) drawMusicDialog(screen *ebiten.Image) {
 	upW := int(float64(upB.Max.X) * g.music.pageUp.scale)
 	upH := int(float64(upB.Max.Y) * g.music.pageUp.scale)
 
-	g.music.pageUp.setLocation(navX+(navColW-upW)/2, listTopY+8)
+	g.music.pageUp.setLocation(navX+(navColW-upW)/2, listTopY+4)
 	g.music.pageUp.draw(screen)
 
 	pageLabel := fmt.Sprintf("%d/%d", g.music.page+1, totalPages)
 	pw, ph := text.Measure(pageLabel, controlfont, 0)
 	drawShadowedText(screen, pageLabel, controlfont, float64(navX)+(float64(navColW)-pw)/2, float64(listTopY)+float64(listH)/2-ph/2, textMuted)
 
-	g.music.pageDn.setLocation(navX+(navColW-upW)/2, listTopY+listH-upH-8)
+	g.music.pageDn.setLocation(navX+(navColW-upW)/2, listTopY+listH-upH-4)
 	g.music.pageDn.draw(screen)
 }
 
@@ -385,11 +414,11 @@ func (g *Game) handleMusicClick(x, y int) {
 		return
 	}
 
-	// A-Z quick jump when at artist root
+	// Letter-bucket quick jump when at artist root
 	if g.music.currentPath == "" {
-		for letter, rect := range g.music.letterRects {
+		for startLetter, rect := range g.music.bucketRects {
 			if x >= rect.Min.X && x <= rect.Max.X && y >= rect.Min.Y && y <= rect.Max.Y {
-				g.music.jumpToLetter(letter)
+				g.music.jumpToLetter(startLetter)
 				tick(g)
 				return
 			}
@@ -426,7 +455,6 @@ func (g *Game) handleMusicClick(x, y int) {
 					tick(g)
 					g.music.openDir(g, item.path)
 				} else {
-					// Build track list from current directory starting at tapped track
 					chirp(g)
 					var tracks []string
 					startIdx := 0
@@ -451,7 +479,6 @@ func (g *Game) shuffleRandomArtist(game *Game) {
 	if len(g.music.artists) == 0 {
 		return
 	}
-	// Pick up to 15 random artists and gather tracks so shuffle starts instantaneously
 	var pool []string
 	for i := 0; i < 15; i++ {
 		artist := g.music.artists[rand.Intn(len(g.music.artists))]
@@ -462,17 +489,21 @@ func (g *Game) shuffleRandomArtist(game *Game) {
 }
 
 func (m *musicBrowser) jumpToLetter(letter string) {
+	if len(letter) == 0 {
+		return
+	}
+	target := letter[0]
 	for idx, item := range m.items {
 		if item.action != "" || len(item.label) == 0 {
 			continue
 		}
-		first := strings.ToUpper(item.label[:1])
-		if letter == "#" {
-			if first < "A" || first > "Z" {
+		c := leadingBucketChar(item.label)
+		if target == '#' {
+			if c == '#' {
 				m.page = idx / musicRowsPerPage
 				return
 			}
-		} else if first >= letter {
+		} else if c != '#' && c >= target {
 			m.page = idx / musicRowsPerPage
 			return
 		}
@@ -507,3 +538,17 @@ func makeRange(start, end int) []int {
 	return out
 }
 
+func leadingBucketChar(s string) byte {
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		return '#'
+	}
+	c := s[0]
+	if c >= 'a' && c <= 'z' {
+		c = c - 'a' + 'A'
+	}
+	if c >= 'A' && c <= 'Z' {
+		return c
+	}
+	return '#'
+}

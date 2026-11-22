@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
 type radiocontrol struct {
@@ -16,6 +17,12 @@ func (g *Game) setupRadioControls() {
 		"Stop": {
 			sprite: getSprite("Spring", "Stop", func(g *Game) {
 				g.stopPlayer()
+			}),
+		},
+		"Next": {
+			sprite: getSprite("Pinwheel", "Next", func(g *Game) {
+				chirp(g)
+				g.nextMusicTrack()
 			}),
 		},
 		"SleepCountdown": {
@@ -41,18 +48,37 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		return
 	}
 
+	hasMusic := g.hasActiveMusicQueue()
+
 	boxwidth := 230
+	if hasMusic {
+		boxwidth += 104
+	}
 	if !g.inSleepCountdown {
-		boxwidth += 105
+		boxwidth += 104
 	}
 
 	boxheight := 142
 	x := (screensize.X / 2) - (boxwidth / 2)
-	y := 228
+	y := 232
 	padX := 22
 	padY := 14
 
-	// Frosted rounded playback dock matching the weather pill & modal style
+	// Now-playing pill above the playback dock when playing from the music library
+	if hasMusic {
+		if title := g.currentNowPlaying(); title != "" {
+			banner := truncateLabel(title, 44)
+			tw, th := text.Measure(banner, controlfont, 0)
+			bw := float32(tw) + 28
+			bh := float32(th) + 12
+			bx := float32(screensize.X/2) - bw/2
+			by := float32(y) - bh - 8
+			drawRoundedBox(screen, bx, by, bw, bh, bh/2, modalSlate, rimLight, 1.0)
+			drawShadowedText(screen, banner, controlfont, float64(bx)+14, float64(by)+6, textPrimary)
+		}
+	}
+
+	// Frosted rounded playback dock
 	drawRoundedBox(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), 18, modalSlate, rimLight, 1.5)
 
 	cx := x + padX
@@ -77,6 +103,13 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	stop.drawWithLabel(screen)
 
 	cx += 104
+
+	if hasMusic {
+		next := g.radiocontrols["Next"]
+		next.setLocation(cx, cy)
+		next.drawWithLabel(screen)
+		cx += 104
+	}
 
 	if !g.inSleepCountdown {
 		sleep := g.radiocontrols["SleepCountdown"]
@@ -113,4 +146,3 @@ func (g *Game) currentVolumePercent() int {
 	}
 	return int(math.Round(g.targetVol * 100))
 }
-

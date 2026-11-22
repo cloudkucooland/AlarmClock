@@ -165,4 +165,3 @@ func (g *Game) drawAlarmConfig(screen *ebiten.Image) {
 func (a Alarm) in(x int, y int) bool {
 	return (x >= a.dialogButton.bounds.Min.X && x <= a.dialogButton.bounds.Max.X) && (y >= a.dialogButton.bounds.Min.Y && y <= a.dialogButton.bounds.Max.Y)
 }
-

@@ -40,7 +40,7 @@ func (g *Game) Update() error {
 					c.startanimation()
 				}
 			}
-			if g.audioPlayer != nil || g.externalAudio != nil {
+			if g.isAudioPlaying() {
 				for _, r := range g.radiocontrols {
 					if r.in(x, y) && !r.ani.in {
 						r.startanimation()
@@ -76,7 +76,7 @@ func (g *Game) Update() error {
 				}
 			}
 
-			if g.audioPlayer != nil || g.externalAudio != nil {
+			if g.isAudioPlaying() {
 				for _, r := range g.radiocontrols {
 					if r.in(x, y) {
 						if r.ani.in {
@@ -100,21 +100,32 @@ func (g *Game) Update() error {
 		case inAlarmConfig:
 			processed := false
 			for key, a := range g.config.Alarms {
+				timeChanged := false
 				if a.dialogButton.hourUp.in(x, y) {
 					a.dialogButton.hourUp.do(g)
 					processed = true
+					timeChanged = true
 				}
 				if a.dialogButton.hourDn.in(x, y) {
 					a.dialogButton.hourDn.do(g)
 					processed = true
+					timeChanged = true
 				}
 				if a.dialogButton.minUp.in(x, y) {
 					a.dialogButton.minUp.do(g)
 					processed = true
+					timeChanged = true
 				}
 				if a.dialogButton.minDn.in(x, y) {
 					a.dialogButton.minDn.do(g)
 					processed = true
+					timeChanged = true
+				}
+
+				if timeChanged && g.config.EnabledAlarmID == key {
+					a.triggered = false
+					a.snooze = false
+					g.setAlarmStateIcon()
 				}
 
 				// check if we are in the body of the list-item, to enable/disable it
@@ -131,7 +142,6 @@ func (g *Game) Update() error {
 					}
 					processed = true
 				}
-
 				if processed {
 					_ = g.storeconfig()
 				}

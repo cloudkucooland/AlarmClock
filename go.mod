@@ -1,6 +1,6 @@
 module github.com/cloudkucooland/AlarmClock
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/briandowns/openweathermap v0.21.1
@@ -21,7 +21,7 @@ require (
 	github.com/brutella/dnssd v1.2.14 // indirect
 	github.com/ebitengine/gomobile v0.0.0-20260811165420-c5a1b14deab0 // indirect
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
-	github.com/ebitengine/oto/v3 v3.4.0 // indirect
+	github.com/ebitengine/oto/v3 v3.5.1 // indirect
 	github.com/go-chi/chi v1.5.5 // indirect
 	github.com/go-text/typesetting v0.3.4 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect

@@ -178,14 +178,19 @@ type spriteanimation struct {
 func (s *sprite) aniStep(screen *ebiten.Image) {
 	s.ani.step = s.ani.step + 1
 
-	scale := s.scale + scaleWibble(float64(s.ani.step))
-	theta := thetaWibble(float64(s.ani.step))
-	recenterx, recentery := locWibble(float64(s.X), float64(s.Y), float64(s.ani.step))
+	step := float64(s.ani.step)
+	scale := s.scale + scaleWibble(step)
+	theta := thetaWibble(step)
+
+	b := s.image.Bounds()
+	cx := float64(b.Max.X) / 2.0
+	cy := float64(b.Max.Y) / 2.0
 
 	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-cx, -cy)
 	op.GeoM.Scale(scale, scale)
 	op.GeoM.Rotate(theta)
-	op.GeoM.Translate(recenterx, recentery)
+	op.GeoM.Translate(float64(s.X)+cx*s.scale, float64(s.Y)+cy*s.scale)
 	screen.DrawImage(s.image, op)
 
 	if s.ani.step > (hz / 4) { // quarter of a second

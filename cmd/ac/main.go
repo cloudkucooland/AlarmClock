@@ -8,6 +8,7 @@ import (
 	"net/rpc"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -71,9 +72,10 @@ func main() {
 	}
 
 	g := &Game{
-		state:   inNormal,
-		clock:   &clock{},
-		weather: nil,
+		state:     inNormal,
+		clock:     &clock{},
+		weather:   nil,
+		targetVol: 0.50,
 	}
 	g.clock.X = defaultClockLocationX
 	g.clock.Y = defaultClockLocationY

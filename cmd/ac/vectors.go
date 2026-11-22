@@ -26,14 +26,27 @@ func button(label string, bgcolor color.RGBA, font *text.GoTextFace) *ebiten.Ima
 }
 
 func buttonbase(textwidth float32, textheight float32, bgcolor color.RGBA, padding float32) *ebiten.Image {
+	border := float32(2.0)
 	totalheight := textheight + padding*2
 	diameter := totalheight
 	radius := diameter / 2
 	totalwidth := radius + padding + textwidth + padding + radius
 
-	img := ebiten.NewImage(int(math.Ceil(float64(totalwidth))), int(math.Ceil(float64(totalheight))))
-	vector.FillCircle(img, radius, radius, radius, bgcolor, true)
-	vector.FillCircle(img, totalwidth-radius, radius, radius, bgcolor, true)
-	vector.FillRect(img, radius, 0, totalwidth-diameter, totalheight, bgcolor, true)
+	w := int(math.Ceil(float64(totalwidth)))
+	h := int(math.Ceil(float64(totalheight)))
+	img := ebiten.NewImage(w, h)
+
+	// Subtle dark border pill
+	borderCol := color.RGBA{R: 0, G: 0, B: 0, A: 90}
+	vector.FillCircle(img, radius, radius, radius, borderCol, true)
+	vector.FillCircle(img, totalwidth-radius, radius, radius, borderCol, true)
+	vector.FillRect(img, radius, 0, totalwidth-diameter, totalheight, borderCol, true)
+
+	// Inner fill pill inset by `border`
+	innerR := radius - border
+	vector.FillCircle(img, radius, radius, innerR, bgcolor, true)
+	vector.FillCircle(img, totalwidth-radius, radius, innerR, bgcolor, true)
+	vector.FillRect(img, radius, border, totalwidth-diameter, totalheight-border*2, bgcolor, true)
+
 	return img
 }

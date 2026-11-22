@@ -1,0 +1,2 @@
+wpctl status
+wpctl set-volume 83 .2

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"maps"
 	// "math"
 	// "net/http"
@@ -22,6 +24,10 @@ type radiobutton struct {
 	url string
 }
 
+type readerOnly struct {
+	io.Reader
+}
+
 func (g *Game) setupRadioButtons() {
 	g.radiobuttons = map[stationName]*radiobutton{
 		"WRR": {
@@ -38,7 +44,7 @@ func (g *Game) setupRadioButtons() {
 		},
 		"Dub Techno": {
 			sprite: getSprite("Bathtime", "Dub Techno", chirp),
-			url:    "http://94.130.113.214:8000/dubtechno",
+			url:    "http://ice1.somafm.com/groovesalad-128-mp3",
 		},
 		"Chillout": {
 			sprite: getSprite("Baby", "Chillout", chirp),
@@ -114,34 +120,61 @@ func (r *radiobutton) startPlayer(g *Game) {
 
 func (g *Game) stopPlayer() {
 	g.inSleepCountdown = false
+	if g.sleepCancel != nil {
+		g.sleepCancel()
+		g.sleepCancel = nil
+	}
 
 	if g.externalAudio != nil {
 		g.stopExternalPlayer()
 	}
 
-	if g.audioPlayer == nil {
-		return
+	if g.hasExternalAudio() {
+		g.stopExternalPlayer()
 	}
 
-	// do not use g.isAudioPlaying since external audio is covered above
-	if g.audioPlayer.IsPlaying() {
-		g.audioPlayer.Pause()
+	if g.audioPlayer != nil {
+		if g.audioPlayer.IsPlaying() {
+			g.audioPlayer.Pause()
+		}
+		if err := g.audioPlayer.Close(); err != nil {
+			g.debug(err.Error())
+		}
+		g.audioPlayer = nil
 	}
-	if err := g.audioPlayer.Close(); err != nil {
-		g.debug(err.Error())
-		return
+
+	if g.streamBody != nil {
+		if err := g.streamBody.Close(); err != nil {
+			g.debug(err.Error())
+		}
+		g.streamBody = nil
 	}
-	g.audioPlayer = nil
 }
 
 func (g *Game) sleepStopPlayer() {
+	if g.sleepCancel != nil {
+		g.sleepCancel()
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	g.sleepCancel = cancel
 	g.inSleepCountdown = true
 
 	// kick the screensaver on in 5
 	g.lastAct = time.Now().Add(-(screensaverTimeout - (5 * time.Second)))
 
-	go func(g *Game) {
-		c := time.Tick(5 * time.Minute)
+	go func(ctx context.Context) {
+		ticker := time.NewTicker(5 * time.Minute)
+		defer ticker.Stop()
+
+		for i := 0; i < 6; i++ {
+			if g.hasExternalAudio() {
+				_ = exec.Command("wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", "5%-").Run()
+				g.refreshExternalVolume()
+			} else if g.audioPlayer != nil {
+				vol := math.Max(g.audioPlayer.Volume()-0.05, 0.05)
+				g.audioPlayer.SetVolume(vol)
+			}
 
 		i := 0
 		for i < 6 {
@@ -151,7 +184,7 @@ func (g *Game) sleepStopPlayer() {
 			<-c
 		}
 		g.stopPlayer()
-	}(g)
+	}(ctx)
 }
 
 func (g *Game) defaultStation() *radiobutton {
@@ -168,9 +201,33 @@ func (g *Game) defaultStation() *radiobutton {
 }
 
 func (g *Game) isAudioPlaying() bool {
-	if g.externalAudio != nil {
+	if g.hasExternalAudio() {
 		return true
+	}
+	if g.audioPlayer == nil {
+		return false
 	}
 
 	return g.audioPlayer.IsPlaying()
+}
+
+func (g *Game) setStreamVolume(vol float64) {
+	vol = math.Max(0.05, math.Min(1.0, vol))
+	g.targetVol = vol
+
+	if g.hasExternalAudio() {
+		pct := fmt.Sprintf("%d%%", int(math.Round(vol*100)))
+		if err := exec.Command("wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", pct).Run(); err != nil {
+			g.debug(err.Error())
+		}
+		g.refreshExternalVolume()
+		return
+	}
+
+	if g.audioPlayer != nil {
+		g.audioPlayer.SetVolume(vol)
+	}
+	if dn, ok := g.radiocontrols["VolDn"]; ok {
+		dn.setLabel(fmt.Sprintf("%d", int(math.Round(vol*100))))
+	}
 }

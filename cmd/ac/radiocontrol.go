@@ -38,14 +38,7 @@ func (g *Game) setupRadioControls() {
 }
 
 func (g *Game) drawRadioControls(screen *ebiten.Image) {
-	// if an external audio program is running (ffplay) draw controls for that
-	if g.externalAudio != nil {
-		g.drawExternalControls(screen)
-		return
-	}
-
-	// if no internal player is running, don't draw anything
-	if g.audioPlayer == nil {
+	if !g.isAudioPlaying() {
 		return
 	}
 
@@ -70,63 +63,58 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 	y = y + ypadding
 	x = x + 2*xpadding
 
-	if g.audioPlayer.IsPlaying() {
-		up := g.radiocontrols["VolUp"]
-		up.scale = 1.0
-		bounds := up.sprite.image.Bounds()
-		up.setLocation(x, y)
-		up.draw(screen)
+	up := g.radiocontrols["VolUp"]
+	up.scale = 1.0
+	bounds := up.sprite.image.Bounds()
+	up.setLocation(x, y)
+	up.draw(screen)
 
-		dn := g.radiocontrols["VolDn"]
-		dn.scale = 1.0
-		dn.setLocation(x, y+bounds.Max.Y+ypadding)
-		dn.setLabel(fmt.Sprintf("%d", int(g.audioPlayer.Volume()*100.0)))
-		dn.drawWithLabel(screen)
+	dn := g.radiocontrols["VolDn"]
+	dn.scale = 1.0
+	dn.setLocation(x, y+bounds.Max.Y+ypadding)
+	dn.setLabel(fmt.Sprintf("%d", g.currentVolumePercent()))
+	dn.drawWithLabel(screen)
 
-		x = x + 100
+	x = x + 100
 
-		stop := g.radiocontrols["Stop"]
-		stop.setLocation(x, y)
-		stop.drawWithLabel(screen)
+	stop := g.radiocontrols["Stop"]
+	stop.setLocation(x, y)
+	stop.drawWithLabel(screen)
 
-		x = x + 100
+	x = x + 100
 
-		if !g.inSleepCountdown {
-			stop := g.radiocontrols["SleepCountdown"]
-			stop.setLocation(x, y)
-			stop.drawWithLabel(screen)
-		}
+	if !g.inSleepCountdown {
+		sleep := g.radiocontrols["SleepCountdown"]
+		sleep.setLocation(x, y)
+		sleep.drawWithLabel(screen)
 	}
 }
 
 func (g *Game) volumeUp() {
-	if g.externalAudio != nil {
+	if g.hasExternalAudio() {
 		volumeUpExternal(g)
 		tick(g)
 		return
 	}
 
-	// internal audio player
-	vol := g.audioPlayer.Volume()
-	vol = math.Min(vol+0.10, 1.0)
-	g.audioPlayer.SetVolume(vol)
-	dn := g.radiocontrols["VolDn"]
-	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
+	g.setStreamVolume(g.targetVol + 0.10)
 	tick(g)
 }
 
 func (g *Game) volumeDn() {
-	if g.externalAudio != nil {
+	if g.hasExternalAudio() {
 		volumeDnExternal(g)
 		tick(g)
 		return
 	}
 
-	// internal audio player
-	vol := g.audioPlayer.Volume()
-	vol = math.Max(vol-0.10, 0.05)
-	g.audioPlayer.SetVolume(vol)
-	dn := g.radiocontrols["VolDn"]
-	dn.setLabel(fmt.Sprintf("%d", int(vol*100.0)))
+	g.setStreamVolume(g.targetVol - 0.10)
 	tick(g)
+}
+
+func (g *Game) currentVolumePercent() int {
+	if g.hasExternalAudio() {
+		return int(g.getExternalVolume())
+	}
+	return int(math.Round(g.targetVol * 100))
 }

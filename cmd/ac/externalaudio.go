@@ -1,16 +1,23 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	// "io"
 	"os/exec"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+	"strconv"
+	"strings"
 )
 
+type externalProc struct {
+	cancel context.CancelFunc
+}
+
 func (g *Game) playExternal(url string) {
+	g.stopExternalPlayer()
+	g.refreshExternalVolume()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	session := &audioSession{cancel: cancel}
 	g.externalAudio = session
@@ -60,8 +67,10 @@ func (g *Game) stopExternalPlayer() {
 	g.externalAudio = nil
 }
 
-func (g *Game) drawExternalControls(screen *ebiten.Image) {
-	if g.externalAudio == nil {
+func (g *Game) refreshExternalVolume() {
+	out, err := exec.Command("wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@").Output()
+	if err != nil {
+		g.debug(err.Error())
 		return
 	}
 

@@ -1,0 +1,11 @@
+#include "core.h"
+// #include "settings.h"
+// #include "metadata.h"
+// #include "log.h"
+// #include "object-manager.h"
+
+int wp_proxy_get_type(void);
+
+void main() {
+	printf("%d\n", wp_proxy_get_type());
+}

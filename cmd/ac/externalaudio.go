@@ -3,8 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
-	"fmt"
-	// "io"
+	"math"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -19,52 +18,83 @@ func (g *Game) playExternal(url string) {
 	g.refreshExternalVolume()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	session := &audioSession{cancel: cancel}
-	g.externalAudio = session
+	proc := &externalProc{cancel: cancel}
 
-	args := []string{"-ac", "1", "-loglevel", "error", "-nodisp", "-volume", "50", "-vn", url}
-	cmd := exec.CommandContext(ctx, "ffplay", args...)
+	g.externalMu.Lock()
+	g.externalAudio = proc
+	g.externalMu.Unlock()
 
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		g.debug(fmt.Sprintf("Failed to get stdin pipe: %v", err))
-		g.externalAudio = nil
-		cancel()
-		return
-	}
-	g.externalAudioStdin = stdin
+	go func() {
+		defer func() {
+			cancel()
+			g.externalMu.Lock()
+			if g.externalAudio == proc {
+				g.externalAudio = nil
+			}
+			g.externalMu.Unlock()
+		}()
 
-	if err := cmd.Start(); err != nil {
-		g.debug(fmt.Sprintf("Failed to start ffplay: %v", err))
-		g.externalAudio = nil
-		cancel()
-		return
-	}
+		var out bytes.Buffer
+		args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
+		cmd := exec.CommandContext(ctx, "ffplay", args...)
+		cmd.Stdout = &out
+		cmd.Stderr = &out
 
-	// Goroutine to monitor the process and clean up state
-	go func(s *audioSession) {
-		if err := cmd.Wait(); err != nil {
-			g.debug(fmt.Sprintf("ffplay exited: %v", err))
+		if err := cmd.Start(); err != nil {
+			g.debug(err.Error())
+			return
 		}
-		if g.externalAudio == s {
-			g.externalAudio = nil
-			g.externalAudioStdin = nil
+
+		err := cmd.Wait()
+		if out.Len() > 0 {
+			g.debug(out.String())
 		}
-	}(session)
+		if err != nil && ctx.Err() == nil {
+			g.debug(err.Error())
+		}
+	}()
 }
 
 func (g *Game) stopExternalPlayer() {
-	if g.externalAudio == nil {
+	g.externalMu.Lock()
+	proc := g.externalAudio
+	g.externalAudio = nil
+	g.externalMu.Unlock()
+
+	if proc != nil {
+		proc.cancel()
+	}
+}
+
+func (g *Game) hasExternalAudio() bool {
+	g.externalMu.Lock()
+	defer g.externalMu.Unlock()
+	return g.externalAudio != nil
+}
+
+func volumeUpExternal(g *Game) {
+	if err := exec.Command("wpctl", "set-volume", "-l", "1.0", "@DEFAULT_AUDIO_SINK@", "10%+").Run(); err != nil {
+		g.debug(err.Error())
 		return
 	}
+	g.refreshExternalVolume()
+}
 
-	if g.externalAudioStdin != nil {
-		g.externalAudioStdin.Close()
-		g.externalAudioStdin = nil
+func volumeDnExternal(g *Game) {
+	// Keep a 5% floor matching internal volumeDn()
+	cur := g.getExternalVolume()
+	if cur <= 5 {
+		return
 	}
-
-	g.externalAudio.cancel()
-	g.externalAudio = nil
+	step := "10%-"
+	if cur < 15 {
+		step = "5%"
+	}
+	if err := exec.Command("wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", step).Run(); err != nil {
+		g.debug(err.Error())
+		return
+	}
+	g.refreshExternalVolume()
 }
 
 func (g *Game) refreshExternalVolume() {
@@ -73,64 +103,19 @@ func (g *Game) refreshExternalVolume() {
 		g.debug(err.Error())
 		return
 	}
-
-	boxwidth := 340
-	boxheight := 150
-	borderwidth := 20
-	x := (screensize.X / 2) - (boxwidth / 2)
-	y := 230
-	ypadding := 16
-	xpadding := 10
-
-	// TODO: base this on sprite size not hardcoded values
-	vector.FillRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), modalgrey, false)
-	vector.StrokeRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
-	vector.StrokeRect(screen, float32(x+xpadding), float32(y+10), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
-
-	// move from box corner to initial location of icons
-	y = y + ypadding
-	x = x + 2*xpadding
-
-	up := g.radiocontrols["VolUp"]
-	up.scale = 1.0
-	bounds := up.sprite.image.Bounds()
-	up.setLocation(x, y)
-	up.draw(screen)
-
-	dn := g.radiocontrols["VolDn"]
-	dn.scale = 1.0
-	dn.setLocation(x, y+bounds.Max.Y+ypadding)
-	dn.setLabel(fmt.Sprintf("%d", getExternalVolume()))
-	dn.drawWithLabel(screen)
-
-	x = x + 100
-	stop := g.radiocontrols["Stop"]
-	stop.setLocation(x, y)
-	stop.drawWithLabel(screen)
-
-	/* not yet
-	x = x + 100
-	if !g.inSleepCountdown {
-		stop := g.radiocontrols["SleepCountdown"]
-		stop.setLocation(x, y)
-		stop.drawWithLabel(screen)
-	} */
-}
-
-func volumeUpExternal(g *Game) {
-	if g.externalAudioStdin != nil {
-		g.externalAudioStdin.Write([]byte("9"))
+	// Output format: "Volume: 0.50" or "Volume: 0.50 [MUTED]"
+	fields := strings.Fields(string(out))
+	if len(fields) >= 2 {
+		if v, err := strconv.ParseFloat(fields[1], 64); err == nil {
+			g.externalMu.Lock()
+			g.externalVol = uint8(math.Round(v * 100))
+			g.externalMu.Unlock()
+		}
 	}
 }
 
-func volumeDnExternal(g *Game) {
-	if g.externalAudioStdin != nil {
-		g.externalAudioStdin.Write([]byte("0"))
-	}
-}
-
-func getExternalVolume() uint8 {
-	// ffplay doesn't provide easy volume feedback.
-	// Returning a dummy value for the UI label.
-	return 50
+func (g *Game) getExternalVolume() uint8 {
+	g.externalMu.Lock()
+	defer g.externalMu.Unlock()
+	return g.externalVol
 }

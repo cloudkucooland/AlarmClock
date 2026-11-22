@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"io"
 	"maps"
-	// "math"
-	// "net/http"
+	"math"
+	"net/http"
+	"os/exec"
 	"slices"
-	// "strings"
+	"strings"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/audio/mp3"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 )
 
 type stationName string
@@ -62,17 +63,17 @@ func (g *Game) setupRadioButtons() {
 			sprite: getSprite("Indignent", "modern ambient", chirp),
 			url:    "http://radio.stereoscenic.com/mod-s",
 		},
-		"BBC 6 Music": {
-			sprite: getSprite("Indignent", "BBC 6 Music", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_81827798/live/ww/bbc_6music/bbc_6music.isml/bbc_6music-audio%3d96000.norewind.m3u8",
+		"SomaFM Drone Zone": {
+			sprite: getSprite("Indignent", "Drone Zone", chirp),
+			url:    "http://ice1.somafm.com/dronezone-128-mp3",
 		},
-		"BBC 4": {
-			sprite: getSprite("Pinwheel", "BBC 4", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_55057080/live/ww/bbc_radio_fourfm/bbc_radio_fourfm.isml/bbc_radio_fourfm-audio%3d96000.norewind.m3u8",
+		"Sleepbot Environmental": {
+			sprite: getSprite("Pinwheel", "Sleepbot Environmental", chirp),
+			url:    "http://ice1.somafm.com/sleepbot-128-mp3",
 		},
-		"BBC World Service": {
-			sprite: getSprite("Spring", "BBC World Service", chirp),
-			url:    "http://as-hls-ww-live.akamaized.net/pool_87948813/live/ww/bbc_world_service/bbc_world_service.isml/bbc_world_service-audio%3d96000.norewind.m3u8",
+		"Suburbs of Goa": {
+			sprite: getSprite("Spring", "Suburbs of Goa", chirp),
+			url:    "http://ice1.somafm.com/sf1033-128-mp3",
 		},
 	}
 }
@@ -114,8 +115,74 @@ func (r *radiobutton) startPlayer(g *Game) {
 	g.selectedStation = r
 	g.stopPlayer()
 
-	// All streams now routed through external player
-	go g.playExternal(r.url)
+	if strings.Contains(r.url, "m3u") {
+		g.playExternal(r.url)
+		return
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	g.streamCancel = cancel
+
+	go func(url string) {
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			g.debug(err.Error())
+			chirp(g)
+			return
+		}
+
+		client := &http.Client{
+			Transport: &http.Transport{
+				ResponseHeaderTimeout: 8 * time.Second,
+			},
+		}
+		req.Header.Set("User-Agent", "Birdhouse-Alarmclock/1.0")
+
+		stream, err := client.Do(req)
+		if err != nil {
+			if ctx.Err() == nil {
+				g.debug(err.Error())
+				chirp(g)
+			}
+			return
+		}
+
+		if stream.StatusCode != http.StatusOK {
+			stream.Body.Close()
+			g.debug(fmt.Sprintf("stream HTTP %d: %s", stream.StatusCode, url))
+			chirp(g)
+			return
+		}
+
+		decoded, err := mp3.DecodeWithSampleRate(44100, stream.Body)
+		if err != nil {
+			stream.Body.Close()
+			if ctx.Err() == nil {
+				g.debug(err.Error())
+				chirp(g)
+			}
+			return
+		}
+
+		if ctx.Err() != nil {
+			stream.Body.Close()
+			return
+		}
+
+		// player, err := g.audioContext.NewPlayer(decoded)
+		player, err := g.audioContext.NewPlayer(readerOnly{decoded})
+		if err != nil {
+			stream.Body.Close()
+			g.debug(err.Error())
+			chirp(g)
+			return
+		}
+
+		player.SetVolume(g.targetVol)
+		g.audioPlayer = player
+		g.streamBody = stream.Body
+		g.audioPlayer.Play()
+	}(r.url)
 }
 
 func (g *Game) stopPlayer() {
@@ -125,8 +192,9 @@ func (g *Game) stopPlayer() {
 		g.sleepCancel = nil
 	}
 
-	if g.externalAudio != nil {
-		g.stopExternalPlayer()
+	if g.streamCancel != nil {
+		g.streamCancel()
+		g.streamCancel = nil
 	}
 
 	if g.hasExternalAudio() {
@@ -176,12 +244,11 @@ func (g *Game) sleepStopPlayer() {
 				g.audioPlayer.SetVolume(vol)
 			}
 
-		i := 0
-		for i < 6 {
-			i = i + 1
-			// Reduce volume
-			volumeDnExternal(g)
-			<-c
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+			}
 		}
 		g.stopPlayer()
 	}(ctx)

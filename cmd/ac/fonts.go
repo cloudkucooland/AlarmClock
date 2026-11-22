@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 
-	// "github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 
 	"github.com/cloudkucooland/AlarmClock/resources"
@@ -12,13 +11,14 @@ import (
 var (
 	spaceMonoSource *text.GoTextFaceSource
 	clockfont       *text.GoTextFace
+	datefont        *text.GoTextFace
 	controlfont     *text.GoTextFace
 	bigbuttonfont   *text.GoTextFace
 	weatherfont     *text.GoTextFace
 )
 
 const (
-	weatherfontsize = 36
+	weatherfontsize = 26
 )
 
 func loadfonts() error {
@@ -30,7 +30,11 @@ func loadfonts() error {
 
 	clockfont = &text.GoTextFace{
 		Source: spaceMonoSource,
-		Size:   192,
+		Size:   184,
+	}
+	datefont = &text.GoTextFace{
+		Source: spaceMonoSource,
+		Size:   34,
 	}
 	controlfont = &text.GoTextFace{
 		Source: spaceMonoSource,
@@ -46,3 +50,4 @@ func loadfonts() error {
 	}
 	return nil
 }
+

@@ -5,6 +5,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+const (
+	modalMargin  = 24
+	modalPadding = 16
+	modalRadius  = float32(18)
+)
+
 type modalbutton struct {
 	*sprite
 }
@@ -15,20 +21,27 @@ var modalbuttons = []*modalbutton{
 	},
 }
 
+func modalBounds() (x, y, w, h int) {
+	return modalMargin, modalMargin, screensize.X - (modalMargin * 2), screensize.Y - (modalMargin * 2)
+}
+
 func (g *Game) drawModal(screen *ebiten.Image) {
-	// determine location from sprite size
-	borderwidth := 30
+	// Dim underlying wallpaper/clock so the modal has clear depth
+	vector.FillRect(screen, 0, 0, float32(screensize.X), float32(screensize.Y), scrimBlack, false)
 
-	vector.FillRect(screen, float32(borderwidth), float32(borderwidth), float32(screensize.X-(borderwidth*2)), float32(screensize.Y-(borderwidth*2)), modalgrey, false)
-	vector.StrokeRect(screen, float32(borderwidth), float32(borderwidth), float32(screensize.X-(borderwidth*2)), float32(screensize.Y-(borderwidth*2)), float32(4), bordergrey, false)
-	vector.StrokeRect(screen, float32(borderwidth)*1.5, float32(borderwidth)*1.5, float32(screensize.X-(borderwidth*3)), float32(screensize.Y-(borderwidth*3)), float32(2), bordergrey, false)
+	mx, my, mw, mh := modalBounds()
+	drawRoundedBox(screen, float32(mx), float32(my), float32(mw), float32(mh), modalRadius, modalSlate, rimLight, 1.5)
 
-	modalbuttons[0].setLocation(screensize.X-(borderwidth*4), screensize.Y-(borderwidth*5)) // should be based on image size not borderwidth
-
-	modalbuttons[0].drawWithLabel(screen)
+	// Anchor Close button dynamically in the top-right corner of the modal card
+	closeBtn := modalbuttons[0]
+	b := closeBtn.image.Bounds()
+	scaledW := int(float64(b.Max.X) * closeBtn.scale)
+	closeBtn.setLocation(mx+mw-scaledW-modalPadding, my+modalPadding)
+	closeBtn.drawWithLabel(screen)
 }
 
 func modalclose(g *Game) {
 	chirp(g)
 	g.state = inNormal
 }
+

@@ -24,6 +24,15 @@ type Config struct {
 	EnabledAlarmID alarmid
 }
 
+type SpecialDay struct {
+    Month   int    `json:"month"`   // 1–12
+    Day     int    `json:"day"`     // 1–31
+    Title   string `json:"title"`   // e.g., "Happy Anniversary!", "Merry Christmas!"
+    Sprite  string `json:"sprite"`  // optional bird sprite override, e.g., "Party" or "Spring"
+    LEDMode string `json:"ledmode"` // optional: "rainbow", "festive", etc.
+}
+
+
 func (g *Game) loadconfig() {
 	err := configdir.MakePath(configPath)
 	if err != nil {

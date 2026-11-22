@@ -85,25 +85,58 @@ func radioDialog(g *Game) {
 func (g *Game) drawRadioDialog(screen *ebiten.Image) {
 	g.drawModal(screen)
 
-	// TODO: base this on sprite size not hardcoded values
-	paddedspritesize := 70 // spritesize * 1.5? modal border + 10?
-	x := paddedspritesize
-	y := paddedspritesize
-	rowspacing := 142 // make dynamic
+	mx, my, mw, mh := modalBounds()
+	closeBtn := modalbuttons[0]
+	closeW := int(float64(closeBtn.image.Bounds().Max.X) * closeBtn.scale)
 
-	for _, k := range slices.Sorted(maps.Keys(g.radiobuttons)) {
+	// Inner content area inside the modal card
+	innerX := mx + modalPadding
+	innerY := my + modalPadding
+	innerW := mw - modalPadding*2 - closeW - modalPadding
+	innerH := mh - modalPadding*2
+
+	cols := 4
+	rows := 3
+	gap := 12
+
+	tileW := (innerW - gap*(cols-1)) / cols
+	tileH := (innerH - gap*(rows-1)) / rows
+
+	keys := slices.Sorted(maps.Keys(g.radiobuttons))
+	for idx, k := range keys {
 		rb, ok := g.radiobuttons[k]
 		if !ok {
 			continue
 		}
-		rb.setLocation(x, y)
-		rb.drawWithLabel(screen)
 
-		x = x + rowspacing
-		if x > screensize.X-100 {
-			x = paddedspritesize
-			y = y + rowspacing
+		col := idx % cols
+		row := idx / cols
+
+		tx := innerX + col*(tileW+gap)
+		ty := innerY + row*(tileH+gap)
+
+		isSelected := (g.selectedStation != nil && rb == g.selectedStation) ||
+			(g.selectedStation == nil && k == defaultRadioStation)
+
+		if isSelected {
+			drawRoundedBox(screen, float32(tx), float32(ty), float32(tileW), float32(tileH), 14, pinkTint, pink, 2.0)
+		} else {
+			drawRoundedBox(screen, float32(tx), float32(ty), float32(tileW), float32(tileH), 14, cardSlate, bordergrey, 1.0)
 		}
+
+		// Center sprite horizontally inside the tile, leaving room below for its label pill
+		b := rb.image.Bounds()
+		sw := int(float64(b.Max.X) * rb.scale)
+		sh := int(float64(b.Max.Y) * rb.scale)
+
+		sx := tx + (tileW-sw)/2
+		sy := ty + (tileH-sh-24)/2
+		if sy < ty+6 {
+			sy = ty + 6
+		}
+
+		rb.setLocation(sx, sy)
+		rb.drawWithLabel(screen)
 	}
 }
 

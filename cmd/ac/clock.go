@@ -38,19 +38,32 @@ func (c *clock) clearCache() {
 func (g *Game) drawClock(screen *ebiten.Image) {
 	if g.clock.cache == nil {
 		g.clock.cache = ebiten.NewImage(screensize.X, screensize.Y)
+
+		// Soft drop shadow pass for readability over bright wallpapers
+		shadowOp := &text.DrawOptions{
+			LayoutOptions: text.LayoutOptions{
+				LineSpacing: 16,
+			},
+		}
+		shadowOp.GeoM.Translate(float64(g.clock.X)+3, float64(g.clock.Y)+4)
+		shadowOp.ColorScale.ScaleWithColor(textShadow)
+		text.Draw(g.clock.cache, g.clock.timestring, clockfont, shadowOp)
+
+		// Crisp foreground pass
 		op := &text.DrawOptions{
 			LayoutOptions: text.LayoutOptions{
 				LineSpacing: 16,
 			},
 		}
-		op.Blend = ebiten.Blend{
-			BlendFactorSourceRGB: ebiten.BlendFactorSourceColor,
-		}
 		op.GeoM.Translate(float64(g.clock.X), float64(g.clock.Y))
-		if g.state == inScreenSaver {
-			op.ColorScale.ScaleAlpha(0.50)
-		}
+		op.ColorScale.ScaleWithColor(textPrimary)
 		text.Draw(g.clock.cache, g.clock.timestring, clockfont, op)
 	}
-	screen.DrawImage(g.clock.cache, &ebiten.DrawImageOptions{})
+
+	drawOp := &ebiten.DrawImageOptions{}
+	if g.state == inScreenSaver {
+		drawOp.ColorScale.ScaleAlpha(0.50)
+	}
+	screen.DrawImage(g.clock.cache, drawOp)
 }
+

@@ -14,6 +14,10 @@ type externalProc struct {
 }
 
 func (g *Game) playExternal(url string) {
+	g.playExternalWithCallback(url, nil)
+}
+
+func (g *Game) playExternalWithCallback(target string, onComplete func()) {
 	g.stopExternalPlayer()
 	g.refreshExternalVolume()
 
@@ -25,6 +29,7 @@ func (g *Game) playExternal(url string) {
 	g.externalMu.Unlock()
 
 	go func() {
+		completedNaturally := false
 		defer func() {
 			cancel()
 			g.externalMu.Lock()
@@ -32,10 +37,14 @@ func (g *Game) playExternal(url string) {
 				g.externalAudio = nil
 			}
 			g.externalMu.Unlock()
+
+			if completedNaturally && onComplete != nil {
+				onComplete()
+			}
 		}()
 
 		var out bytes.Buffer
-		args := []string{"-ac", "1", "-loglevel", "error", "-vn", url}
+		args := []string{"-nodisp", "-autoexit", "-ac", "2", "-loglevel", "error", "-vn", target}
 		cmd := exec.CommandContext(ctx, "ffplay", args...)
 		cmd.Stdout = &out
 		cmd.Stderr = &out
@@ -49,8 +58,14 @@ func (g *Game) playExternal(url string) {
 		if out.Len() > 0 {
 			g.debug(out.String())
 		}
-		if err != nil && ctx.Err() == nil {
-			g.debug(err.Error())
+		if err != nil {
+			if ctx.Err() == nil {
+				g.debug(err.Error())
+			}
+			return
+		}
+		if ctx.Err() == nil {
+			completedNaturally = true
 		}
 	}()
 }
@@ -81,7 +96,6 @@ func volumeUpExternal(g *Game) {
 }
 
 func volumeDnExternal(g *Game) {
-	// Keep a 5% floor matching internal volumeDn()
 	cur := g.getExternalVolume()
 	if cur <= 5 {
 		return
@@ -103,7 +117,6 @@ func (g *Game) refreshExternalVolume() {
 		g.debug(err.Error())
 		return
 	}
-	// Output format: "Volume: 0.50" or "Volume: 0.50 [MUTED]"
 	fields := strings.Fields(string(out))
 	if len(fields) >= 2 {
 		if v, err := strconv.ParseFloat(fields[1], 64); err == nil {
@@ -119,3 +132,4 @@ func (g *Game) getExternalVolume() uint8 {
 	defer g.externalMu.Unlock()
 	return g.externalVol
 }
+

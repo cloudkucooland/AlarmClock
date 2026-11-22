@@ -5,7 +5,6 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type radiocontrol struct {
@@ -42,50 +41,46 @@ func (g *Game) drawRadioControls(screen *ebiten.Image) {
 		return
 	}
 
-	boxwidth := 240
+	boxwidth := 230
 	if !g.inSleepCountdown {
-		boxwidth += 100
+		boxwidth += 105
 	}
 
-	boxheight := 150
-	borderwidth := 20
+	boxheight := 142
 	x := (screensize.X / 2) - (boxwidth / 2)
-	y := 230
-	ypadding := 16
-	xpadding := 10
+	y := 228
+	padX := 22
+	padY := 14
 
-	// TODO: base this on sprite size not hardcoded values
-	vector.FillRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), modalgrey, false)
-	vector.StrokeRect(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), float32(4), bordergrey, false)
-	vector.StrokeRect(screen, float32(x+xpadding), float32(y+10), float32(boxwidth-borderwidth), float32(boxheight-borderwidth), float32(2), bordergrey, false)
+	// Frosted rounded playback dock matching the weather pill & modal style
+	drawRoundedBox(screen, float32(x), float32(y), float32(boxwidth), float32(boxheight), 18, modalSlate, rimLight, 1.5)
 
-	// move from box corner to initial location of icons
-	y = y + ypadding
-	x = x + 2*xpadding
+	cx := x + padX
+	cy := y + padY
 
 	up := g.radiocontrols["VolUp"]
 	up.scale = 1.0
 	bounds := up.sprite.image.Bounds()
-	up.setLocation(x, y)
+	up.setLocation(cx, cy)
 	up.draw(screen)
 
 	dn := g.radiocontrols["VolDn"]
 	dn.scale = 1.0
-	dn.setLocation(x, y+bounds.Max.Y+ypadding)
-	dn.setLabel(fmt.Sprintf("%d", g.currentVolumePercent()))
+	dn.setLocation(cx, cy+bounds.Max.Y+12)
+	dn.setLabel(fmt.Sprintf("%d%%", g.currentVolumePercent()))
 	dn.drawWithLabel(screen)
 
-	x = x + 100
+	cx += 96
 
 	stop := g.radiocontrols["Stop"]
-	stop.setLocation(x, y)
+	stop.setLocation(cx, cy)
 	stop.drawWithLabel(screen)
 
-	x = x + 100
+	cx += 104
 
 	if !g.inSleepCountdown {
 		sleep := g.radiocontrols["SleepCountdown"]
-		sleep.setLocation(x, y)
+		sleep.setLocation(cx, cy)
 		sleep.drawWithLabel(screen)
 	}
 }
@@ -118,3 +113,4 @@ func (g *Game) currentVolumePercent() int {
 	}
 	return int(math.Round(g.targetVol * 100))
 }
+

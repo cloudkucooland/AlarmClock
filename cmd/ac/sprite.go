@@ -75,20 +75,28 @@ func getSprite(name string, label string, do func(*Game)) *sprite {
 func (s *sprite) draw(screen *ebiten.Image) {
 	if s.ani.in {
 		s.aniStep(screen)
-	} else {
-		// draw still
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(s.scale, s.scale)
-		op.GeoM.Translate(float64(s.X), float64(s.Y))
-		screen.DrawImage(s.image, op)
+		return
+	}
 
-		// draw hitbox
-		if drawhitbox {
-			b := s.image.Bounds()
-			w := int((float64(b.Max.X) * s.scale))
-			h := int((float64(b.Max.Y) * s.scale))
-			vector.StrokeRect(screen, float32(s.X), float32(s.Y), float32(w), float32(h), 1, color.Black, false)
-		}
+	// Soft grounding shadow so icons separate cleanly from any wallpaper
+	shadowOp := &ebiten.DrawImageOptions{}
+	shadowOp.GeoM.Scale(s.scale, s.scale)
+	shadowOp.GeoM.Translate(float64(s.X)+2, float64(s.Y)+3)
+	shadowOp.ColorScale.Scale(0, 0, 0, 0.35)
+	screen.DrawImage(s.image, shadowOp)
+
+	// Foreground sprite
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Scale(s.scale, s.scale)
+	op.GeoM.Translate(float64(s.X), float64(s.Y))
+	screen.DrawImage(s.image, op)
+
+	// draw hitbox
+	if drawhitbox {
+		b := s.image.Bounds()
+		w := int((float64(b.Max.X) * s.scale))
+		h := int((float64(b.Max.Y) * s.scale))
+		vector.StrokeRect(screen, float32(s.X), float32(s.Y), float32(w), float32(h), 1, color.Black, false)
 	}
 }
 
@@ -119,7 +127,7 @@ func (s *sprite) setlabelloc() {
 	lb := s.labelimg.Bounds()
 	labelcenterx := lb.Max.X / 2
 	s.labelloc.X = spritecenterx - labelcenterx
-	s.labelloc.Y = s.Y + int(float64(b.Max.Y)*s.scale) + 4
+	s.labelloc.Y = s.Y + int(float64(b.Max.Y)*s.scale) + 6
 }
 
 func (s *sprite) drawWithLabel(screen *ebiten.Image) {
@@ -145,9 +153,6 @@ func chirp(g *Game) {
 	}
 	p.SetVolume(0.20)
 	p.Play()
-	/* if err := p.Close(); err != nil {
-		g.debug(err.Error())
-	} */
 }
 
 func tick(g *Game) {
@@ -186,6 +191,15 @@ func (s *sprite) aniStep(screen *ebiten.Image) {
 	cx := float64(b.Max.X) / 2.0
 	cy := float64(b.Max.Y) / 2.0
 
+	// Lifted drop shadow during tap wibble
+	shadowOp := &ebiten.DrawImageOptions{}
+	shadowOp.GeoM.Translate(-cx, -cy)
+	shadowOp.GeoM.Scale(scale, scale)
+	shadowOp.GeoM.Rotate(theta)
+	shadowOp.GeoM.Translate(float64(s.X)+cx*s.scale+3, float64(s.Y)+cy*s.scale+5)
+	shadowOp.ColorScale.Scale(0, 0, 0, 0.30)
+	screen.DrawImage(s.image, shadowOp)
+
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-cx, -cy)
 	op.GeoM.Scale(scale, scale)
@@ -205,11 +219,6 @@ func scaleWibble(i float64) float64 {
 
 func thetaWibble(i float64) float64 {
 	return math.Sin(i/6) / 6
-}
-
-func locWibble(x, y, step float64) (float64, float64) {
-	z := thetaWibble(step) * 25
-	return x + z, y + z
 }
 
 func (s *sprite) startanimation() {

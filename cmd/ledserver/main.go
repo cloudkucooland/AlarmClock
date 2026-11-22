@@ -14,7 +14,7 @@ import (
 
 	"github.com/brutella/hap"
 	"github.com/brutella/hap/accessory"
-	"github.com/cloudkucooland/AlarmClock/ledserver"
+	"github.com/cloudkucooland/AlarmClock/internal/ledserver"
 )
 
 const fulldir = "/var/local/ledserver"
@@ -77,11 +77,11 @@ func main() {
 		for {
 			select {
 			case <-t:
-				max, err := thermal()
+				max, err := ledserver.Thermal()
 				if err != nil {
 					return
 				}
-				if max > threshold {
+				if max > ledserver.ThermalThreshold {
 					ledserver.ThermalHigh()
 				} else {
 					ledserver.ThermalNormal()

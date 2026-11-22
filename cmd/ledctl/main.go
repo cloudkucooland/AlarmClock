@@ -12,7 +12,7 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"github.com/cloudkucooland/AlarmClock/ledserver"
+	"github.com/cloudkucooland/AlarmClock/internal/ledserver"
 )
 
 func main() {

@@ -6,7 +6,7 @@ import (
 	"net/rpc"
 	"time"
 
-	"github.com/cloudkucooland/AlarmClock/ledserver"
+	"github.com/cloudkucooland/AlarmClock/internal/ledserver"
 )
 
 func (g *Game) ledAllOn() {

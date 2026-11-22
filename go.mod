@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/briandowns/openweathermap v0.21.1
 	github.com/brutella/hap v0.0.35
-	github.com/ebitengine/purego v0.10.2
+	github.com/ebitengine/purego v0.11.0
 	github.com/hajimehoshi/ebiten/v2 v2.9.9
 	github.com/kirsle/configdir v0.0.0-20170128060238-e45d2f54772f
 	github.com/lucasb-eyer/go-colorful v1.4.1
@@ -26,6 +26,7 @@ require (
 	github.com/go-text/typesetting v0.3.4 // indirect
 	github.com/hajimehoshi/go-mp3 v0.3.4 // indirect
 	github.com/jezek/xgb v1.3.1 // indirect
+	github.com/jfreymuth/pulse v0.1.3 // indirect
 	github.com/miekg/dns v1.1.68 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/tadglines/go-pkgs v0.0.0-20210623144937-b983b20f54f9 // indirect
